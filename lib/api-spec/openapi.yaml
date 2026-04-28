@@ -3,20 +3,28 @@ info:
   # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: Students of Islamic Law Forum API
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
-    description: Health operations
+  - name: auth
+  - name: users
+  - name: posts
+  - name: stories
+  - name: chat
+  - name: meetings
+  - name: books
+  - name: tests
+  - name: dashboard
+
 paths:
   /healthz:
     get:
       operationId: healthCheck
       tags: [health]
       summary: Health check
-      description: Returns server health status
       responses:
         "200":
           description: Healthy
@@ -24,13 +32,791 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+
+  /auth/register:
+    post:
+      operationId: register
+      tags: [auth]
+      summary: Register a new student account
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RegisterBody"
+      responses:
+        "201":
+          description: Registered
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        "400":
+          description: Invalid
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorResponse" }
+        "409":
+          description: Username taken
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorResponse" }
+
+  /auth/login:
+    post:
+      operationId: login
+      tags: [auth]
+      summary: Sign in
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginBody"
+      responses:
+        "200":
+          description: Signed in
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/User" }
+        "401":
+          description: Invalid credentials
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorResponse" }
+
+  /auth/logout:
+    post:
+      operationId: logout
+      tags: [auth]
+      summary: Sign out
+      responses:
+        "204":
+          description: Signed out
+
+  /auth/me:
+    get:
+      operationId: getCurrentUser
+      tags: [auth]
+      summary: Get current user
+      responses:
+        "200":
+          description: Current user (or null if signed out)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/CurrentUserResponse" }
+
+  /users:
+    get:
+      operationId: listUsers
+      tags: [users]
+      summary: List members
+      parameters:
+        - in: query
+          name: gender
+          schema:
+            type: string
+            enum: [male, female]
+      responses:
+        "200":
+          description: Members
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/User" }
+
+  /users/{id}:
+    get:
+      operationId: getUser
+      tags: [users]
+      summary: Get user profile
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+      responses:
+        "200":
+          description: User
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/User" }
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorResponse" }
+
+  /posts:
+    get:
+      operationId: listPosts
+      tags: [posts]
+      summary: Feed of beneficial posts (visible to all)
+      responses:
+        "200":
+          description: Posts
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/Post" }
+    post:
+      operationId: createPost
+      tags: [posts]
+      summary: Create a post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/CreatePostBody" }
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Post" }
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorResponse" }
+
+  /posts/{id}/like:
+    post:
+      operationId: togglePostLike
+      tags: [posts]
+      summary: Toggle like on a post
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+      responses:
+        "200":
+          description: New like state
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Post" }
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorResponse" }
+
+  /stories:
+    get:
+      operationId: listStories
+      tags: [stories]
+      summary: Active stories grouped by author (last 24h)
+      responses:
+        "200":
+          description: Stories
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/UserStories" }
+    post:
+      operationId: createStory
+      tags: [stories]
+      summary: Post a 24-hour story
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/CreateStoryBody" }
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Story" }
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorResponse" }
+
+  /chat/groups:
+    get:
+      operationId: listChatGroups
+      tags: [chat]
+      summary: List chat groups available to the current user (filtered by gender)
+      responses:
+        "200":
+          description: Groups
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/ChatGroup" }
+
+  /chat/groups/{id}:
+    get:
+      operationId: getChatGroup
+      tags: [chat]
+      summary: Get chat group details
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+      responses:
+        "200":
+          description: Group
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ChatGroup" }
+        "403":
+          description: Forbidden (gender restricted)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorResponse" }
+
+  /chat/groups/{id}/messages:
+    get:
+      operationId: listChatMessages
+      tags: [chat]
+      summary: Messages in a chat group
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+      responses:
+        "200":
+          description: Messages
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/ChatMessage" }
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorResponse" }
+    post:
+      operationId: postChatMessage
+      tags: [chat]
+      summary: Post a chat message
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/CreateChatMessageBody" }
+      responses:
+        "201":
+          description: Posted
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ChatMessage" }
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorResponse" }
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorResponse" }
+
+  /meetings:
+    get:
+      operationId: listMeetings
+      tags: [meetings]
+      summary: All scholarly sessions (live and recorded)
+      parameters:
+        - in: query
+          name: kind
+          schema:
+            type: string
+            enum: [live, recorded]
+      responses:
+        "200":
+          description: Meetings
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/Meeting" }
+
+  /meetings/upcoming:
+    get:
+      operationId: listUpcomingMeetings
+      tags: [meetings]
+      summary: Upcoming live sessions
+      responses:
+        "200":
+          description: Meetings
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/Meeting" }
+
+  /meetings/{id}:
+    get:
+      operationId: getMeeting
+      tags: [meetings]
+      summary: Meeting details
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+      responses:
+        "200":
+          description: Meeting
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Meeting" }
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorResponse" }
+
+  /books:
+    get:
+      operationId: listBooks
+      tags: [books]
+      summary: Library of religious books
+      parameters:
+        - in: query
+          name: category
+          schema: { type: string }
+      responses:
+        "200":
+          description: Books
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/Book" }
+
+  /books/{id}:
+    get:
+      operationId: getBook
+      tags: [books]
+      summary: Book details
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+      responses:
+        "200":
+          description: Book
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Book" }
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorResponse" }
+
+  /tests:
+    get:
+      operationId: listTests
+      tags: [tests]
+      summary: Aqeedah tests on the Salafi methodology
+      responses:
+        "200":
+          description: Tests
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/TestSummary" }
+
+  /tests/{id}:
+    get:
+      operationId: getTest
+      tags: [tests]
+      summary: Test with full questions
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+      responses:
+        "200":
+          description: Test
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/TestDetail" }
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorResponse" }
+
+  /tests/{id}/attempt:
+    post:
+      operationId: submitTestAttempt
+      tags: [tests]
+      summary: Submit answers for a test
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/SubmitTestAttemptBody" }
+      responses:
+        "200":
+          description: Result
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/TestAttemptResult" }
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorResponse" }
+
+  /tests/leaderboard:
+    get:
+      operationId: getTestLeaderboard
+      tags: [tests]
+      summary: Top scoring students across all tests
+      responses:
+        "200":
+          description: Leaderboard
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/LeaderboardEntry" }
+
+  /dashboard/summary:
+    get:
+      operationId: getDashboardSummary
+      tags: [dashboard]
+      summary: Forum-wide summary
+      responses:
+        "200":
+          description: Summary
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/DashboardSummary" }
+
 components:
   schemas:
     HealthStatus:
       type: object
+      required: [status]
       properties:
-        status:
-          type: string
-      required:
-        - status
+        status: { type: string }
 
+    ErrorResponse:
+      type: object
+      required: [error]
+      properties:
+        error: { type: string }
+
+    Gender:
+      type: string
+      enum: [male, female]
+
+    User:
+      type: object
+      required: [id, username, displayName, gender, createdAt]
+      properties:
+        id: { type: integer }
+        username: { type: string }
+        displayName: { type: string }
+        gender: { $ref: "#/components/schemas/Gender" }
+        country:
+          type: ["string", "null"]
+        bio:
+          type: ["string", "null"]
+        avatarUrl:
+          type: ["string", "null"]
+        createdAt: { type: string, format: date-time }
+
+    CurrentUserResponse:
+      type: object
+      properties:
+        user:
+          oneOf:
+            - $ref: "#/components/schemas/User"
+            - type: "null"
+
+    RegisterBody:
+      type: object
+      required: [username, displayName, password, gender]
+      properties:
+        username:
+          type: string
+          minLength: 3
+          maxLength: 32
+          description: lowercase letters, numbers, underscores
+        displayName:
+          type: string
+          minLength: 2
+          maxLength: 60
+        password:
+          type: string
+          minLength: 6
+        gender: { $ref: "#/components/schemas/Gender" }
+        country:
+          type: ["string", "null"]
+        bio:
+          type: ["string", "null"]
+
+    LoginBody:
+      type: object
+      required: [username, password]
+      properties:
+        username: { type: string }
+        password: { type: string }
+
+    Post:
+      type: object
+      required: [id, userId, author, content, likeCount, likedByMe, createdAt]
+      properties:
+        id: { type: integer }
+        userId: { type: integer }
+        author: { $ref: "#/components/schemas/User" }
+        content: { type: string }
+        imageUrl:
+          type: ["string", "null"]
+        likeCount: { type: integer }
+        likedByMe: { type: boolean }
+        createdAt: { type: string, format: date-time }
+
+    CreatePostBody:
+      type: object
+      required: [content]
+      properties:
+        content:
+          type: string
+          minLength: 1
+          maxLength: 2000
+        imageUrl:
+          type: ["string", "null"]
+
+    Story:
+      type: object
+      required: [id, userId, content, expiresAt, createdAt]
+      properties:
+        id: { type: integer }
+        userId: { type: integer }
+        content: { type: string }
+        imageUrl:
+          type: ["string", "null"]
+        expiresAt: { type: string, format: date-time }
+        createdAt: { type: string, format: date-time }
+
+    UserStories:
+      type: object
+      required: [user, stories]
+      properties:
+        user: { $ref: "#/components/schemas/User" }
+        stories:
+          type: array
+          items: { $ref: "#/components/schemas/Story" }
+
+    CreateStoryBody:
+      type: object
+      required: [content]
+      properties:
+        content:
+          type: string
+          minLength: 1
+          maxLength: 500
+        imageUrl:
+          type: ["string", "null"]
+
+    ChatGroup:
+      type: object
+      required: [id, name, gender, memberCount, lastMessageAt, createdAt]
+      properties:
+        id: { type: integer }
+        name: { type: string }
+        description:
+          type: ["string", "null"]
+        gender: { $ref: "#/components/schemas/Gender" }
+        coverImageUrl:
+          type: ["string", "null"]
+        memberCount: { type: integer }
+        lastMessageAt:
+          type: ["string", "null"]
+          format: date-time
+        createdAt: { type: string, format: date-time }
+
+    ChatMessage:
+      type: object
+      required: [id, groupId, userId, author, content, createdAt]
+      properties:
+        id: { type: integer }
+        groupId: { type: integer }
+        userId: { type: integer }
+        author: { $ref: "#/components/schemas/User" }
+        content: { type: string }
+        createdAt: { type: string, format: date-time }
+
+    CreateChatMessageBody:
+      type: object
+      required: [content]
+      properties:
+        content:
+          type: string
+          minLength: 1
+          maxLength: 1000
+
+    Meeting:
+      type: object
+      required: [id, title, scholar, kind, createdAt]
+      properties:
+        id: { type: integer }
+        title: { type: string }
+        description:
+          type: ["string", "null"]
+        scholar: { type: string }
+        kind:
+          type: string
+          enum: [live, recorded]
+        videoUrl:
+          type: ["string", "null"]
+        liveUrl:
+          type: ["string", "null"]
+        scheduledFor:
+          type: ["string", "null"]
+          format: date-time
+        durationMinutes:
+          type: ["integer", "null"]
+        coverImageUrl:
+          type: ["string", "null"]
+        createdAt: { type: string, format: date-time }
+
+    Book:
+      type: object
+      required: [id, title, author, fileUrl, language, category, createdAt]
+      properties:
+        id: { type: integer }
+        title: { type: string }
+        author: { type: string }
+        description:
+          type: ["string", "null"]
+        coverImageUrl:
+          type: ["string", "null"]
+        fileUrl: { type: string }
+        pages:
+          type: ["integer", "null"]
+        language: { type: string }
+        category: { type: string }
+        createdAt: { type: string, format: date-time }
+
+    TestSummary:
+      type: object
+      required: [id, title, level, questionCount, createdAt]
+      properties:
+        id: { type: integer }
+        title: { type: string }
+        description:
+          type: ["string", "null"]
+        level:
+          type: string
+          enum: [beginner, intermediate, advanced]
+        questionCount: { type: integer }
+        createdAt: { type: string, format: date-time }
+
+    TestQuestion:
+      type: object
+      required: [id, prompt, options, order]
+      properties:
+        id: { type: integer }
+        prompt: { type: string }
+        options:
+          type: array
+          items: { type: string }
+        order: { type: integer }
+
+    TestDetail:
+      type: object
+      required: [id, title, level, questions, createdAt]
+      properties:
+        id: { type: integer }
+        title: { type: string }
+        description:
+          type: ["string", "null"]
+        level:
+          type: string
+          enum: [beginner, intermediate, advanced]
+        questions:
+          type: array
+          items: { $ref: "#/components/schemas/TestQuestion" }
+        createdAt: { type: string, format: date-time }
+
+    SubmitTestAttemptBody:
+      type: object
+      required: [answers]
+      properties:
+        answers:
+          type: array
+          description: For each question (in order), the index of the chosen option
+          items:
+            type: integer
+
+    QuestionResult:
+      type: object
+      required: [questionId, prompt, chosenIndex, correctIndex, isCorrect]
+      properties:
+        questionId: { type: integer }
+        prompt: { type: string }
+        chosenIndex: { type: integer }
+        correctIndex: { type: integer }
+        isCorrect: { type: boolean }
+        explanation:
+          type: ["string", "null"]
+
+    TestAttemptResult:
+      type: object
+      required: [testId, score, totalQuestions, percentage, results, completedAt]
+      properties:
+        testId: { type: integer }
+        score: { type: integer }
+        totalQuestions: { type: integer }
+        percentage: { type: integer }
+        results:
+          type: array
+          items: { $ref: "#/components/schemas/QuestionResult" }
+        completedAt: { type: string, format: date-time }
+
+    LeaderboardEntry:
+      type: object
+      required: [user, totalScore, attemptsCount, bestPercentage]
+      properties:
+        user: { $ref: "#/components/schemas/User" }
+        totalScore: { type: integer }
+        attemptsCount: { type: integer }
+        bestPercentage: { type: integer }
+
+    DashboardSummary:
+      type: object
+      required: [memberCount, postCount, bookCount, meetingCount, recentPosts, upcomingMeetings]
+      properties:
+        memberCount: { type: integer }
+        postCount: { type: integer }
+        bookCount: { type: integer }
+        meetingCount: { type: integer }
+        recentPosts:
+          type: array
+          items: { $ref: "#/components/schemas/Post" }
+        upcomingMeetings:
+          type: array
+          items: { $ref: "#/components/schemas/Meeting" }

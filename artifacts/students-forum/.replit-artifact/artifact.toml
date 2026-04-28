@@ -1,0 +1,31 @@
+kind = "web"
+previewPath = "/"
+title = "Students of Islamic Law Forum"
+version = "1.0.0"
+id = "artifacts/students-forum"
+router = "path"
+
+[[integratedSkills]]
+name = "react-vite"
+version = "1.0.0"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 25398
+
+[services.development]
+run = "pnpm --filter @workspace/students-forum run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/students-forum", "run", "build" ]
+publicDir = "artifacts/students-forum/dist/public"
+serve = "static"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "25398"
+BASE_PATH = "/"

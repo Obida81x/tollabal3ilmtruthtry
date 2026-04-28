@@ -1,0 +1,20 @@
+uploads = []
+outputs = []
+
+[[generated]]
+id = "hXgiARmt2NsexDrOEnlN9"
+uri = "file://artifacts/students-forum/src/assets/hero-calligraphy.png"
+type = "image"
+title = "Landing hero calligraphy"
+
+[[generated]]
+id = "vwl0XSqLFBm0tF9lk2sZc"
+uri = "file://artifacts/students-forum/src/assets/mosque-hall.png"
+type = "image"
+title = "Mosque study hall"
+
+[[generated]]
+id = "-hsekor9UA1Lm8_MtNLJn"
+uri = "file://artifacts/students-forum/src/assets/geometric-pattern.png"
+type = "image"
+title = "Geometric pattern"

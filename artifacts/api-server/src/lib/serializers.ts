@@ -1,0 +1,14 @@
+import type { User } from "@workspace/db";
+
+export function serializeUser(u: User) {
+  return {
+    id: u.id,
+    username: u.username,
+    displayName: u.displayName,
+    gender: u.gender as "male" | "female",
+    country: u.country,
+    bio: u.bio,
+    avatarUrl: u.avatarUrl,
+    createdAt: u.createdAt,
+  };
+}
