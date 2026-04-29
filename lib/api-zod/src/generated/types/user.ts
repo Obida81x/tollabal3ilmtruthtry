@@ -18,5 +18,8 @@ export interface User {
   bio?: string | null;
   /** @nullable */
   avatarUrl?: string | null;
+  isAdmin: boolean;
+  isMainAdmin: boolean;
+  isActive: boolean;
   createdAt: Date;
 }

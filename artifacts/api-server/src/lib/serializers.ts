@@ -9,6 +9,9 @@ export function serializeUser(u: User) {
     country: u.country,
     bio: u.bio,
     avatarUrl: u.avatarUrl,
+    isAdmin: u.isAdmin,
+    isMainAdmin: u.isMainAdmin,
+    isActive: u.isActive,
     createdAt: u.createdAt,
   };
 }

@@ -12,6 +12,8 @@ export interface Story {
   content: string;
   /** @nullable */
   imageUrl?: string | null;
+  /** @nullable */
+  videoUrl?: string | null;
   expiresAt: Date;
   createdAt: Date;
 }

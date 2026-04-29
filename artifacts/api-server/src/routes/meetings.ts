@@ -4,7 +4,9 @@ import { db, meetingsTable } from "@workspace/db";
 import {
   ListMeetingsQueryParams,
   GetMeetingParams,
+  CreateMeetingBody,
 } from "@workspace/api-zod";
+import { requireUser, getUserId } from "../lib/auth";
 
 const router: IRouter = Router();
 
@@ -20,9 +22,13 @@ function serializeMeeting(m: typeof meetingsTable.$inferSelect) {
     scheduledFor: m.scheduledFor,
     durationMinutes: m.durationMinutes,
     coverImageUrl: m.coverImageUrl,
+    createdByUserId: m.createdByUserId,
     createdAt: m.createdAt,
   };
 }
+
+const GOOGLE_MEET_RE =
+  /^https?:\/\/(?:www\.)?meet\.google\.com\/[A-Za-z0-9-]+(?:\?.*)?$/;
 
 router.get("/meetings", async (req, res): Promise<void> => {
   const parsed = ListMeetingsQueryParams.safeParse(req.query);
@@ -37,6 +43,44 @@ router.get("/meetings", async (req, res): Promise<void> => {
     .where(kind ? eq(meetingsTable.kind, kind) : undefined)
     .orderBy(desc(meetingsTable.scheduledFor));
   res.json(rows.map(serializeMeeting));
+});
+
+router.post("/meetings", requireUser, async (req, res): Promise<void> => {
+  const parsed = CreateMeetingBody.safeParse(req.body);
+  if (!parsed.success) {
+    res.status(400).json({ error: parsed.error.message });
+    return;
+  }
+  const userId = getUserId(req);
+  if (!userId) {
+    res.status(401).json({ error: "Authentication required" });
+    return;
+  }
+  if (!GOOGLE_MEET_RE.test(parsed.data.liveUrl)) {
+    res.status(400).json({
+      error:
+        "The live broadcast link must be a valid Google Meet URL (https://meet.google.com/...).",
+    });
+    return;
+  }
+  const [row] = await db
+    .insert(meetingsTable)
+    .values({
+      title: parsed.data.title,
+      description: parsed.data.description ?? null,
+      scholar: parsed.data.scholar,
+      kind: "live",
+      liveUrl: parsed.data.liveUrl,
+      scheduledFor: parsed.data.scheduledFor ?? null,
+      durationMinutes: parsed.data.durationMinutes ?? null,
+      createdByUserId: userId,
+    })
+    .returning();
+  if (!row) {
+    res.status(500).json({ error: "Failed to create live broadcast" });
+    return;
+  }
+  res.status(201).json(serializeMeeting(row));
 });
 
 router.get("/meetings/upcoming", async (_req, res): Promise<void> => {

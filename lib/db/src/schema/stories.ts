@@ -19,6 +19,7 @@ export const storiesTable = pgTable(
       .references(() => usersTable.id, { onDelete: "cascade" }),
     content: text("content").notNull(),
     imageUrl: text("image_url"),
+    videoUrl: text("video_url"),
     expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
     createdAt: timestamp("created_at", { withTimezone: true })
       .notNull()

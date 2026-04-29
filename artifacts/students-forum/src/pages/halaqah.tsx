@@ -31,6 +31,22 @@ export default function HalaqahListPage() {
         subtitle={t("halaqah.subtitle")}
       />
       <div className="px-6 lg:px-10 py-8 max-w-3xl mx-auto space-y-3">
+        <div
+          className={
+            "rounded-md border-l-4 px-4 py-3 text-sm flex items-center gap-3 " +
+            (isBrothers
+              ? "border-blue-500 bg-blue-500/10 text-blue-900 dark:text-blue-100"
+              : "border-pink-500 bg-pink-500/10 text-pink-900 dark:text-pink-100")
+          }
+          data-testid="banner-gender"
+        >
+          <MessagesSquare className="h-4 w-4" />
+          <span>
+            {isBrothers
+              ? t("halaqah.brothersBanner")
+              : t("halaqah.sistersBanner")}
+          </span>
+        </div>
         {isLoading && (
           <>
             <Skeleton className="h-24 w-full" />

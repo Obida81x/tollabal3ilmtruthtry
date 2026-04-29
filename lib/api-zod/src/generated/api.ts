@@ -57,6 +57,9 @@ export const LoginResponse = zod.object({
   country: zod.string().nullish(),
   bio: zod.string().nullish(),
   avatarUrl: zod.string().nullish(),
+  isAdmin: zod.boolean(),
+  isMainAdmin: zod.boolean(),
+  isActive: zod.boolean(),
   createdAt: zod.coerce.date(),
 });
 
@@ -74,6 +77,9 @@ export const GetCurrentUserResponse = zod.object({
         country: zod.string().nullish(),
         bio: zod.string().nullish(),
         avatarUrl: zod.string().nullish(),
+        isAdmin: zod.boolean(),
+        isMainAdmin: zod.boolean(),
+        isActive: zod.boolean(),
         createdAt: zod.coerce.date(),
       }),
       zod.null(),
@@ -96,6 +102,9 @@ export const ListUsersResponseItem = zod.object({
   country: zod.string().nullish(),
   bio: zod.string().nullish(),
   avatarUrl: zod.string().nullish(),
+  isAdmin: zod.boolean(),
+  isMainAdmin: zod.boolean(),
+  isActive: zod.boolean(),
   createdAt: zod.coerce.date(),
 });
 export const ListUsersResponse = zod.array(ListUsersResponseItem);
@@ -115,6 +124,9 @@ export const GetUserResponse = zod.object({
   country: zod.string().nullish(),
   bio: zod.string().nullish(),
   avatarUrl: zod.string().nullish(),
+  isAdmin: zod.boolean(),
+  isMainAdmin: zod.boolean(),
+  isActive: zod.boolean(),
   createdAt: zod.coerce.date(),
 });
 
@@ -132,10 +144,14 @@ export const ListPostsResponseItem = zod.object({
     country: zod.string().nullish(),
     bio: zod.string().nullish(),
     avatarUrl: zod.string().nullish(),
+    isAdmin: zod.boolean(),
+    isMainAdmin: zod.boolean(),
+    isActive: zod.boolean(),
     createdAt: zod.coerce.date(),
   }),
   content: zod.string(),
   imageUrl: zod.string().nullish(),
+  videoUrl: zod.string().nullish(),
   likeCount: zod.number(),
   likedByMe: zod.boolean(),
   createdAt: zod.coerce.date(),
@@ -150,6 +166,7 @@ export const createPostBodyContentMax = 2000;
 export const CreatePostBody = zod.object({
   content: zod.string().min(1).max(createPostBodyContentMax),
   imageUrl: zod.string().nullish(),
+  videoUrl: zod.string().nullish(),
 });
 
 /**
@@ -170,10 +187,14 @@ export const TogglePostLikeResponse = zod.object({
     country: zod.string().nullish(),
     bio: zod.string().nullish(),
     avatarUrl: zod.string().nullish(),
+    isAdmin: zod.boolean(),
+    isMainAdmin: zod.boolean(),
+    isActive: zod.boolean(),
     createdAt: zod.coerce.date(),
   }),
   content: zod.string(),
   imageUrl: zod.string().nullish(),
+  videoUrl: zod.string().nullish(),
   likeCount: zod.number(),
   likedByMe: zod.boolean(),
   createdAt: zod.coerce.date(),
@@ -191,6 +212,9 @@ export const ListStoriesResponseItem = zod.object({
     country: zod.string().nullish(),
     bio: zod.string().nullish(),
     avatarUrl: zod.string().nullish(),
+    isAdmin: zod.boolean(),
+    isMainAdmin: zod.boolean(),
+    isActive: zod.boolean(),
     createdAt: zod.coerce.date(),
   }),
   stories: zod.array(
@@ -199,6 +223,7 @@ export const ListStoriesResponseItem = zod.object({
       userId: zod.number(),
       content: zod.string(),
       imageUrl: zod.string().nullish(),
+      videoUrl: zod.string().nullish(),
       expiresAt: zod.coerce.date(),
       createdAt: zod.coerce.date(),
     }),
@@ -214,6 +239,7 @@ export const createStoryBodyContentMax = 500;
 export const CreateStoryBody = zod.object({
   content: zod.string().min(1).max(createStoryBodyContentMax),
   imageUrl: zod.string().nullish(),
+  videoUrl: zod.string().nullish(),
 });
 
 /**
@@ -268,6 +294,9 @@ export const ListChatMessagesResponseItem = zod.object({
     country: zod.string().nullish(),
     bio: zod.string().nullish(),
     avatarUrl: zod.string().nullish(),
+    isAdmin: zod.boolean(),
+    isMainAdmin: zod.boolean(),
+    isActive: zod.boolean(),
     createdAt: zod.coerce.date(),
   }),
   content: zod.string(),
@@ -306,9 +335,43 @@ export const ListMeetingsResponseItem = zod.object({
   scheduledFor: zod.coerce.date().nullish(),
   durationMinutes: zod.number().nullish(),
   coverImageUrl: zod.string().nullish(),
+  createdByUserId: zod.number().nullish(),
   createdAt: zod.coerce.date(),
 });
 export const ListMeetingsResponse = zod.array(ListMeetingsResponseItem);
+
+/**
+ * @summary Create a live broadcast (Google Meet link)
+ */
+export const createMeetingBodyTitleMin = 3;
+export const createMeetingBodyTitleMax = 200;
+
+export const createMeetingBodyDescriptionMax = 2000;
+
+export const createMeetingBodyScholarMin = 2;
+export const createMeetingBodyScholarMax = 120;
+
+export const createMeetingBodyLiveUrlMin = 5;
+export const createMeetingBodyLiveUrlMax = 500;
+
+export const CreateMeetingBody = zod.object({
+  title: zod
+    .string()
+    .min(createMeetingBodyTitleMin)
+    .max(createMeetingBodyTitleMax),
+  description: zod.string().max(createMeetingBodyDescriptionMax).nullish(),
+  scholar: zod
+    .string()
+    .min(createMeetingBodyScholarMin)
+    .max(createMeetingBodyScholarMax),
+  liveUrl: zod
+    .string()
+    .min(createMeetingBodyLiveUrlMin)
+    .max(createMeetingBodyLiveUrlMax)
+    .describe("A Google Meet link"),
+  scheduledFor: zod.coerce.date().nullish(),
+  durationMinutes: zod.number().nullish(),
+});
 
 /**
  * @summary Upcoming live sessions
@@ -324,6 +387,7 @@ export const ListUpcomingMeetingsResponseItem = zod.object({
   scheduledFor: zod.coerce.date().nullish(),
   durationMinutes: zod.number().nullish(),
   coverImageUrl: zod.string().nullish(),
+  createdByUserId: zod.number().nullish(),
   createdAt: zod.coerce.date(),
 });
 export const ListUpcomingMeetingsResponse = zod.array(
@@ -348,6 +412,7 @@ export const GetMeetingResponse = zod.object({
   scheduledFor: zod.coerce.date().nullish(),
   durationMinutes: zod.number().nullish(),
   coverImageUrl: zod.string().nullish(),
+  createdByUserId: zod.number().nullish(),
   createdAt: zod.coerce.date(),
 });
 
@@ -471,6 +536,9 @@ export const GetTestLeaderboardResponseItem = zod.object({
     country: zod.string().nullish(),
     bio: zod.string().nullish(),
     avatarUrl: zod.string().nullish(),
+    isAdmin: zod.boolean(),
+    isMainAdmin: zod.boolean(),
+    isActive: zod.boolean(),
     createdAt: zod.coerce.date(),
   }),
   totalScore: zod.number(),
@@ -501,10 +569,14 @@ export const GetDashboardSummaryResponse = zod.object({
         country: zod.string().nullish(),
         bio: zod.string().nullish(),
         avatarUrl: zod.string().nullish(),
+        isAdmin: zod.boolean(),
+        isMainAdmin: zod.boolean(),
+        isActive: zod.boolean(),
         createdAt: zod.coerce.date(),
       }),
       content: zod.string(),
       imageUrl: zod.string().nullish(),
+      videoUrl: zod.string().nullish(),
       likeCount: zod.number(),
       likedByMe: zod.boolean(),
       createdAt: zod.coerce.date(),
@@ -522,7 +594,118 @@ export const GetDashboardSummaryResponse = zod.object({
       scheduledFor: zod.coerce.date().nullish(),
       durationMinutes: zod.number().nullish(),
       coverImageUrl: zod.string().nullish(),
+      createdByUserId: zod.number().nullish(),
       createdAt: zod.coerce.date(),
     }),
   ),
+});
+
+/**
+ * @summary Upload an image or video file (multipart/form-data)
+ */
+export const UploadFileBody = zod.object({
+  file: zod.instanceof(File),
+});
+
+/**
+ * @summary Verify admin password and elevate the current session
+ */
+export const AdminLoginBody = zod.object({
+  password: zod.string(),
+});
+
+export const AdminLoginResponse = zod.object({
+  id: zod.number(),
+  username: zod.string(),
+  displayName: zod.string(),
+  gender: zod.enum(["male", "female"]),
+  country: zod.string().nullish(),
+  bio: zod.string().nullish(),
+  avatarUrl: zod.string().nullish(),
+  isAdmin: zod.boolean(),
+  isMainAdmin: zod.boolean(),
+  isActive: zod.boolean(),
+  createdAt: zod.coerce.date(),
+});
+
+/**
+ * @summary List all members (admin only)
+ */
+export const AdminListUsersResponseItem = zod.object({
+  id: zod.number(),
+  username: zod.string(),
+  displayName: zod.string(),
+  gender: zod.enum(["male", "female"]),
+  country: zod.string().nullish(),
+  bio: zod.string().nullish(),
+  avatarUrl: zod.string().nullish(),
+  isAdmin: zod.boolean(),
+  isMainAdmin: zod.boolean(),
+  isActive: zod.boolean(),
+  createdAt: zod.coerce.date(),
+});
+export const AdminListUsersResponse = zod.array(AdminListUsersResponseItem);
+
+/**
+ * @summary Grant or revoke admin role (main admin only)
+ */
+export const AdminSetAdminParams = zod.object({
+  id: zod.coerce.number(),
+});
+
+export const AdminSetAdminBody = zod.object({
+  value: zod.boolean(),
+});
+
+export const AdminSetAdminResponse = zod.object({
+  id: zod.number(),
+  username: zod.string(),
+  displayName: zod.string(),
+  gender: zod.enum(["male", "female"]),
+  country: zod.string().nullish(),
+  bio: zod.string().nullish(),
+  avatarUrl: zod.string().nullish(),
+  isAdmin: zod.boolean(),
+  isMainAdmin: zod.boolean(),
+  isActive: zod.boolean(),
+  createdAt: zod.coerce.date(),
+});
+
+/**
+ * @summary Activate or deactivate a member (admin only)
+ */
+export const AdminSetActiveParams = zod.object({
+  id: zod.coerce.number(),
+});
+
+export const AdminSetActiveBody = zod.object({
+  value: zod.boolean(),
+});
+
+export const AdminSetActiveResponse = zod.object({
+  id: zod.number(),
+  username: zod.string(),
+  displayName: zod.string(),
+  gender: zod.enum(["male", "female"]),
+  country: zod.string().nullish(),
+  bio: zod.string().nullish(),
+  avatarUrl: zod.string().nullish(),
+  isAdmin: zod.boolean(),
+  isMainAdmin: zod.boolean(),
+  isActive: zod.boolean(),
+  createdAt: zod.coerce.date(),
+});
+
+/**
+ * @summary Delete a post (admin only)
+ */
+export const AdminDeletePostParams = zod.object({
+  id: zod.coerce.number(),
+});
+
+/**
+ * @summary Delete a live broadcast or sitting (admin only)
+ */
+export const AdminDeleteMeetingParams = zod.object({
+  id: zod.coerce.number(),
 });

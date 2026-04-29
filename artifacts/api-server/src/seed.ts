@@ -9,14 +9,32 @@ import {
   postsTable,
 } from "@workspace/db";
 import { hashPassword } from "./lib/auth";
-import { sql } from "drizzle-orm";
+import { sql, eq } from "drizzle-orm";
+
+async function ensureMainAdmin(): Promise<void> {
+  const [existing] = await db
+    .select()
+    .from(usersTable)
+    .where(eq(usersTable.username, "admin"))
+    .limit(1);
+  if (existing) {
+    if (!existing.isMainAdmin || !existing.isAdmin) {
+      await db
+        .update(usersTable)
+        .set({ isAdmin: true, isMainAdmin: true, isActive: true })
+        .where(eq(usersTable.id, existing.id));
+      console.log("Promoted existing 'admin' user to main administrator.");
+    }
+  }
+}
 
 async function main(): Promise<void> {
   const [{ count }] = await db
     .select({ count: sql<number>`count(*)::int` })
     .from(testsTable);
   if ((count ?? 0) > 0) {
-    console.log("Seed already applied. Skipping.");
+    console.log("Seed already applied. Ensuring main admin role.");
+    await ensureMainAdmin();
     return;
   }
 
@@ -501,6 +519,9 @@ async function main(): Promise<void> {
       bio: "Caretaker of this forum. May Allah accept from us all.",
       passwordHash: hash,
       passwordSalt: salt,
+      isAdmin: true,
+      isMainAdmin: true,
+      isActive: true,
     })
     .returning();
   if (admin) {

@@ -9,6 +9,7 @@ import {
 } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod/v4";
+import { usersTable } from "./users";
 
 export const meetingsTable = pgTable(
   "meetings",
@@ -23,6 +24,10 @@ export const meetingsTable = pgTable(
     scheduledFor: timestamp("scheduled_for", { withTimezone: true }),
     durationMinutes: integer("duration_minutes"),
     coverImageUrl: text("cover_image_url"),
+    createdByUserId: integer("created_by_user_id").references(
+      () => usersTable.id,
+      { onDelete: "set null" },
+    ),
     createdAt: timestamp("created_at", { withTimezone: true })
       .notNull()
       .defaultNow(),

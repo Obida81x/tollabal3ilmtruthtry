@@ -70,6 +70,7 @@ async function fetchPostsWithMeta(postIds: number[], viewerId: number | null) {
       author: serializeUser(r.author),
       content: r.post.content,
       imageUrl: r.post.imageUrl,
+      videoUrl: r.post.videoUrl,
       likeCount: countMap.get(r.post.id) ?? 0,
       likedByMe: likedSet.has(r.post.id),
       createdAt: r.post.createdAt,
@@ -106,6 +107,7 @@ router.post("/posts", requireUser, async (req, res): Promise<void> => {
       userId,
       content: parsed.data.content,
       imageUrl: parsed.data.imageUrl ?? null,
+      videoUrl: parsed.data.videoUrl ?? null,
     })
     .returning();
   if (!post) {

@@ -14,4 +14,6 @@ export interface CreatePostBody {
   content: string;
   /** @nullable */
   imageUrl?: string | null;
+  /** @nullable */
+  videoUrl?: string | null;
 }

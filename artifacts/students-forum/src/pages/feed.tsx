@@ -15,7 +15,9 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { InitialsAvatar } from "@/components/InitialsAvatar";
+import { MediaUploadButton } from "@/components/MediaUploadButton";
 import { useTranslation } from "@/lib/i18n";
+import type { UploadResult } from "@/lib/upload";
 
 export default function FeedPage() {
   useRequireAuth();
@@ -27,14 +29,22 @@ export default function FeedPage() {
   });
   const create = useCreatePost();
   const [content, setContent] = useState("");
+  const [media, setMedia] = useState<UploadResult | null>(null);
 
   const handlePost = () => {
     if (!content.trim()) return;
     create.mutate(
-      { data: { content: content.trim() } },
+      {
+        data: {
+          content: content.trim(),
+          imageUrl: media?.kind === "image" ? media.url : null,
+          videoUrl: media?.kind === "video" ? media.url : null,
+        },
+      },
       {
         onSuccess: () => {
           setContent("");
+          setMedia(null);
           queryClient.invalidateQueries({ queryKey: getListPostsQueryKey() });
         },
       },
@@ -68,6 +78,11 @@ export default function FeedPage() {
                     rows={3}
                     maxLength={2000}
                     data-testid="input-post-content"
+                  />
+                  <MediaUploadButton
+                    value={media}
+                    onChange={setMedia}
+                    testIdPrefix="post-media"
                   />
                   <div className="flex justify-between items-center">
                     <span className="text-xs text-muted-foreground">

@@ -31,6 +31,9 @@ export interface User {
   bio?: string | null;
   /** @nullable */
   avatarUrl?: string | null;
+  isAdmin: boolean;
+  isMainAdmin: boolean;
+  isActive: boolean;
   createdAt: string;
 }
 
@@ -71,6 +74,8 @@ export interface Post {
   content: string;
   /** @nullable */
   imageUrl?: string | null;
+  /** @nullable */
+  videoUrl?: string | null;
   likeCount: number;
   likedByMe: boolean;
   createdAt: string;
@@ -84,6 +89,8 @@ export interface CreatePostBody {
   content: string;
   /** @nullable */
   imageUrl?: string | null;
+  /** @nullable */
+  videoUrl?: string | null;
 }
 
 export interface Story {
@@ -92,6 +99,8 @@ export interface Story {
   content: string;
   /** @nullable */
   imageUrl?: string | null;
+  /** @nullable */
+  videoUrl?: string | null;
   expiresAt: string;
   createdAt: string;
 }
@@ -109,6 +118,8 @@ export interface CreateStoryBody {
   content: string;
   /** @nullable */
   imageUrl?: string | null;
+  /** @nullable */
+  videoUrl?: string | null;
 }
 
 export interface ChatGroup {
@@ -166,7 +177,60 @@ export interface Meeting {
   durationMinutes?: number | null;
   /** @nullable */
   coverImageUrl?: string | null;
+  /** @nullable */
+  createdByUserId?: number | null;
   createdAt: string;
+}
+
+export interface CreateMeetingBody {
+  /**
+   * @minLength 3
+   * @maxLength 200
+   */
+  title: string;
+  /**
+   * @maxLength 2000
+   * @nullable
+   */
+  description?: string | null;
+  /**
+   * @minLength 2
+   * @maxLength 120
+   */
+  scholar: string;
+  /**
+   * A Google Meet link
+   * @minLength 5
+   * @maxLength 500
+   */
+  liveUrl: string;
+  /** @nullable */
+  scheduledFor?: string | null;
+  /** @nullable */
+  durationMinutes?: number | null;
+}
+
+export type UploadResponseKind =
+  (typeof UploadResponseKind)[keyof typeof UploadResponseKind];
+
+export const UploadResponseKind = {
+  image: "image",
+  video: "video",
+} as const;
+
+export interface UploadResponse {
+  objectPath: string;
+  url: string;
+  kind: UploadResponseKind;
+  contentType: string;
+}
+
+export interface AdminLoginBody {
+  password: string;
+}
+
+export interface AdminToggleBody {
+  value: boolean;
 }
 
 export interface Book {
@@ -296,4 +360,8 @@ export const ListMeetingsKind = {
 
 export type ListBooksParams = {
   category?: string;
+};
+
+export type UploadFileBody = {
+  file: Blob;
 };

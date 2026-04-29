@@ -3,6 +3,7 @@ import { Plus, X } from "lucide-react";
 import { InitialsAvatar } from "@/components/InitialsAvatar";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import { MediaUploadButton } from "@/components/MediaUploadButton";
 import {
   Dialog,
   DialogContent,
@@ -18,10 +19,19 @@ import {
 import { useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/lib/auth";
 import { useTranslation } from "@/lib/i18n";
+import type { UploadResult } from "@/lib/upload";
 
 type StoryUser = {
   id: number;
   displayName: string;
+};
+
+type StoryItem = {
+  id: number;
+  content: string;
+  imageUrl?: string | null;
+  videoUrl?: string | null;
+  createdAt: string | Date;
 };
 
 export function StoryTray() {
@@ -35,19 +45,27 @@ export function StoryTray() {
 
   const [open, setOpen] = useState(false);
   const [content, setContent] = useState("");
+  const [media, setMedia] = useState<UploadResult | null>(null);
   const [viewing, setViewing] = useState<{
     user: StoryUser;
-    stories: Array<{ id: number; content: string; createdAt: string | Date }>;
+    stories: StoryItem[];
   } | null>(null);
 
   const handleSubmit = () => {
     if (!content.trim()) return;
     create.mutate(
-      { data: { content: content.trim() } },
+      {
+        data: {
+          content: content.trim(),
+          imageUrl: media?.kind === "image" ? media.url : null,
+          videoUrl: media?.kind === "video" ? media.url : null,
+        },
+      },
       {
         onSuccess: () => {
           queryClient.invalidateQueries({ queryKey: getListStoriesQueryKey() });
           setContent("");
+          setMedia(null);
           setOpen(false);
         },
       },
@@ -77,7 +95,7 @@ export function StoryTray() {
           <button
             type="button"
             key={g.user.id}
-            onClick={() => setViewing(g)}
+            onClick={() => setViewing(g as { user: StoryUser; stories: StoryItem[] })}
             data-testid={`button-story-${g.user.id}`}
             className="flex flex-col items-center gap-2 min-w-[64px] group"
           >
@@ -108,6 +126,11 @@ export function StoryTray() {
             rows={4}
             maxLength={500}
             data-testid="input-story-content"
+          />
+          <MediaUploadButton
+            value={media}
+            onChange={setMedia}
+            testIdPrefix="story-media"
           />
           <DialogFooter>
             <Button
@@ -156,11 +179,33 @@ export function StoryTray() {
                 {viewing.stories.map((s) => (
                   <div
                     key={s.id}
-                    data-testid={`text-story-content-${s.id}`}
-                    className="rounded-md bg-primary-foreground/10 p-4 text-base"
-                    style={{ fontFamily: "var(--app-font-serif)" }}
+                    data-testid={`story-card-${s.id}`}
+                    className="rounded-md bg-primary-foreground/10 p-4 space-y-3"
                   >
-                    {s.content}
+                    <div
+                      className="text-base"
+                      style={{ fontFamily: "var(--app-font-serif)" }}
+                      data-testid={`text-story-content-${s.id}`}
+                    >
+                      {s.content}
+                    </div>
+                    {s.imageUrl && (
+                      <img
+                        src={s.imageUrl}
+                        alt=""
+                        className="rounded-md max-h-80 w-full object-contain bg-black/20"
+                        data-testid={`img-story-${s.id}`}
+                      />
+                    )}
+                    {s.videoUrl && (
+                      <video
+                        src={s.videoUrl}
+                        controls
+                        playsInline
+                        className="rounded-md max-h-80 w-full bg-black"
+                        data-testid={`video-story-${s.id}`}
+                      />
+                    )}
                   </div>
                 ))}
               </div>

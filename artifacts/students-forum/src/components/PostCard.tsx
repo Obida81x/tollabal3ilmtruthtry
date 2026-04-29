@@ -1,12 +1,18 @@
-import { Heart } from "lucide-react";
+import { Heart, Trash2 } from "lucide-react";
 import { Link } from "wouter";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { InitialsAvatar } from "@/components/InitialsAvatar";
 import { cn, timeAgo } from "@/lib/utils";
-import { useTogglePostLike, getListPostsQueryKey, getGetDashboardSummaryQueryKey } from "@workspace/api-client-react";
+import {
+  useTogglePostLike,
+  useAdminDeletePost,
+  getListPostsQueryKey,
+  getGetDashboardSummaryQueryKey,
+} from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "@/lib/i18n";
+import { useAuth } from "@/lib/auth";
 
 type Author = {
   id: number;
@@ -18,6 +24,7 @@ type Post = {
   id: number;
   content: string;
   imageUrl?: string | null;
+  videoUrl?: string | null;
   likeCount: number;
   likedByMe: boolean;
   createdAt: string | Date;
@@ -27,10 +34,27 @@ type Post = {
 export function PostCard({ post }: { post: Post }) {
   const queryClient = useQueryClient();
   const toggle = useTogglePostLike();
+  const adminDelete = useAdminDeletePost();
   const { t } = useTranslation();
+  const { user } = useAuth();
 
   const handleLike = () => {
     toggle.mutate(
+      { id: post.id },
+      {
+        onSettled: () => {
+          queryClient.invalidateQueries({ queryKey: getListPostsQueryKey() });
+          queryClient.invalidateQueries({
+            queryKey: getGetDashboardSummaryQueryKey(),
+          });
+        },
+      },
+    );
+  };
+
+  const handleDelete = () => {
+    if (!window.confirm(t("admin.confirmDeletePost"))) return;
+    adminDelete.mutate(
       { id: post.id },
       {
         onSettled: () => {
@@ -57,6 +81,19 @@ export function PostCard({ post }: { post: Post }) {
               @{post.author.username} · {timeAgo(post.createdAt, t)}
             </div>
           </div>
+          {user?.isAdmin && (
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={handleDelete}
+              disabled={adminDelete.isPending}
+              data-testid={`button-admin-delete-post-${post.id}`}
+              className="text-muted-foreground hover:text-destructive"
+              title={t("admin.deletePost")}
+            >
+              <Trash2 className="h-4 w-4" />
+            </Button>
+          )}
         </div>
         <p
           className="text-foreground whitespace-pre-wrap leading-relaxed"
@@ -65,6 +102,23 @@ export function PostCard({ post }: { post: Post }) {
         >
           {post.content}
         </p>
+        {post.imageUrl && (
+          <img
+            src={post.imageUrl}
+            alt=""
+            className="mt-4 rounded-md border border-card-border max-h-[480px] w-auto object-contain bg-muted"
+            data-testid={`img-post-${post.id}`}
+          />
+        )}
+        {post.videoUrl && (
+          <video
+            src={post.videoUrl}
+            controls
+            playsInline
+            className="mt-4 rounded-md border border-card-border max-h-[480px] w-full bg-black"
+            data-testid={`video-post-${post.id}`}
+          />
+        )}
         <div className="mt-4 flex items-center justify-between">
           <Button
             variant="ghost"

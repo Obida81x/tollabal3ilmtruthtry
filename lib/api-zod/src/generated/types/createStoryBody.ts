@@ -14,4 +14,6 @@ export interface CreateStoryBody {
   content: string;
   /** @nullable */
   imageUrl?: string | null;
+  /** @nullable */
+  videoUrl?: string | null;
 }

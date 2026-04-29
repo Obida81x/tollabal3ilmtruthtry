@@ -14,6 +14,9 @@ type CurrentUser = {
   country?: string | null;
   bio?: string | null;
   avatarUrl?: string | null;
+  isAdmin?: boolean;
+  isMainAdmin?: boolean;
+  isActive?: boolean;
   createdAt: string | Date;
 } | null;
 

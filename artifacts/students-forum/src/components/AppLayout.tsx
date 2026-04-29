@@ -10,6 +10,7 @@ import {
   Newspaper,
   LogOut,
   UserCircle,
+  Shield,
 } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { useLogout, getGetCurrentUserQueryKey } from "@workspace/api-client-react";
@@ -37,6 +38,9 @@ export function AppLayout({ children }: { children: ReactNode }) {
     { path: "/library", labelKey: "nav.library", icon: BookOpen, testId: "link-nav-library" },
     { path: "/tests", labelKey: "nav.tests", icon: GraduationCap, testId: "link-nav-tests" },
     { path: "/members", labelKey: "nav.members", icon: Users, testId: "link-nav-members" },
+    ...(user?.isAdmin
+      ? [{ path: "/admin", labelKey: "nav.admin", icon: Shield, testId: "link-nav-admin" }]
+      : []),
   ];
 
   const handleLogout = () => {

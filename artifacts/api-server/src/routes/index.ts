@@ -9,6 +9,8 @@ import meetingsRouter from "./meetings";
 import booksRouter from "./books";
 import testsRouter from "./tests";
 import dashboardRouter from "./dashboard";
+import storageRouter from "./storage";
+import adminRouter from "./admin";
 
 const router: IRouter = Router();
 
@@ -22,5 +24,7 @@ router.use(meetingsRouter);
 router.use(booksRouter);
 router.use(testsRouter);
 router.use(dashboardRouter);
+router.use(storageRouter);
+router.use(adminRouter);
 
 export default router;

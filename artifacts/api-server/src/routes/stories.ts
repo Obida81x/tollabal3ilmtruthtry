@@ -34,6 +34,7 @@ router.get("/stories", async (_req, res): Promise<void> => {
         userId: s.userId,
         content: s.content,
         imageUrl: s.imageUrl,
+        videoUrl: s.videoUrl,
         expiresAt: s.expiresAt,
         createdAt: s.createdAt,
       })),
@@ -59,6 +60,7 @@ router.post("/stories", requireUser, async (req, res): Promise<void> => {
       userId,
       content: parsed.data.content,
       imageUrl: parsed.data.imageUrl ?? null,
+      videoUrl: parsed.data.videoUrl ?? null,
       expiresAt,
     })
     .returning();
@@ -71,6 +73,7 @@ router.post("/stories", requireUser, async (req, res): Promise<void> => {
     userId: row.userId,
     content: row.content,
     imageUrl: row.imageUrl,
+    videoUrl: row.videoUrl,
     expiresAt: row.expiresAt,
     createdAt: row.createdAt,
   });

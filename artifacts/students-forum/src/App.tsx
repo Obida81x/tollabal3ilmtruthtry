@@ -20,6 +20,7 @@ import TestsPage from "@/pages/tests";
 import TestDetailPage from "@/pages/test-detail";
 import MembersPage from "@/pages/members";
 import ProfilePage from "@/pages/profile";
+import AdminPage from "@/pages/admin";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -48,6 +49,7 @@ function Routes() {
       <Route path="/tests/:id" component={TestDetailPage} />
       <Route path="/members" component={MembersPage} />
       <Route path="/profile/:id" component={ProfilePage} />
+      <Route path="/admin" component={AdminPage} />
       <Route component={NotFound} />
     </Switch>
   );

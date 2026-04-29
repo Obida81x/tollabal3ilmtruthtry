@@ -18,6 +18,8 @@ tags:
   - name: books
   - name: tests
   - name: dashboard
+  - name: admin
+  - name: storage
 
 paths:
   /healthz:
@@ -347,6 +349,26 @@ paths:
               schema:
                 type: array
                 items: { $ref: "#/components/schemas/Meeting" }
+    post:
+      operationId: createMeeting
+      tags: [meetings]
+      summary: Create a live broadcast (Google Meet link)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/CreateMeetingBody" }
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Meeting" }
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorResponse" }
 
   /meetings/upcoming:
     get:
@@ -513,6 +535,172 @@ paths:
             application/json:
               schema: { $ref: "#/components/schemas/DashboardSummary" }
 
+  /storage/uploads:
+    post:
+      operationId: uploadFile
+      tags: [storage]
+      summary: Upload an image or video file (multipart/form-data)
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [file]
+              properties:
+                file:
+                  type: string
+                  format: binary
+      responses:
+        "201":
+          description: Uploaded
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/UploadResponse" }
+        "400":
+          description: Invalid file
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorResponse" }
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorResponse" }
+
+  /admin/login:
+    post:
+      operationId: adminLogin
+      tags: [admin]
+      summary: Verify admin password and elevate the current session
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/AdminLoginBody" }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/User" }
+        "401":
+          description: Invalid
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorResponse" }
+
+  /admin/users:
+    get:
+      operationId: adminListUsers
+      tags: [admin]
+      summary: List all members (admin only)
+      responses:
+        "200":
+          description: Members
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/User" }
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorResponse" }
+
+  /admin/users/{id}/admin:
+    post:
+      operationId: adminSetAdmin
+      tags: [admin]
+      summary: Grant or revoke admin role (main admin only)
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/AdminToggleBody" }
+      responses:
+        "200":
+          description: Updated user
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/User" }
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorResponse" }
+
+  /admin/users/{id}/active:
+    post:
+      operationId: adminSetActive
+      tags: [admin]
+      summary: Activate or deactivate a member (admin only)
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/AdminToggleBody" }
+      responses:
+        "200":
+          description: Updated user
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/User" }
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorResponse" }
+
+  /admin/posts/{id}:
+    delete:
+      operationId: adminDeletePost
+      tags: [admin]
+      summary: Delete a post (admin only)
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+      responses:
+        "204":
+          description: Deleted
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorResponse" }
+
+  /admin/meetings/{id}:
+    delete:
+      operationId: adminDeleteMeeting
+      tags: [admin]
+      summary: Delete a live broadcast or sitting (admin only)
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+      responses:
+        "204":
+          description: Deleted
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorResponse" }
+
 components:
   schemas:
     HealthStatus:
@@ -533,7 +721,7 @@ components:
 
     User:
       type: object
-      required: [id, username, displayName, gender, createdAt]
+      required: [id, username, displayName, gender, isAdmin, isMainAdmin, isActive, createdAt]
       properties:
         id: { type: integer }
         username: { type: string }
@@ -545,6 +733,9 @@ components:
           type: ["string", "null"]
         avatarUrl:
           type: ["string", "null"]
+        isAdmin: { type: boolean }
+        isMainAdmin: { type: boolean }
+        isActive: { type: boolean }
         createdAt: { type: string, format: date-time }
 
     CurrentUserResponse:
@@ -594,6 +785,8 @@ components:
         content: { type: string }
         imageUrl:
           type: ["string", "null"]
+        videoUrl:
+          type: ["string", "null"]
         likeCount: { type: integer }
         likedByMe: { type: boolean }
         createdAt: { type: string, format: date-time }
@@ -608,6 +801,8 @@ components:
           maxLength: 2000
         imageUrl:
           type: ["string", "null"]
+        videoUrl:
+          type: ["string", "null"]
 
     Story:
       type: object
@@ -617,6 +812,8 @@ components:
         userId: { type: integer }
         content: { type: string }
         imageUrl:
+          type: ["string", "null"]
+        videoUrl:
           type: ["string", "null"]
         expiresAt: { type: string, format: date-time }
         createdAt: { type: string, format: date-time }
@@ -639,6 +836,8 @@ components:
           minLength: 1
           maxLength: 500
         imageUrl:
+          type: ["string", "null"]
+        videoUrl:
           type: ["string", "null"]
 
     ChatGroup:
@@ -701,7 +900,58 @@ components:
           type: ["integer", "null"]
         coverImageUrl:
           type: ["string", "null"]
+        createdByUserId:
+          type: ["integer", "null"]
         createdAt: { type: string, format: date-time }
+
+    CreateMeetingBody:
+      type: object
+      required: [title, scholar, liveUrl]
+      properties:
+        title:
+          type: string
+          minLength: 3
+          maxLength: 200
+        description:
+          type: ["string", "null"]
+          maxLength: 2000
+        scholar:
+          type: string
+          minLength: 2
+          maxLength: 120
+        liveUrl:
+          type: string
+          minLength: 5
+          maxLength: 500
+          description: A Google Meet link
+        scheduledFor:
+          type: ["string", "null"]
+          format: date-time
+        durationMinutes:
+          type: ["integer", "null"]
+
+    UploadResponse:
+      type: object
+      required: [objectPath, url, kind, contentType]
+      properties:
+        objectPath: { type: string }
+        url: { type: string }
+        kind:
+          type: string
+          enum: [image, video]
+        contentType: { type: string }
+
+    AdminLoginBody:
+      type: object
+      required: [password]
+      properties:
+        password: { type: string }
+
+    AdminToggleBody:
+      type: object
+      required: [value]
+      properties:
+        value: { type: boolean }
 
     Book:
       type: object

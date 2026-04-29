@@ -24,5 +24,7 @@ export interface Meeting {
   durationMinutes?: number | null;
   /** @nullable */
   coverImageUrl?: string | null;
+  /** @nullable */
+  createdByUserId?: number | null;
   createdAt: Date;
 }

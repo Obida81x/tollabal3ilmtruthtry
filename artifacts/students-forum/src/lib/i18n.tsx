@@ -233,6 +233,64 @@ const en: Dict = {
   "ar.whatYoullFind": "ما تجده هنا",
   "ar.majlisFull": "مَجْلِسُ طُلَّابِ العِلْمِ",
   "ar.studentsOfIlm": "طلاب علم",
+
+  // Navigation
+  "nav.admin": "Admin",
+
+  // Uploads
+  "upload.image": "Add image",
+  "upload.videoOk": "Video also welcome",
+  "upload.uploading": "Uploading…",
+  "upload.tooBig": "File is too large. Maximum is 50 MB.",
+  "upload.remove": "Remove attachment",
+
+  // Sessions creation
+  "sessions.create.button": "Start a live broadcast",
+  "sessions.create.title": "Start a live broadcast",
+  "sessions.create.help":
+    "Open Google Meet in another tab, copy the meeting link, and paste it here. Brothers and sisters will be able to join from the sessions page.",
+  "sessions.create.titleField": "Title",
+  "sessions.create.scholar": "Speaker",
+  "sessions.create.description": "Description",
+  "sessions.create.link": "Google Meet link",
+  "sessions.create.linkHelp":
+    "Must be a meet.google.com link. Other providers are not allowed.",
+  "sessions.create.when": "When (optional)",
+  "sessions.create.duration": "Duration (minutes)",
+  "sessions.create.publish": "Publish broadcast",
+  "sessions.create.publishing": "Publishing…",
+  "sessions.create.invalidLink":
+    "The link must be a valid Google Meet URL (meet.google.com).",
+  "sessions.create.failed": "Could not publish the broadcast.",
+
+  // Halaqah gender separation
+  "halaqah.brothersBanner":
+    "Brothers' lounge — only brothers can read and write here.",
+  "halaqah.sistersBanner":
+    "Sisters' lounge — only sisters can read and write here.",
+
+  // Admin
+  "admin.title": "Admin control panel",
+  "admin.subtitle":
+    "Grant or revoke admin access, deactivate accounts, and moderate content.",
+  "admin.gate.title": "Admin access required",
+  "admin.gate.subtitle":
+    "Enter the admin password to unlock the control panel.",
+  "admin.gate.password": "Admin password",
+  "admin.gate.unlock": "Unlock",
+  "admin.gate.invalid": "Incorrect admin password.",
+  "admin.role.main": "Main admin",
+  "admin.role.admin": "Admin",
+  "admin.role.inactive": "Deactivated",
+  "admin.role.onlyMain": "Only the main admin can grant or revoke admin access.",
+  "admin.role.cannotChangeMain": "The main admin cannot be changed.",
+  "admin.action.grantAdmin": "Grant admin",
+  "admin.action.revokeAdmin": "Revoke admin",
+  "admin.action.activate": "Activate",
+  "admin.action.deactivate": "Deactivate",
+  "admin.deletePost": "Delete post",
+  "admin.confirmDeletePost":
+    "Delete this post? This cannot be undone.",
 };
 
 const ar: Dict = {
@@ -454,6 +512,65 @@ const ar: Dict = {
   "ar.whatYoullFind": "ما تجده هنا",
   "ar.majlisFull": "مَجْلِسُ طُلَّابِ العِلْمِ",
   "ar.studentsOfIlm": "طلاب علم",
+
+  // Navigation
+  "nav.admin": "الإدارة",
+
+  // Uploads
+  "upload.image": "إضافة صورة",
+  "upload.videoOk": "ويمكن أيضًا رفع مقطع فيديو",
+  "upload.uploading": "جارٍ الرفع…",
+  "upload.tooBig": "حجم الملف كبير جدًا. الحد الأقصى ٥٠ ميجابايت.",
+  "upload.remove": "حذف المرفق",
+
+  // Sessions creation
+  "sessions.create.button": "ابدأ بثًا مباشرًا",
+  "sessions.create.title": "ابدأ بثًا مباشرًا",
+  "sessions.create.help":
+    "افتح Google Meet في علامة تبويب أخرى، وانسخ رابط الاجتماع، ثم الصقه هنا. سيتمكن الإخوة والأخوات من الانضمام من صفحة المجالس.",
+  "sessions.create.titleField": "العنوان",
+  "sessions.create.scholar": "المتحدث",
+  "sessions.create.description": "الوصف",
+  "sessions.create.link": "رابط Google Meet",
+  "sessions.create.linkHelp":
+    "يجب أن يكون الرابط من meet.google.com، الروابط الأخرى غير مسموح بها.",
+  "sessions.create.when": "الموعد (اختياري)",
+  "sessions.create.duration": "المدة (بالدقائق)",
+  "sessions.create.publish": "نشر البث",
+  "sessions.create.publishing": "جارٍ النشر…",
+  "sessions.create.invalidLink":
+    "يجب أن يكون الرابط من Google Meet (meet.google.com).",
+  "sessions.create.failed": "تعذّر نشر البث المباشر.",
+
+  // Halaqah gender separation
+  "halaqah.brothersBanner":
+    "مجلس الإخوة — لا يقرأ ولا يكتب هنا إلا الإخوة.",
+  "halaqah.sistersBanner":
+    "مجلس الأخوات — لا تقرأ ولا تكتب هنا إلا الأخوات.",
+
+  // Admin
+  "admin.title": "لوحة تحكّم الإدارة",
+  "admin.subtitle":
+    "منح صلاحية الإدارة أو سحبها، وتعطيل الحسابات، والإشراف على المحتوى.",
+  "admin.gate.title": "يلزم الدخول الإداري",
+  "admin.gate.subtitle":
+    "أدخل كلمة سر الإدارة لفتح لوحة التحكّم.",
+  "admin.gate.password": "كلمة سرّ الإدارة",
+  "admin.gate.unlock": "فتح",
+  "admin.gate.invalid": "كلمة سرّ الإدارة غير صحيحة.",
+  "admin.role.main": "المدير الرئيس",
+  "admin.role.admin": "مدير",
+  "admin.role.inactive": "موقوف",
+  "admin.role.onlyMain":
+    "لا يمكن منح صلاحية الإدارة أو سحبها إلا للمدير الرئيس.",
+  "admin.role.cannotChangeMain": "لا يمكن تعديل المدير الرئيس.",
+  "admin.action.grantAdmin": "منح الإدارة",
+  "admin.action.revokeAdmin": "سحب الإدارة",
+  "admin.action.activate": "تفعيل",
+  "admin.action.deactivate": "تعطيل",
+  "admin.deletePost": "حذف المنشور",
+  "admin.confirmDeletePost":
+    "هل تريد حذف هذا المنشور؟ لا يمكن التراجع عن ذلك.",
 };
 
 const dictionaries: Record<Language, Dict> = { en, ar };

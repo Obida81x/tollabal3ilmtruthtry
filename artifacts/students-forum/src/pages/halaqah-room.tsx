@@ -79,8 +79,28 @@ export default function HalaqahRoomPage() {
               </Button>
             </Link>
         </div>
-        <Card className="border-card-border mb-4">
+        <Card
+          className={
+            "mb-4 border-l-4 " +
+            (user?.gender === "male"
+              ? "border-l-blue-500 border-card-border"
+              : "border-l-pink-500 border-card-border")
+          }
+        >
           <CardContent className="p-5">
+            <div
+              className={
+                "inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[11px] uppercase tracking-wide font-medium mb-2 " +
+                (user?.gender === "male"
+                  ? "bg-blue-500/10 text-blue-700 dark:text-blue-300"
+                  : "bg-pink-500/10 text-pink-700 dark:text-pink-300")
+              }
+              data-testid="badge-room-gender"
+            >
+              {user?.gender === "male"
+                ? t("common.brothers")
+                : t("common.sisters")}
+            </div>
             <h1
               className="text-2xl text-foreground"
               style={{ fontFamily: "var(--app-font-serif)" }}
@@ -91,6 +111,14 @@ export default function HalaqahRoomPage() {
             {group?.description && (
               <p className="text-sm text-muted-foreground mt-1">{group.description}</p>
             )}
+            <p
+              className="text-xs text-muted-foreground mt-2"
+              data-testid="text-room-gender-banner"
+            >
+              {user?.gender === "male"
+                ? t("halaqah.brothersBanner")
+                : t("halaqah.sistersBanner")}
+            </p>
           </CardContent>
         </Card>
 

@@ -1,16 +1,33 @@
+import { useState } from "react";
 import { Link } from "wouter";
-import { Video, Radio, Calendar } from "lucide-react";
+import { Video, Radio, Calendar, Plus } from "lucide-react";
 import {
   useListMeetings,
+  useCreateMeeting,
   getListMeetingsQueryKey,
+  getListUpcomingMeetingsQueryKey,
 } from "@workspace/api-client-react";
-import { useRequireAuth } from "@/lib/auth";
+import { useQueryClient } from "@tanstack/react-query";
+import { useRequireAuth, useAuth } from "@/lib/auth";
 import { AppLayout } from "@/components/AppLayout";
 import { PageHeader } from "@/components/PageHeader";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { formatDateTime } from "@/lib/utils";
 import { useTranslation } from "@/lib/i18n";
 
@@ -77,9 +94,208 @@ function MeetingList({ items, isLoading }: { items?: Meeting[]; isLoading: boole
   );
 }
 
+function CreateLiveBroadcastDialog() {
+  const { t } = useTranslation();
+  const { user } = useAuth();
+  const queryClient = useQueryClient();
+  const create = useCreateMeeting();
+  const [open, setOpen] = useState(false);
+  const [title, setTitle] = useState("");
+  const [scholar, setScholar] = useState(user?.displayName ?? "");
+  const [description, setDescription] = useState("");
+  const [liveUrl, setLiveUrl] = useState("");
+  const [scheduledFor, setScheduledFor] = useState("");
+  const [durationMinutes, setDurationMinutes] = useState<string>("");
+  const [error, setError] = useState<string | null>(null);
+
+  const reset = () => {
+    setTitle("");
+    setScholar(user?.displayName ?? "");
+    setDescription("");
+    setLiveUrl("");
+    setScheduledFor("");
+    setDurationMinutes("");
+    setError(null);
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setError(null);
+    if (!/^https?:\/\/(?:www\.)?meet\.google\.com\//.test(liveUrl.trim())) {
+      setError(t("sessions.create.invalidLink"));
+      return;
+    }
+    create.mutate(
+      {
+        data: {
+          title: title.trim(),
+          scholar: scholar.trim() || user?.displayName || "",
+          description: description.trim() || null,
+          liveUrl: liveUrl.trim(),
+          scheduledFor: scheduledFor
+            ? new Date(scheduledFor).toISOString()
+            : null,
+          durationMinutes: durationMinutes ? Number(durationMinutes) : null,
+        },
+      },
+      {
+        onSuccess: () => {
+          queryClient.invalidateQueries({
+            queryKey: getListMeetingsQueryKey({ kind: "live" }),
+          });
+          queryClient.invalidateQueries({
+            queryKey: getListMeetingsQueryKey(),
+          });
+          queryClient.invalidateQueries({
+            queryKey: getListUpcomingMeetingsQueryKey(),
+          });
+          reset();
+          setOpen(false);
+        },
+        onError: (err) => {
+          const msg =
+            (err as { message?: string })?.message ??
+            t("sessions.create.failed");
+          setError(msg);
+        },
+      },
+    );
+  };
+
+  return (
+    <Dialog
+      open={open}
+      onOpenChange={(o) => {
+        setOpen(o);
+        if (!o) reset();
+      }}
+    >
+      <DialogTrigger asChild>
+        <Button data-testid="button-open-create-meeting" className="gap-1">
+          <Plus className="h-4 w-4" />
+          {t("sessions.create.button")}
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="max-w-lg">
+        <DialogHeader>
+          <DialogTitle>{t("sessions.create.title")}</DialogTitle>
+          <DialogDescription>{t("sessions.create.help")}</DialogDescription>
+        </DialogHeader>
+        <form onSubmit={handleSubmit} className="space-y-3">
+          <div className="space-y-1.5">
+            <Label htmlFor="meeting-title">{t("sessions.create.titleField")}</Label>
+            <Input
+              id="meeting-title"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              maxLength={200}
+              required
+              minLength={3}
+              data-testid="input-meeting-title"
+            />
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="meeting-scholar">{t("sessions.create.scholar")}</Label>
+            <Input
+              id="meeting-scholar"
+              value={scholar}
+              onChange={(e) => setScholar(e.target.value)}
+              maxLength={120}
+              required
+              data-testid="input-meeting-scholar"
+            />
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="meeting-description">
+              {t("sessions.create.description")}
+            </Label>
+            <Textarea
+              id="meeting-description"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              rows={3}
+              maxLength={1000}
+              data-testid="input-meeting-description"
+            />
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="meeting-link">{t("sessions.create.link")}</Label>
+            <Input
+              id="meeting-link"
+              type="url"
+              placeholder="https://meet.google.com/abc-defg-hij"
+              value={liveUrl}
+              onChange={(e) => setLiveUrl(e.target.value)}
+              required
+              data-testid="input-meeting-link"
+            />
+            <p className="text-xs text-muted-foreground">
+              {t("sessions.create.linkHelp")}
+            </p>
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-1.5">
+              <Label htmlFor="meeting-when">{t("sessions.create.when")}</Label>
+              <Input
+                id="meeting-when"
+                type="datetime-local"
+                value={scheduledFor}
+                onChange={(e) => setScheduledFor(e.target.value)}
+                data-testid="input-meeting-when"
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="meeting-duration">
+                {t("sessions.create.duration")}
+              </Label>
+              <Input
+                id="meeting-duration"
+                type="number"
+                min={1}
+                max={600}
+                value={durationMinutes}
+                onChange={(e) => setDurationMinutes(e.target.value)}
+                data-testid="input-meeting-duration"
+              />
+            </div>
+          </div>
+          {error && (
+            <p
+              className="text-sm text-destructive"
+              data-testid="text-meeting-error"
+            >
+              {error}
+            </p>
+          )}
+          <DialogFooter>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setOpen(false)}
+              data-testid="button-meeting-cancel"
+            >
+              {t("common.cancel")}
+            </Button>
+            <Button
+              type="submit"
+              disabled={create.isPending}
+              data-testid="button-meeting-submit"
+            >
+              {create.isPending
+                ? t("sessions.create.publishing")
+                : t("sessions.create.publish")}
+            </Button>
+          </DialogFooter>
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 export default function SessionsPage() {
   useRequireAuth();
   const { t } = useTranslation();
+  const { user } = useAuth();
   const live = useListMeetings(
     { kind: "live" },
     { query: { queryKey: getListMeetingsQueryKey({ kind: "live" }) } },
@@ -97,6 +313,11 @@ export default function SessionsPage() {
         subtitle={t("sessions.subtitle")}
       />
       <div className="px-6 lg:px-10 py-8 max-w-5xl mx-auto">
+        {user && (
+          <div className="mb-4 flex justify-end">
+            <CreateLiveBroadcastDialog />
+          </div>
+        )}
         <Tabs defaultValue="live">
           <TabsList data-testid="tabs-sessions">
             <TabsTrigger value="live" data-testid="tab-live">{t("sessions.tabLive")}</TabsTrigger>
