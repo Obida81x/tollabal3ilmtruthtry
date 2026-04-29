@@ -12,27 +12,31 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { PostCard } from "@/components/PostCard";
 import { formatDateTime } from "@/lib/utils";
+import { useTranslation } from "@/lib/i18n";
 
 export default function HomePage() {
   useRequireAuth();
   const { user } = useAuth();
+  const { t, lang } = useTranslation();
   const { data, isLoading } = useGetDashboardSummary({
     query: { queryKey: getGetDashboardSummaryQueryKey() },
   });
 
   const stats = [
-    { icon: Users, label: "Members", value: data?.memberCount ?? 0, key: "members" },
-    { icon: Newspaper, label: "Posts", value: data?.postCount ?? 0, key: "posts" },
-    { icon: BookOpen, label: "Books", value: data?.bookCount ?? 0, key: "books" },
-    { icon: Video, label: "Sittings", value: data?.meetingCount ?? 0, key: "meetings" },
+    { icon: Users, labelKey: "home.stat.members", value: data?.memberCount ?? 0, key: "members" },
+    { icon: Newspaper, labelKey: "home.stat.posts", value: data?.postCount ?? 0, key: "posts" },
+    { icon: BookOpen, labelKey: "home.stat.books", value: data?.bookCount ?? 0, key: "books" },
+    { icon: Video, labelKey: "home.stat.sittings", value: data?.meetingCount ?? 0, key: "meetings" },
   ];
 
   return (
     <AppLayout>
       <PageHeader
-        title={user ? `As-salamu 'alaykum, ${user.displayName}` : "Welcome"}
-        arabicLabel="السلام عليكم"
-        subtitle="Your majlis at a glance — recent benefits, upcoming sittings, and the state of the gathering."
+        title={
+          user ? t("home.greeting", { name: user.displayName }) : t("common.welcome")
+        }
+        arabicLabel={t("ar.salam")}
+        subtitle={t("home.subtitle")}
       />
       <div className="px-6 lg:px-10 py-8 max-w-5xl mx-auto space-y-8">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -53,7 +57,7 @@ export default function HomePage() {
                         {isLoading ? "—" : s.value}
                       </div>
                       <div className="text-xs text-muted-foreground uppercase tracking-wide">
-                        {s.label}
+                        {t(s.labelKey)}
                       </div>
                     </div>
                   </div>
@@ -70,11 +74,14 @@ export default function HomePage() {
                 className="text-xl text-foreground"
                 style={{ fontFamily: "var(--app-font-serif)" }}
               >
-                Recent benefits from the brothers and sisters
+                {t("home.recentBenefits")}
               </h2>
               <Button asChild variant="ghost" size="sm" className="gap-1" data-testid="button-view-all-feed">
                 <Link href="/feed">
-                  View feed <ArrowRight className="h-4 w-4" />
+                  {t("home.viewFeed")}{" "}
+                  <ArrowRight
+                    className={lang === "ar" ? "h-4 w-4 rotate-180" : "h-4 w-4"}
+                  />
                 </Link>
               </Button>
             </div>
@@ -88,7 +95,7 @@ export default function HomePage() {
             {!isLoading && data?.recentPosts?.length === 0 && (
               <Card className="border-card-border">
                 <CardContent className="p-6 text-center text-muted-foreground">
-                  No posts yet. Be the first to share a benefit.
+                  {t("home.noPostsYet")}
                 </CardContent>
               </Card>
             )}
@@ -99,7 +106,7 @@ export default function HomePage() {
               className="text-xl text-foreground"
               style={{ fontFamily: "var(--app-font-serif)" }}
             >
-              Upcoming live sittings
+              {t("home.upcomingSittings")}
             </h2>
             {isLoading && <Skeleton className="h-24 w-full" />}
             {data?.upcomingMeetings?.map((m) => (
@@ -108,7 +115,7 @@ export default function HomePage() {
                   <Card className="border-card-border hover:border-primary transition-colors">
                     <CardContent className="p-4">
                       <div className="text-xs text-secondary uppercase tracking-wide mb-1">
-                        {formatDateTime(m.scheduledFor)}
+                        {formatDateTime(m.scheduledFor, lang === "ar" ? "ar" : undefined, t("common.tba"))}
                       </div>
                       <div className="font-medium text-foreground group-hover:text-primary transition-colors">
                         {m.title}
@@ -123,7 +130,7 @@ export default function HomePage() {
             {!isLoading && data?.upcomingMeetings?.length === 0 && (
               <Card className="border-card-border">
                 <CardContent className="p-4 text-center text-sm text-muted-foreground">
-                  No live sittings scheduled.
+                  {t("home.noLiveScheduled")}
                 </CardContent>
               </Card>
             )}

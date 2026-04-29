@@ -1,5 +1,5 @@
 import { Link, useRoute } from "wouter";
-import { ArrowLeft, MapPin, Calendar } from "lucide-react";
+import { ArrowLeft, ArrowRight, MapPin, Calendar } from "lucide-react";
 import {
   useGetUser,
   getGetUserQueryKey,
@@ -13,21 +13,25 @@ import { InitialsAvatar } from "@/components/InitialsAvatar";
 import { Badge } from "@/components/ui/badge";
 import { ArabesqueDivider } from "@/components/Pattern";
 import { formatDateTime } from "@/lib/utils";
+import { useTranslation } from "@/lib/i18n";
 
 export default function ProfilePage() {
   useRequireAuth();
+  const { t, lang } = useTranslation();
   const [, params] = useRoute<{ id: string }>("/profile/:id");
   const id = params?.id ? Number(params.id) : 0;
   const { data: user, isLoading } = useGetUser(id, {
     query: { enabled: !!id, queryKey: getGetUserQueryKey(id) },
   });
 
+  const BackIcon = lang === "ar" ? ArrowRight : ArrowLeft;
+
   return (
     <AppLayout>
       <div className="px-6 lg:px-10 py-8 max-w-3xl mx-auto">
         <Link href="/members" data-testid="link-back-members">
             <Button variant="ghost" size="sm" className="gap-1 mb-4">
-              <ArrowLeft className="h-4 w-4" /> All members
+              <BackIcon className="h-4 w-4" /> {t("members.allMembers")}
             </Button>
           </Link>
         {isLoading && <Skeleton className="h-64 w-full" />}
@@ -45,7 +49,7 @@ export default function ProfilePage() {
                 </h1>
                 <div className="text-sm text-muted-foreground mt-1">@{user.username}</div>
                 <Badge variant="secondary" className="mt-3" data-testid="badge-profile-gender">
-                  {user.gender === "male" ? "Brother" : "Sister"}
+                  {user.gender === "male" ? t("common.brother") : t("common.sister")}
                 </Badge>
                 <ArabesqueDivider className="my-6 w-full max-w-xs" />
                 <div className="flex flex-wrap gap-4 justify-center text-sm text-muted-foreground">
@@ -55,7 +59,14 @@ export default function ProfilePage() {
                     </div>
                   )}
                   <div className="inline-flex items-center gap-1">
-                    <Calendar className="h-4 w-4" /> Joined {formatDateTime(user.createdAt)}
+                    <Calendar className="h-4 w-4" />{" "}
+                    {t("profile.joined", {
+                      date: formatDateTime(
+                        user.createdAt,
+                        lang === "ar" ? "ar" : undefined,
+                        t("common.tba"),
+                      ),
+                    })}
                   </div>
                 </div>
                 {user.bio && (

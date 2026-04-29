@@ -19,11 +19,14 @@ import {
 import { Card, CardContent } from "@/components/ui/card";
 import { Logo } from "@/components/Logo";
 import { ArabesqueDivider, GeometricPattern } from "@/components/Pattern";
+import { LanguageToggle } from "@/components/LanguageToggle";
+import { useTranslation } from "@/lib/i18n";
 
 export default function RegisterPage() {
   const [, setLocation] = useLocation();
   const queryClient = useQueryClient();
   const register = useRegister();
+  const { t } = useTranslation();
   const [form, setForm] = useState({
     username: "",
     displayName: "",
@@ -38,7 +41,7 @@ export default function RegisterPage() {
     e.preventDefault();
     setError(null);
     if (form.gender !== "male" && form.gender !== "female") {
-      setError("Please select your gender (used to assign halaqah groups).");
+      setError(t("register.selectGender"));
       return;
     }
     register.mutate(
@@ -58,7 +61,7 @@ export default function RegisterPage() {
           setLocation("/home");
         },
         onError: (err) => {
-          setError(err instanceof Error ? err.message : "Registration failed");
+          setError(err instanceof Error ? err.message : t("register.failed"));
         },
       },
     );
@@ -68,6 +71,9 @@ export default function RegisterPage() {
     <div className="min-h-screen bg-background text-foreground flex items-center justify-center px-4 py-10 relative overflow-hidden">
       <div className="absolute inset-0 pointer-events-none">
         <GeometricPattern opacity={0.06} />
+      </div>
+      <div className="absolute top-4 right-4 z-10">
+        <LanguageToggle variant="outline" />
       </div>
       <div className="relative w-full max-w-lg">
         <div className="text-center mb-6">
@@ -80,20 +86,20 @@ export default function RegisterPage() {
                 className="text-secondary text-lg mb-1"
                 style={{ fontFamily: "var(--app-font-serif)" }}
               >
-                انضم إلى المجلس
+                {t("ar.joinMajlis")}
               </div>
               <h2
                 className="text-2xl text-foreground"
                 style={{ fontFamily: "var(--app-font-serif)" }}
               >
-                Create your account
+                {t("register.title")}
               </h2>
               <ArabesqueDivider className="mt-4" />
             </div>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="grid sm:grid-cols-2 gap-4">
                 <div>
-                  <Label htmlFor="username">Username</Label>
+                  <Label htmlFor="username">{t("register.username")}</Label>
                   <Input
                     id="username"
                     value={form.username}
@@ -102,11 +108,12 @@ export default function RegisterPage() {
                     minLength={3}
                     maxLength={32}
                     required
+                    autoComplete="username"
                     data-testid="input-register-username"
                   />
                 </div>
                 <div>
-                  <Label htmlFor="displayName">Display name</Label>
+                  <Label htmlFor="displayName">{t("register.displayName")}</Label>
                   <Input
                     id="displayName"
                     value={form.displayName}
@@ -120,7 +127,7 @@ export default function RegisterPage() {
                 </div>
               </div>
               <div>
-                <Label htmlFor="password">Password</Label>
+                <Label htmlFor="password">{t("register.password")}</Label>
                 <Input
                   id="password"
                   type="password"
@@ -128,47 +135,54 @@ export default function RegisterPage() {
                   onChange={(e) => setForm({ ...form, password: e.target.value })}
                   minLength={6}
                   required
+                  autoComplete="new-password"
                   data-testid="input-register-password"
                 />
-                <p className="text-xs text-muted-foreground mt-1">At least 6 characters.</p>
+                <p className="text-xs text-muted-foreground mt-1">
+                  {t("register.passwordHint")}
+                </p>
               </div>
               <div>
-                <Label>I am a</Label>
+                <Label>{t("register.iAmA")}</Label>
                 <Select
                   value={form.gender}
                   onValueChange={(v) => setForm({ ...form, gender: v })}
                 >
                   <SelectTrigger data-testid="select-gender">
-                    <SelectValue placeholder="Select" />
+                    <SelectValue placeholder={t("register.select")} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="male" data-testid="option-gender-male">Brother</SelectItem>
-                    <SelectItem value="female" data-testid="option-gender-female">Sister</SelectItem>
+                    <SelectItem value="male" data-testid="option-gender-male">
+                      {t("common.brother")}
+                    </SelectItem>
+                    <SelectItem value="female" data-testid="option-gender-female">
+                      {t("common.sister")}
+                    </SelectItem>
                   </SelectContent>
                 </Select>
                 <p className="text-xs text-muted-foreground mt-1">
-                  Used to place you in the brothers' or sisters' halaqah.
+                  {t("register.genderHint")}
                 </p>
               </div>
               <div>
-                <Label htmlFor="country">Country (optional)</Label>
+                <Label htmlFor="country">{t("register.country")}</Label>
                 <Input
                   id="country"
                   value={form.country}
                   onChange={(e) => setForm({ ...form, country: e.target.value })}
-                  placeholder="e.g. Egypt"
+                  placeholder={t("register.countryPlaceholder")}
                   data-testid="input-register-country"
                 />
               </div>
               <div>
-                <Label htmlFor="bio">A short note (optional)</Label>
+                <Label htmlFor="bio">{t("register.bio")}</Label>
                 <Textarea
                   id="bio"
                   value={form.bio}
                   onChange={(e) => setForm({ ...form, bio: e.target.value })}
                   rows={3}
                   maxLength={280}
-                  placeholder="Tell the brothers and sisters a little about yourself."
+                  placeholder={t("register.bioPlaceholder")}
                   data-testid="input-register-bio"
                 />
               </div>
@@ -183,12 +197,16 @@ export default function RegisterPage() {
                 disabled={register.isPending}
                 data-testid="button-register-submit"
               >
-                {register.isPending ? "Creating account…" : "Create account"}
+                {register.isPending
+                  ? t("common.creatingAccount")
+                  : t("common.createAccount")}
               </Button>
             </form>
             <p className="mt-6 text-sm text-center text-muted-foreground">
-              Already a member?{" "}
-              <Link href="/login" className="text-primary hover:underline" data-testid="link-to-login">Sign in</Link>
+              {t("register.alreadyMember")}{" "}
+              <Link href="/login" className="text-primary hover:underline" data-testid="link-to-login">
+                {t("common.signIn")}
+              </Link>
             </p>
           </CardContent>
         </Card>

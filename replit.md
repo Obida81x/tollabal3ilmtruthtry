@@ -31,8 +31,9 @@ See the `pnpm-workspace` skill for workspace structure, TypeScript setup, and pa
 ### students-forum (`artifacts/students-forum`)
 "Students of Islamic Law Forum" — React + Vite + Tailwind community site grounded in the Salafi methodology.
 
-- Theme: parchment / emerald / gold; Amiri (serif) + Outfit (sans). No emojis.
+- Theme: parchment / emerald / gold; Amiri (serif) + Outfit (sans, EN) / Cairo (sans, AR). No emojis.
 - Imagery policy: NO images of people, faces, or living beings. Only Arabic calligraphy, geometric SVG patterns (`Pattern.tsx`), and initials avatars.
+- Bilingual EN/AR with full RTL support: `lib/i18n.tsx` provides `I18nProvider`, `useI18n`/`useTranslation`, `t("key", { vars })`. Persists in `localStorage` (`students-forum-lang`), auto-detects browser language. Sets `html[lang]` + `html[dir]` via effect. CSS swaps `--app-font-sans` to Cairo and right-aligns text in RTL. `LanguageToggle` (Languages icon, label = *target* language) lives in sidebar, mobile header, landing header, and auth pages. Decorative Arabic phrases (e.g. `طلاب علم`, `بارك الله فيك`) are kept Arabic in both languages — they live under `ar.*` keys. Helpers: `timeAgo(date, t?)` and `formatDateTime(date, locale?, fallback?)` accept the translator/locale.
 - Pages: landing, login, register, home (feed + stories + dashboard summary), halaqah list + room (gender-segregated chat), sessions (live + recorded scholarly meetings), library (downloadable PDFs), tests (Aqeedah quizzes with leaderboard), members, profile.
 - Auth: cookie-session via `express-session` (`SESSION_SECRET`); `AuthProvider` exposes `useAuth` / `useRequireAuth`. Default seeded admin: `admin` / `password123`.
 - Routing: `wouter` v3. NEVER wrap `<Link>` children in `<a>` — Link renders its own anchor; pass `data-testid`, `className`, etc. directly on `<Link>`.

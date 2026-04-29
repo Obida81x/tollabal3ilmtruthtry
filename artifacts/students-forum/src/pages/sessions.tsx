@@ -12,6 +12,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import { formatDateTime } from "@/lib/utils";
+import { useTranslation } from "@/lib/i18n";
 
 type Meeting = {
   id: number;
@@ -24,12 +25,13 @@ type Meeting = {
 };
 
 function MeetingList({ items, isLoading }: { items?: Meeting[]; isLoading: boolean }) {
+  const { t, lang } = useTranslation();
   if (isLoading) return <Skeleton className="h-32 w-full" />;
   if (!items || items.length === 0) {
     return (
       <Card className="border-card-border">
         <CardContent className="p-6 text-center text-muted-foreground">
-          No sittings here yet.
+          {t("sessions.empty")}
         </CardContent>
       </Card>
     );
@@ -47,12 +49,12 @@ function MeetingList({ items, isLoading }: { items?: Meeting[]; isLoading: boole
                     data-testid={`badge-kind-${m.id}`}
                   >
                     {m.kind === "live" ? <Radio className="h-3 w-3" /> : <Video className="h-3 w-3" />}
-                    {m.kind}
+                    {t(`sessions.kind.${m.kind}`)}
                   </Badge>
                   {m.scheduledFor && (
                     <span className="text-xs text-muted-foreground inline-flex items-center gap-1">
                       <Calendar className="h-3 w-3" />
-                      {formatDateTime(m.scheduledFor)}
+                      {formatDateTime(m.scheduledFor, lang === "ar" ? "ar" : undefined, t("common.tba"))}
                     </span>
                   )}
                 </div>
@@ -77,6 +79,7 @@ function MeetingList({ items, isLoading }: { items?: Meeting[]; isLoading: boole
 
 export default function SessionsPage() {
   useRequireAuth();
+  const { t } = useTranslation();
   const live = useListMeetings(
     { kind: "live" },
     { query: { queryKey: getListMeetingsQueryKey({ kind: "live" }) } },
@@ -89,15 +92,15 @@ export default function SessionsPage() {
   return (
     <AppLayout>
       <PageHeader
-        title="Scholarly Sittings"
-        arabicLabel="المجالس العلمية"
-        subtitle="Live halaqahs and recorded explanations from scholars and students of knowledge."
+        title={t("sessions.title")}
+        arabicLabel={t("ar.sittings")}
+        subtitle={t("sessions.subtitle")}
       />
       <div className="px-6 lg:px-10 py-8 max-w-5xl mx-auto">
         <Tabs defaultValue="live">
           <TabsList data-testid="tabs-sessions">
-            <TabsTrigger value="live" data-testid="tab-live">Live & Upcoming</TabsTrigger>
-            <TabsTrigger value="recorded" data-testid="tab-recorded">Recorded</TabsTrigger>
+            <TabsTrigger value="live" data-testid="tab-live">{t("sessions.tabLive")}</TabsTrigger>
+            <TabsTrigger value="recorded" data-testid="tab-recorded">{t("sessions.tabRecorded")}</TabsTrigger>
           </TabsList>
           <TabsContent value="live" className="mt-6">
             <MeetingList items={live.data as Meeting[]} isLoading={live.isLoading} />

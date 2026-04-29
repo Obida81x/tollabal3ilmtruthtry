@@ -11,10 +11,12 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import { timeAgo } from "@/lib/utils";
+import { useTranslation } from "@/lib/i18n";
 
 export default function HalaqahListPage() {
   useRequireAuth();
   const { user } = useAuth();
+  const { t, lang } = useTranslation();
   const { data: groups, isLoading } = useListChatGroups({
     query: { queryKey: getListChatGroupsQueryKey() },
   });
@@ -24,9 +26,9 @@ export default function HalaqahListPage() {
   return (
     <AppLayout>
       <PageHeader
-        title={isBrothers ? "Brothers' Halaqahs" : "Sisters' Halaqahs"}
-        arabicLabel={isBrothers ? "حلقات الإخوة" : "حلقات الأخوات"}
-        subtitle="Quiet study circles — choose a halaqah to enter the discussion."
+        title={isBrothers ? t("halaqah.brothersTitle") : t("halaqah.sistersTitle")}
+        arabicLabel={isBrothers ? t("ar.brothersHalaqahs") : t("ar.sistersHalaqahs")}
+        subtitle={t("halaqah.subtitle")}
       />
       <div className="px-6 lg:px-10 py-8 max-w-3xl mx-auto space-y-3">
         {isLoading && (
@@ -60,14 +62,22 @@ export default function HalaqahListPage() {
                     )}
                     <div className="flex items-center gap-3 mt-2 text-xs text-muted-foreground">
                       <Badge variant="secondary" data-testid={`badge-members-${g.id}`}>
-                        {g.memberCount} contributing
+                        {t("halaqah.contributing", { n: g.memberCount })}
                       </Badge>
                       {g.lastMessageAt && (
-                        <span>Last message {timeAgo(g.lastMessageAt)}</span>
+                        <span>
+                          {t("halaqah.lastMessage", { time: timeAgo(g.lastMessageAt, t) })}
+                        </span>
                       )}
                     </div>
                   </div>
-                  <ChevronRight className="h-5 w-5 text-muted-foreground group-hover:text-primary" />
+                  <ChevronRight
+                    className={
+                      lang === "ar"
+                        ? "h-5 w-5 text-muted-foreground group-hover:text-primary rotate-180"
+                        : "h-5 w-5 text-muted-foreground group-hover:text-primary"
+                    }
+                  />
                 </CardContent>
               </Card>
             </Link>
@@ -75,7 +85,7 @@ export default function HalaqahListPage() {
         {!isLoading && groups?.length === 0 && (
           <Card className="border-card-border">
             <CardContent className="p-6 text-center text-muted-foreground">
-              No halaqahs available yet.
+              {t("halaqah.empty")}
             </CardContent>
           </Card>
         )}

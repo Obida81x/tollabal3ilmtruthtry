@@ -17,6 +17,7 @@ import {
 } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/lib/auth";
+import { useTranslation } from "@/lib/i18n";
 
 type StoryUser = {
   id: number;
@@ -25,6 +26,7 @@ type StoryUser = {
 
 export function StoryTray() {
   const { user } = useAuth();
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
   const { data: groups, isLoading } = useListStories({
     query: { queryKey: getListStoriesQueryKey() },
@@ -65,11 +67,11 @@ export function StoryTray() {
             <div className="relative h-16 w-16 rounded-full bg-muted border-2 border-dashed border-secondary flex items-center justify-center group-hover:border-primary transition-colors">
               <Plus className="h-6 w-6 text-secondary group-hover:text-primary" />
             </div>
-            <span className="text-xs text-muted-foreground">Your story</span>
+            <span className="text-xs text-muted-foreground">{t("stories.your")}</span>
           </button>
         )}
         {isLoading && (
-          <div className="text-xs text-muted-foreground py-4">Loading stories…</div>
+          <div className="text-xs text-muted-foreground py-4">{t("stories.loading")}</div>
         )}
         {groups?.map((g) => (
           <button
@@ -94,15 +96,15 @@ export function StoryTray() {
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Share a story</DialogTitle>
+            <DialogTitle>{t("stories.share")}</DialogTitle>
           </DialogHeader>
           <p className="text-sm text-muted-foreground">
-            Stories are visible to all members for 24 hours.
+            {t("stories.dialogHelp")}
           </p>
           <Textarea
             value={content}
             onChange={(e) => setContent(e.target.value)}
-            placeholder="A beneficial reminder, an ayah, a hadith…"
+            placeholder={t("stories.placeholder")}
             rows={4}
             maxLength={500}
             data-testid="input-story-content"
@@ -113,14 +115,14 @@ export function StoryTray() {
               onClick={() => setOpen(false)}
               data-testid="button-story-cancel"
             >
-              Cancel
+              {t("common.cancel")}
             </Button>
             <Button
               onClick={handleSubmit}
               disabled={!content.trim() || create.isPending}
               data-testid="button-story-submit"
             >
-              {create.isPending ? "Posting…" : "Post story"}
+              {create.isPending ? t("common.posting") : t("stories.postStory")}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -143,7 +145,10 @@ export function StoryTray() {
                 <div>
                   <div className="font-medium">{viewing.user.displayName}</div>
                   <div className="text-xs opacity-80">
-                    {viewing.stories.length} story{viewing.stories.length === 1 ? "" : "s"}
+                    {viewing.stories.length}{" "}
+                    {viewing.stories.length === 1
+                      ? t("stories.singular")
+                      : t("stories.plural")}
                   </div>
                 </div>
               </div>

@@ -12,9 +12,11 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { InitialsAvatar } from "@/components/InitialsAvatar";
+import { useTranslation } from "@/lib/i18n";
 
 export default function MembersPage() {
   useRequireAuth();
+  const { t } = useTranslation();
   const [filter, setFilter] = useState<"all" | "male" | "female">("all");
   const params = filter === "all" ? undefined : { gender: filter };
   const { data: users, isLoading } = useListUsers(params, {
@@ -24,9 +26,9 @@ export default function MembersPage() {
   return (
     <AppLayout>
       <PageHeader
-        title="The Members"
-        arabicLabel="الأعضاء"
-        subtitle="Brothers and sisters who have joined this majlis."
+        title={t("members.title")}
+        arabicLabel={t("ar.members")}
+        subtitle={t("members.subtitle")}
       />
       <div className="px-6 lg:px-10 py-8 max-w-5xl mx-auto">
         <div className="flex gap-2 mb-6">
@@ -36,7 +38,7 @@ export default function MembersPage() {
             onClick={() => setFilter("all")}
             data-testid="button-filter-all-members"
           >
-            All
+            {t("common.all")}
           </Button>
           <Button
             variant={filter === "male" ? "default" : "outline"}
@@ -44,7 +46,7 @@ export default function MembersPage() {
             onClick={() => setFilter("male")}
             data-testid="button-filter-brothers"
           >
-            Brothers
+            {t("common.brothers")}
           </Button>
           <Button
             variant={filter === "female" ? "default" : "outline"}
@@ -52,7 +54,7 @@ export default function MembersPage() {
             onClick={() => setFilter("female")}
             data-testid="button-filter-sisters"
           >
-            Sisters
+            {t("common.sisters")}
           </Button>
         </div>
         {isLoading && (

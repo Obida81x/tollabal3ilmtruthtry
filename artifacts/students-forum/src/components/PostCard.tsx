@@ -6,6 +6,7 @@ import { InitialsAvatar } from "@/components/InitialsAvatar";
 import { cn, timeAgo } from "@/lib/utils";
 import { useTogglePostLike, getListPostsQueryKey, getGetDashboardSummaryQueryKey } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
+import { useTranslation } from "@/lib/i18n";
 
 type Author = {
   id: number;
@@ -26,6 +27,7 @@ type Post = {
 export function PostCard({ post }: { post: Post }) {
   const queryClient = useQueryClient();
   const toggle = useTogglePostLike();
+  const { t } = useTranslation();
 
   const handleLike = () => {
     toggle.mutate(
@@ -52,7 +54,7 @@ export function PostCard({ post }: { post: Post }) {
                 {post.author.displayName}
               </Link>
             <div className="text-xs text-muted-foreground">
-              @{post.author.username} · {timeAgo(post.createdAt)}
+              @{post.author.username} · {timeAgo(post.createdAt, t)}
             </div>
           </div>
         </div>

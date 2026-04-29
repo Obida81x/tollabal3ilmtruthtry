@@ -15,10 +15,12 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { InitialsAvatar } from "@/components/InitialsAvatar";
+import { useTranslation } from "@/lib/i18n";
 
 export default function FeedPage() {
   useRequireAuth();
   const { user } = useAuth();
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
   const { data: posts, isLoading } = useListPosts({
     query: { queryKey: getListPostsQueryKey() },
@@ -42,9 +44,9 @@ export default function FeedPage() {
   return (
     <AppLayout>
       <PageHeader
-        title="The Feed"
-        arabicLabel="الفوائد"
-        subtitle="Beneficial posts from members of the majlis. Stories above are visible to all for 24 hours."
+        title={t("feed.title")}
+        arabicLabel={t("ar.feedHeading")}
+        subtitle={t("feed.subtitle")}
       />
       <div className="px-6 lg:px-10 py-8 max-w-3xl mx-auto space-y-6">
         <Card className="border-card-border">
@@ -62,7 +64,7 @@ export default function FeedPage() {
                   <Textarea
                     value={content}
                     onChange={(e) => setContent(e.target.value)}
-                    placeholder="Share a beneficial reminder, an ayah, a hadith, or a question for the brothers and sisters…"
+                    placeholder={t("feed.composerPlaceholder")}
                     rows={3}
                     maxLength={2000}
                     data-testid="input-post-content"
@@ -76,7 +78,7 @@ export default function FeedPage() {
                       disabled={!content.trim() || create.isPending}
                       data-testid="button-submit-post"
                     >
-                      {create.isPending ? "Posting…" : "Post"}
+                      {create.isPending ? t("common.posting") : t("common.post")}
                     </Button>
                   </div>
                 </div>
@@ -97,7 +99,7 @@ export default function FeedPage() {
         {!isLoading && posts?.length === 0 && (
           <Card className="border-card-border">
             <CardContent className="p-8 text-center text-muted-foreground">
-              No posts yet — be the first to share a benefit.
+              {t("feed.empty")}
             </CardContent>
           </Card>
         )}

@@ -12,9 +12,11 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { useTranslation } from "@/lib/i18n";
 
 export default function LibraryPage() {
   useRequireAuth();
+  const { t } = useTranslation();
   const { data: books, isLoading } = useListBooks(undefined, {
     query: { queryKey: getListBooksQueryKey() },
   });
@@ -34,9 +36,9 @@ export default function LibraryPage() {
   return (
     <AppLayout>
       <PageHeader
-        title="The Library"
-        arabicLabel="المكتبة"
-        subtitle="Classical works in Aqeedah, Hadith, Tafsir, and Fiqh — for reading and download."
+        title={t("library.title")}
+        arabicLabel={t("ar.library")}
+        subtitle={t("library.subtitle")}
       />
       <div className="px-6 lg:px-10 py-8 max-w-6xl mx-auto">
         <div className="flex flex-wrap gap-2 mb-6">
@@ -46,7 +48,7 @@ export default function LibraryPage() {
             onClick={() => setFilter("all")}
             data-testid="button-filter-all"
           >
-            All
+            {t("common.all")}
           </Button>
           {categories.map((c) => (
             <Button
@@ -92,14 +94,14 @@ export default function LibraryPage() {
                 <div className="flex items-center gap-2 text-xs text-muted-foreground mb-2">
                   <Badge variant="secondary" data-testid={`badge-category-${b.id}`}>{b.category}</Badge>
                   <span>{b.language}</span>
-                  {b.pages && <span>· {b.pages} pp.</span>}
+                  {b.pages && <span>· {b.pages} {t("common.pp")}</span>}
                 </div>
                 {b.description && (
                   <p className="text-sm text-muted-foreground line-clamp-2 mb-4 flex-1">{b.description}</p>
                 )}
                 <div className="flex gap-2">
                   <Button asChild size="sm" variant="outline" className="flex-1" data-testid={`link-book-${b.id}`}>
-                    <Link href={`/library/${b.id}`}>Details</Link>
+                    <Link href={`/library/${b.id}`}>{t("common.details")}</Link>
                   </Button>
                   <Button asChild size="sm" className="gap-1" data-testid={`button-download-${b.id}`}>
                     <a href={b.fileUrl} target="_blank" rel="noopener noreferrer">
@@ -114,7 +116,7 @@ export default function LibraryPage() {
         {!isLoading && filtered.length === 0 && (
           <Card className="border-card-border">
             <CardContent className="p-8 text-center text-muted-foreground">
-              No books in this category yet.
+              {t("library.empty")}
             </CardContent>
           </Card>
         )}

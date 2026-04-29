@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useRoute, Link } from "wouter";
-import { ArrowLeft, Send } from "lucide-react";
+import { ArrowLeft, ArrowRight, Send } from "lucide-react";
 import {
   useGetChatGroup,
   useListChatMessages,
@@ -17,9 +17,11 @@ import { Card, CardContent } from "@/components/ui/card";
 import { InitialsAvatar } from "@/components/InitialsAvatar";
 import { Skeleton } from "@/components/ui/skeleton";
 import { timeAgo } from "@/lib/utils";
+import { useTranslation } from "@/lib/i18n";
 
 export default function HalaqahRoomPage() {
   const user = useRequireAuth();
+  const { t, lang } = useTranslation();
   const [, params] = useRoute<{ id: string }>("/halaqah/:id");
   const groupId = params?.id ? Number(params.id) : 0;
   const queryClient = useQueryClient();
@@ -65,13 +67,15 @@ export default function HalaqahRoomPage() {
     );
   };
 
+  const BackIcon = lang === "ar" ? ArrowRight : ArrowLeft;
+
   return (
     <AppLayout>
       <div className="max-w-3xl mx-auto px-4 lg:px-10 py-6 flex flex-col h-[calc(100vh-4rem)] lg:h-[calc(100vh-5rem)]">
         <div className="flex items-center gap-3 mb-4">
           <Link href="/halaqah" data-testid="link-back-halaqah">
               <Button variant="ghost" size="sm" className="gap-1">
-                <ArrowLeft className="h-4 w-4" /> All halaqahs
+                <BackIcon className="h-4 w-4" /> {t("halaqah.allHalaqahs")}
               </Button>
             </Link>
         </div>
@@ -82,7 +86,7 @@ export default function HalaqahRoomPage() {
               style={{ fontFamily: "var(--app-font-serif)" }}
               data-testid="text-group-title"
             >
-              {group?.name ?? "Halaqah"}
+              {group?.name ?? t("halaqah.fallbackName")}
             </h1>
             {group?.description && (
               <p className="text-sm text-muted-foreground mt-1">{group.description}</p>
@@ -110,7 +114,7 @@ export default function HalaqahRoomPage() {
                     <span data-testid={`text-author-${m.id}`}>
                       {m.author?.displayName}
                     </span>
-                    <span>{timeAgo(m.createdAt)}</span>
+                    <span>{timeAgo(m.createdAt, t)}</span>
                   </div>
                   <div
                     className={`px-4 py-2.5 rounded-lg ${
@@ -128,7 +132,7 @@ export default function HalaqahRoomPage() {
           })}
           {!isLoading && messages?.length === 0 && (
             <div className="text-center text-muted-foreground py-12">
-              No messages yet. Be the first to share a benefit.
+              {t("halaqah.noMessages")}
             </div>
           )}
         </div>
@@ -137,7 +141,7 @@ export default function HalaqahRoomPage() {
           <Input
             value={content}
             onChange={(e) => setContent(e.target.value)}
-            placeholder="Write a message…"
+            placeholder={t("halaqah.messagePlaceholder")}
             maxLength={1000}
             data-testid="input-message"
           />
@@ -148,7 +152,7 @@ export default function HalaqahRoomPage() {
             className="gap-1"
           >
             <Send className="h-4 w-4" />
-            <span className="hidden sm:inline">Send</span>
+            <span className="hidden sm:inline">{t("common.send")}</span>
           </Button>
         </form>
       </div>

@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400;1,700&family=Outfit:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400;1,700&family=Cairo:wght@300;400;500;600;700&family=Outfit:wght@300;400;500;600;700&display=swap');
 @import "tailwindcss";
 @import "tw-animate-css";
 @plugin "@tailwindcss/typography";
@@ -125,7 +125,7 @@
   --chart-4: 180 30% 35%;
   --chart-5: 0 40% 45%;
 
-  --app-font-sans: 'Outfit', sans-serif;
+  --app-font-sans: 'Outfit', 'Cairo', sans-serif;
   --app-font-serif: 'Amiri', serif;
   --app-font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
   
@@ -212,6 +212,15 @@
 
   body {
     @apply font-sans antialiased bg-background text-foreground;
+  }
+
+  html[dir="rtl"] body {
+    --app-font-sans: 'Cairo', 'Outfit', sans-serif;
+    font-family: 'Cairo', 'Outfit', sans-serif;
+  }
+
+  html[dir="rtl"] {
+    text-align: right;
   }
 }
 

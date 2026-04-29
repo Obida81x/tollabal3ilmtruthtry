@@ -1,5 +1,5 @@
 import { Link, useRoute } from "wouter";
-import { ArrowLeft, Download, BookOpen } from "lucide-react";
+import { ArrowLeft, ArrowRight, Download, BookOpen } from "lucide-react";
 import {
   useGetBook,
   getGetBookQueryKey,
@@ -10,21 +10,25 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useTranslation } from "@/lib/i18n";
 
 export default function BookDetailPage() {
   useRequireAuth();
+  const { t, lang } = useTranslation();
   const [, params] = useRoute<{ id: string }>("/library/:id");
   const id = params?.id ? Number(params.id) : 0;
   const { data: b, isLoading } = useGetBook(id, {
     query: { enabled: !!id, queryKey: getGetBookQueryKey(id) },
   });
 
+  const BackIcon = lang === "ar" ? ArrowRight : ArrowLeft;
+
   return (
     <AppLayout>
       <div className="px-6 lg:px-10 py-8 max-w-4xl mx-auto">
         <Link href="/library" data-testid="link-back-library">
             <Button variant="ghost" size="sm" className="gap-1 mb-4">
-              <ArrowLeft className="h-4 w-4" /> Back to library
+              <BackIcon className="h-4 w-4" /> {t("library.backToLibrary")}
             </Button>
           </Link>
         {isLoading && <Skeleton className="h-64 w-full" />}
@@ -48,7 +52,8 @@ export default function BookDetailPage() {
               </h1>
               <div className="text-secondary text-lg mt-1">{b.author}</div>
               <div className="text-sm text-muted-foreground mt-2">
-                {b.language}{b.pages ? ` · ${b.pages} pages` : ""}
+                {b.language}
+                {b.pages ? ` · ${b.pages} ${t("common.pages")}` : ""}
               </div>
               {b.description && (
                 <Card className="border-card-border mt-6">
@@ -65,7 +70,7 @@ export default function BookDetailPage() {
               )}
               <Button asChild size="lg" className="mt-6 gap-2" data-testid="button-download">
                 <a href={b.fileUrl} target="_blank" rel="noopener noreferrer">
-                  <Download className="h-4 w-4" /> Download
+                  <Download className="h-4 w-4" /> {t("common.download")}
                 </a>
               </Button>
             </div>

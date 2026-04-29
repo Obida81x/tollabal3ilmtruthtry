@@ -13,6 +13,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import { InitialsAvatar } from "@/components/InitialsAvatar";
+import { useTranslation } from "@/lib/i18n";
 
 const levelStyles: Record<string, string> = {
   beginner: "bg-emerald-100 text-emerald-900 dark:bg-emerald-900/30 dark:text-emerald-200",
@@ -22,6 +23,7 @@ const levelStyles: Record<string, string> = {
 
 export default function TestsPage() {
   useRequireAuth();
+  const { t, lang } = useTranslation();
   const { data: tests, isLoading } = useListTests({
     query: { queryKey: getListTestsQueryKey() },
   });
@@ -32,15 +34,15 @@ export default function TestsPage() {
   return (
     <AppLayout>
       <PageHeader
-        title="Aqeedah Tests"
-        arabicLabel="اختبارات العقيدة"
-        subtitle="Test your understanding of the creed of Ahl as-Sunnah upon the methodology of the Salaf."
+        title={t("tests.title")}
+        arabicLabel={t("ar.tests")}
+        subtitle={t("tests.subtitle")}
       />
       <div className="px-6 lg:px-10 py-8 max-w-5xl mx-auto grid lg:grid-cols-[1fr_300px] gap-8">
         <div className="space-y-3">
           {isLoading && <Skeleton className="h-32 w-full" />}
-          {tests?.map((t) => (
-            <Link key={t.id} href={`/tests/${t.id}`} data-testid={`link-test-${t.id}`} className="block group">
+          {tests?.map((tst) => (
+            <Link key={tst.id} href={`/tests/${tst.id}`} data-testid={`link-test-${tst.id}`} className="block group">
                 <Card className="border-card-border hover:border-primary transition-colors">
                   <CardContent className="p-5 flex items-center gap-4">
                     <div className="h-12 w-12 rounded-md bg-primary/10 text-primary flex items-center justify-center">
@@ -48,25 +50,31 @@ export default function TestsPage() {
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-1">
-                        <Badge className={levelStyles[t.level]} data-testid={`badge-level-${t.id}`}>
-                          {t.level}
+                        <Badge className={levelStyles[tst.level]} data-testid={`badge-level-${tst.id}`}>
+                          {t(`tests.level.${tst.level}`)}
                         </Badge>
                         <span className="text-xs text-muted-foreground">
-                          {t.questionCount} questions
+                          {tst.questionCount} {t("common.questions")}
                         </span>
                       </div>
                       <h3
                         className="text-lg text-foreground group-hover:text-primary transition-colors"
                         style={{ fontFamily: "var(--app-font-serif)" }}
-                        data-testid={`text-test-title-${t.id}`}
+                        data-testid={`text-test-title-${tst.id}`}
                       >
-                        {t.title}
+                        {tst.title}
                       </h3>
-                      {t.description && (
-                        <p className="text-sm text-muted-foreground mt-1">{t.description}</p>
+                      {tst.description && (
+                        <p className="text-sm text-muted-foreground mt-1">{tst.description}</p>
                       )}
                     </div>
-                    <ChevronRight className="h-5 w-5 text-muted-foreground group-hover:text-primary" />
+                    <ChevronRight
+                      className={
+                        lang === "ar"
+                          ? "h-5 w-5 text-muted-foreground group-hover:text-primary rotate-180"
+                          : "h-5 w-5 text-muted-foreground group-hover:text-primary"
+                      }
+                    />
                   </CardContent>
                 </Card>
               </Link>
@@ -82,12 +90,12 @@ export default function TestsPage() {
                   className="text-lg text-foreground"
                   style={{ fontFamily: "var(--app-font-serif)" }}
                 >
-                  Leaderboard
+                  {t("tests.leaderboard")}
                 </h3>
               </div>
               {!leaderboard || leaderboard.length === 0 ? (
                 <p className="text-sm text-muted-foreground">
-                  No attempts yet — be the first.
+                  {t("tests.leaderboardEmpty")}
                 </p>
               ) : (
                 <ol className="space-y-3">
@@ -104,7 +112,10 @@ export default function TestsPage() {
                       <div className="flex-1 min-w-0">
                         <div className="text-sm truncate">{entry.user.displayName}</div>
                         <div className="text-xs text-muted-foreground">
-                          Best: {entry.bestPercentage}% · {entry.attemptsCount} attempts
+                          {t("tests.bestLine", {
+                            pct: entry.bestPercentage,
+                            attempts: entry.attemptsCount,
+                          })}
                         </div>
                       </div>
                       <span className="text-sm font-semibold text-primary">

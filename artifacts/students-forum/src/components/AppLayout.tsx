@@ -18,23 +18,26 @@ import { Logo } from "@/components/Logo";
 import { InitialsAvatar } from "@/components/InitialsAvatar";
 import { Button } from "@/components/ui/button";
 import { GeometricPattern } from "@/components/Pattern";
+import { LanguageToggle } from "@/components/LanguageToggle";
 import { cn } from "@/lib/utils";
-
-const navItems = [
-  { path: "/home", label: "Dashboard", icon: Home, testId: "link-nav-home" },
-  { path: "/feed", label: "Feed", icon: Newspaper, testId: "link-nav-feed" },
-  { path: "/halaqah", label: "Halaqah", icon: MessagesSquare, testId: "link-nav-halaqah" },
-  { path: "/sessions", label: "Sessions", icon: Video, testId: "link-nav-sessions" },
-  { path: "/library", label: "Library", icon: BookOpen, testId: "link-nav-library" },
-  { path: "/tests", label: "Aqeedah Tests", icon: GraduationCap, testId: "link-nav-tests" },
-  { path: "/members", label: "Members", icon: Users, testId: "link-nav-members" },
-];
+import { useTranslation } from "@/lib/i18n";
 
 export function AppLayout({ children }: { children: ReactNode }) {
   const [location, setLocation] = useLocation();
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const logout = useLogout();
+  const { t } = useTranslation();
+
+  const navItems = [
+    { path: "/home", labelKey: "nav.dashboard", icon: Home, testId: "link-nav-home" },
+    { path: "/feed", labelKey: "nav.feed", icon: Newspaper, testId: "link-nav-feed" },
+    { path: "/halaqah", labelKey: "nav.halaqah", icon: MessagesSquare, testId: "link-nav-halaqah" },
+    { path: "/sessions", labelKey: "nav.sessions", icon: Video, testId: "link-nav-sessions" },
+    { path: "/library", labelKey: "nav.library", icon: BookOpen, testId: "link-nav-library" },
+    { path: "/tests", labelKey: "nav.tests", icon: GraduationCap, testId: "link-nav-tests" },
+    { path: "/members", labelKey: "nav.members", icon: Users, testId: "link-nav-members" },
+  ];
 
   const handleLogout = () => {
     logout.mutate(undefined, {
@@ -52,10 +55,11 @@ export function AppLayout({ children }: { children: ReactNode }) {
           <div className="absolute inset-0 pointer-events-none">
             <GeometricPattern opacity={0.05} />
           </div>
-          <div className="relative px-6 pt-6 pb-4 border-b border-sidebar-border">
+          <div className="relative px-6 pt-6 pb-4 border-b border-sidebar-border flex items-center justify-between gap-2">
             <Link href={user ? "/home" : "/"} data-testid="link-home-logo">
-                <Logo size="md" />
-              </Link>
+              <Logo size="md" />
+            </Link>
+            <LanguageToggle />
           </div>
           <nav className="relative flex-1 px-3 py-4 space-y-1">
             {navItems.map((item) => {
@@ -70,7 +74,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
                         : "text-sidebar-foreground hover:bg-sidebar-accent",
                     )}>
                     <Icon className="h-4 w-4" />
-                    <span>{item.label}</span>
+                    <span>{t(item.labelKey)}</span>
                   </Link>
               );
             })}
@@ -99,16 +103,16 @@ export function AppLayout({ children }: { children: ReactNode }) {
                   data-testid="button-logout"
                 >
                   <LogOut className="h-4 w-4" />
-                  Sign out
+                  {t("common.signOut")}
                 </Button>
               </div>
             ) : (
               <div className="space-y-2">
                 <Button asChild className="w-full" data-testid="button-sidebar-login">
-                  <Link href="/login">Sign in</Link>
+                  <Link href="/login">{t("common.signIn")}</Link>
                 </Button>
                 <Button asChild variant="outline" className="w-full" data-testid="button-sidebar-register">
-                  <Link href="/register">Create account</Link>
+                  <Link href="/register">{t("common.createAccount")}</Link>
                 </Button>
               </div>
             )}
@@ -119,14 +123,15 @@ export function AppLayout({ children }: { children: ReactNode }) {
           <header className="lg:hidden flex items-center justify-between border-b border-border px-4 py-3 bg-card">
             <Link href={user ? "/home" : "/"}><Logo size="sm" showWordmark={false} /></Link>
             <div className="flex items-center gap-2">
+              <LanguageToggle />
               {user ? (
                 <Link href={`/profile/${user.id}`} data-testid="link-mobile-profile">
                     <InitialsAvatar name={user.displayName} size="sm" />
                   </Link>
               ) : (
                 <>
-                  <Button asChild size="sm" variant="ghost"><Link href="/login">Sign in</Link></Button>
-                  <Button asChild size="sm"><Link href="/register">Join</Link></Button>
+                  <Button asChild size="sm" variant="ghost"><Link href="/login">{t("common.signIn")}</Link></Button>
+                  <Button asChild size="sm"><Link href="/register">{t("common.join")}</Link></Button>
                 </>
               )}
             </div>
@@ -144,7 +149,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
                       active ? "text-primary" : "text-muted-foreground",
                     )}>
                     <Icon className="h-5 w-5" />
-                    <span>{item.label}</span>
+                    <span>{t(item.labelKey)}</span>
                   </Link>
               );
             })}
@@ -154,7 +159,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
 
           <footer className="hidden lg:flex items-center justify-center gap-2 border-t border-border py-4 text-xs text-muted-foreground">
             <UserCircle className="h-3 w-3" />
-            <span>Students of Islamic Law Forum · A quiet majlis for seekers of knowledge</span>
+            <span>{t("app.footer")}</span>
           </footer>
         </div>
       </div>

@@ -1,9 +1,12 @@
+import { useTranslation } from "@/lib/i18n";
+
 type LogoProps = {
   size?: "sm" | "md" | "lg";
   showWordmark?: boolean;
 };
 
 export function Logo({ size = "md", showWordmark = true }: LogoProps) {
+  const { t, lang } = useTranslation();
   const dim = size === "sm" ? 28 : size === "lg" ? 56 : 40;
   return (
     <div className="flex items-center gap-3" data-testid="logo-app">
@@ -46,10 +49,16 @@ export function Logo({ size = "md", showWordmark = true }: LogoProps) {
             className="font-serif text-base text-foreground"
             style={{ fontFamily: "var(--app-font-serif)" }}
           >
-            طلاب علم
+            {t("ar.studentsOfIlm")}
           </span>
-          <span className="text-xs text-muted-foreground tracking-wide uppercase">
-            Students of Islamic Law
+          <span
+            className={
+              lang === "ar"
+                ? "text-xs text-muted-foreground tracking-wide"
+                : "text-xs text-muted-foreground tracking-wide uppercase"
+            }
+          >
+            {t("app.name.en")}
           </span>
         </div>
       )}
