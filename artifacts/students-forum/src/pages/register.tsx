@@ -30,6 +30,7 @@ export default function RegisterPage() {
   const [form, setForm] = useState({
     username: "",
     displayName: "",
+    email: "",
     password: "",
     gender: "",
     country: "",
@@ -49,6 +50,7 @@ export default function RegisterPage() {
         data: {
           username: form.username.trim(),
           displayName: form.displayName.trim(),
+          email: form.email.trim(),
           password: form.password,
           gender: form.gender as "male" | "female",
           country: form.country.trim() || undefined,
@@ -125,6 +127,23 @@ export default function RegisterPage() {
                     data-testid="input-register-display-name"
                   />
                 </div>
+              </div>
+              <div>
+                <Label htmlFor="email">{t("register.email")}</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  value={form.email}
+                  onChange={(e) => setForm({ ...form, email: e.target.value })}
+                  placeholder={t("register.emailPlaceholder")}
+                  maxLength={254}
+                  required
+                  autoComplete="email"
+                  data-testid="input-register-email"
+                />
+                <p className="text-xs text-muted-foreground mt-1">
+                  {t("register.emailHint")}
+                </p>
               </div>
               <div>
                 <Label htmlFor="password">{t("register.password")}</Label>

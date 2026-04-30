@@ -108,11 +108,54 @@ paths:
             application/json:
               schema: { $ref: "#/components/schemas/CurrentUserResponse" }
 
+  /auth/forgot-password:
+    post:
+      operationId: forgotPassword
+      tags: [auth]
+      summary: Send password reset code by email
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ForgotPasswordBody"
+      responses:
+        "200":
+          description: Reset code sent (always returns ok to prevent enumeration)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ForgotPasswordResponse"
+
+  /auth/reset-password:
+    post:
+      operationId: resetPassword
+      tags: [auth]
+      summary: Reset password using a code
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ResetPasswordBody"
+      responses:
+        "200":
+          description: Password reset
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OkResponse"
+        "400":
+          description: Invalid code
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorResponse" }
+
   /users:
     get:
       operationId: listUsers
       tags: [users]
-      summary: List members
+      summary: List members (members only)
       parameters:
         - in: query
           name: gender
@@ -127,12 +170,50 @@ paths:
               schema:
                 type: array
                 items: { $ref: "#/components/schemas/User" }
+        "401":
+          description: Authentication required
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorResponse" }
+
+  /users/me:
+    patch:
+      operationId: updateMyProfile
+      tags: [users]
+      summary: Update my profile
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateProfileBody"
+      responses:
+        "200":
+          description: Updated user
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/User" }
+        "400":
+          description: Invalid
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorResponse" }
+        "401":
+          description: Authentication required
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorResponse" }
+        "409":
+          description: Email already in use
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorResponse" }
 
   /users/{id}:
     get:
       operationId: getUser
       tags: [users]
-      summary: Get user profile
+      summary: Get user profile (members only)
       parameters:
         - in: path
           name: id
@@ -144,6 +225,11 @@ paths:
           content:
             application/json:
               schema: { $ref: "#/components/schemas/User" }
+        "401":
+          description: Authentication required
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorResponse" }
         "404":
           description: Not found
           content:
@@ -682,11 +768,144 @@ paths:
             application/json:
               schema: { $ref: "#/components/schemas/ErrorResponse" }
 
+  /admin/meetings:
+    post:
+      operationId: adminCreateMeeting
+      tags: [admin]
+      summary: Create a live broadcast or recorded lesson (admin only)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/AdminCreateMeetingBody" }
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Meeting" }
+        "400":
+          description: Invalid
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorResponse" }
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorResponse" }
+
   /admin/meetings/{id}:
+    patch:
+      operationId: adminUpdateMeeting
+      tags: [admin]
+      summary: Edit a live broadcast or recorded lesson (admin only)
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/AdminUpdateMeetingBody" }
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Meeting" }
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorResponse" }
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorResponse" }
     delete:
       operationId: adminDeleteMeeting
       tags: [admin]
       summary: Delete a live broadcast or sitting (admin only)
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+      responses:
+        "204":
+          description: Deleted
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorResponse" }
+
+  /admin/books:
+    post:
+      operationId: adminCreateBook
+      tags: [admin]
+      summary: Add a book download (admin only)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/AdminCreateBookBody" }
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Book" }
+        "400":
+          description: Invalid
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorResponse" }
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorResponse" }
+
+  /admin/books/{id}:
+    patch:
+      operationId: adminUpdateBook
+      tags: [admin]
+      summary: Edit a book download (admin only)
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/AdminUpdateBookBody" }
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Book" }
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorResponse" }
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorResponse" }
+    delete:
+      operationId: adminDeleteBook
+      tags: [admin]
+      summary: Delete a book download (admin only)
       parameters:
         - in: path
           name: id
@@ -726,6 +945,9 @@ components:
         id: { type: integer }
         username: { type: string }
         displayName: { type: string }
+        email:
+          type: ["string", "null"]
+          format: email
         gender: { $ref: "#/components/schemas/Gender" }
         country:
           type: ["string", "null"]
@@ -748,7 +970,7 @@ components:
 
     RegisterBody:
       type: object
-      required: [username, displayName, password, gender]
+      required: [username, displayName, email, password, gender]
       properties:
         username:
           type: string
@@ -759,6 +981,10 @@ components:
           type: string
           minLength: 2
           maxLength: 60
+        email:
+          type: string
+          format: email
+          maxLength: 254
         password:
           type: string
           minLength: 6
@@ -774,6 +1000,51 @@ components:
       properties:
         username: { type: string }
         password: { type: string }
+
+    ForgotPasswordBody:
+      type: object
+      required: [email]
+      properties:
+        email: { type: string, format: email }
+
+    ForgotPasswordResponse:
+      type: object
+      required: [ok, emailConfigured]
+      properties:
+        ok: { type: boolean }
+        emailConfigured: { type: boolean }
+
+    ResetPasswordBody:
+      type: object
+      required: [email, code, newPassword]
+      properties:
+        email: { type: string, format: email }
+        code: { type: string, minLength: 4, maxLength: 12 }
+        newPassword: { type: string, minLength: 6 }
+
+    OkResponse:
+      type: object
+      required: [ok]
+      properties:
+        ok: { type: boolean }
+
+    UpdateProfileBody:
+      type: object
+      properties:
+        displayName:
+          type: string
+          minLength: 2
+          maxLength: 60
+        email:
+          type: string
+          format: email
+          maxLength: 254
+        country:
+          type: ["string", "null"]
+        bio:
+          type: ["string", "null"]
+        avatarUrl:
+          type: ["string", "null"]
 
     Post:
       type: object
@@ -940,6 +1211,90 @@ components:
           type: string
           enum: [image, video]
         contentType: { type: string }
+
+    AdminCreateMeetingBody:
+      type: object
+      required: [title, scholar, kind]
+      properties:
+        title: { type: string, minLength: 3, maxLength: 200 }
+        description:
+          type: ["string", "null"]
+          maxLength: 2000
+        scholar: { type: string, minLength: 2, maxLength: 120 }
+        kind:
+          type: string
+          enum: [live, recorded]
+        liveUrl:
+          type: ["string", "null"]
+          maxLength: 500
+        videoUrl:
+          type: ["string", "null"]
+          maxLength: 500
+        scheduledFor:
+          type: ["string", "null"]
+          format: date-time
+        durationMinutes:
+          type: ["integer", "null"]
+        coverImageUrl:
+          type: ["string", "null"]
+
+    AdminUpdateMeetingBody:
+      type: object
+      properties:
+        title: { type: string, minLength: 3, maxLength: 200 }
+        description:
+          type: ["string", "null"]
+          maxLength: 2000
+        scholar: { type: string, minLength: 2, maxLength: 120 }
+        kind:
+          type: string
+          enum: [live, recorded]
+        liveUrl:
+          type: ["string", "null"]
+          maxLength: 500
+        videoUrl:
+          type: ["string", "null"]
+          maxLength: 500
+        scheduledFor:
+          type: ["string", "null"]
+          format: date-time
+        durationMinutes:
+          type: ["integer", "null"]
+        coverImageUrl:
+          type: ["string", "null"]
+
+    AdminCreateBookBody:
+      type: object
+      required: [title, author, fileUrl, language, category]
+      properties:
+        title: { type: string, minLength: 2, maxLength: 200 }
+        author: { type: string, minLength: 2, maxLength: 200 }
+        description:
+          type: ["string", "null"]
+          maxLength: 2000
+        coverImageUrl:
+          type: ["string", "null"]
+        fileUrl: { type: string, minLength: 8, maxLength: 500 }
+        pages:
+          type: ["integer", "null"]
+        language: { type: string, minLength: 2, maxLength: 32 }
+        category: { type: string, minLength: 2, maxLength: 60 }
+
+    AdminUpdateBookBody:
+      type: object
+      properties:
+        title: { type: string, minLength: 2, maxLength: 200 }
+        author: { type: string, minLength: 2, maxLength: 200 }
+        description:
+          type: ["string", "null"]
+          maxLength: 2000
+        coverImageUrl:
+          type: ["string", "null"]
+        fileUrl: { type: string, minLength: 8, maxLength: 500 }
+        pages:
+          type: ["integer", "null"]
+        language: { type: string, minLength: 2, maxLength: 32 }
+        category: { type: string, minLength: 2, maxLength: 60 }
 
     AdminLoginBody:
       type: object

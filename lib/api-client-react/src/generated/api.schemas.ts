@@ -24,6 +24,8 @@ export interface User {
   id: number;
   username: string;
   displayName: string;
+  /** @nullable */
+  email?: string | null;
   gender: Gender;
   /** @nullable */
   country?: string | null;
@@ -53,6 +55,8 @@ export interface RegisterBody {
    * @maxLength 60
    */
   displayName: string;
+  /** @maxLength 254 */
+  email: string;
   /** @minLength 6 */
   password: string;
   gender: Gender;
@@ -65,6 +69,46 @@ export interface RegisterBody {
 export interface LoginBody {
   username: string;
   password: string;
+}
+
+export interface ForgotPasswordBody {
+  email: string;
+}
+
+export interface ForgotPasswordResponse {
+  ok: boolean;
+  emailConfigured: boolean;
+}
+
+export interface ResetPasswordBody {
+  email: string;
+  /**
+   * @minLength 4
+   * @maxLength 12
+   */
+  code: string;
+  /** @minLength 6 */
+  newPassword: string;
+}
+
+export interface OkResponse {
+  ok: boolean;
+}
+
+export interface UpdateProfileBody {
+  /**
+   * @minLength 2
+   * @maxLength 60
+   */
+  displayName?: string;
+  /** @maxLength 254 */
+  email?: string;
+  /** @nullable */
+  country?: string | null;
+  /** @nullable */
+  bio?: string | null;
+  /** @nullable */
+  avatarUrl?: string | null;
 }
 
 export interface Post {
@@ -223,6 +267,166 @@ export interface UploadResponse {
   url: string;
   kind: UploadResponseKind;
   contentType: string;
+}
+
+export type AdminCreateMeetingBodyKind =
+  (typeof AdminCreateMeetingBodyKind)[keyof typeof AdminCreateMeetingBodyKind];
+
+export const AdminCreateMeetingBodyKind = {
+  live: "live",
+  recorded: "recorded",
+} as const;
+
+export interface AdminCreateMeetingBody {
+  /**
+   * @minLength 3
+   * @maxLength 200
+   */
+  title: string;
+  /**
+   * @maxLength 2000
+   * @nullable
+   */
+  description?: string | null;
+  /**
+   * @minLength 2
+   * @maxLength 120
+   */
+  scholar: string;
+  kind: AdminCreateMeetingBodyKind;
+  /**
+   * @maxLength 500
+   * @nullable
+   */
+  liveUrl?: string | null;
+  /**
+   * @maxLength 500
+   * @nullable
+   */
+  videoUrl?: string | null;
+  /** @nullable */
+  scheduledFor?: string | null;
+  /** @nullable */
+  durationMinutes?: number | null;
+  /** @nullable */
+  coverImageUrl?: string | null;
+}
+
+export type AdminUpdateMeetingBodyKind =
+  (typeof AdminUpdateMeetingBodyKind)[keyof typeof AdminUpdateMeetingBodyKind];
+
+export const AdminUpdateMeetingBodyKind = {
+  live: "live",
+  recorded: "recorded",
+} as const;
+
+export interface AdminUpdateMeetingBody {
+  /**
+   * @minLength 3
+   * @maxLength 200
+   */
+  title?: string;
+  /**
+   * @maxLength 2000
+   * @nullable
+   */
+  description?: string | null;
+  /**
+   * @minLength 2
+   * @maxLength 120
+   */
+  scholar?: string;
+  kind?: AdminUpdateMeetingBodyKind;
+  /**
+   * @maxLength 500
+   * @nullable
+   */
+  liveUrl?: string | null;
+  /**
+   * @maxLength 500
+   * @nullable
+   */
+  videoUrl?: string | null;
+  /** @nullable */
+  scheduledFor?: string | null;
+  /** @nullable */
+  durationMinutes?: number | null;
+  /** @nullable */
+  coverImageUrl?: string | null;
+}
+
+export interface AdminCreateBookBody {
+  /**
+   * @minLength 2
+   * @maxLength 200
+   */
+  title: string;
+  /**
+   * @minLength 2
+   * @maxLength 200
+   */
+  author: string;
+  /**
+   * @maxLength 2000
+   * @nullable
+   */
+  description?: string | null;
+  /** @nullable */
+  coverImageUrl?: string | null;
+  /**
+   * @minLength 8
+   * @maxLength 500
+   */
+  fileUrl: string;
+  /** @nullable */
+  pages?: number | null;
+  /**
+   * @minLength 2
+   * @maxLength 32
+   */
+  language: string;
+  /**
+   * @minLength 2
+   * @maxLength 60
+   */
+  category: string;
+}
+
+export interface AdminUpdateBookBody {
+  /**
+   * @minLength 2
+   * @maxLength 200
+   */
+  title?: string;
+  /**
+   * @minLength 2
+   * @maxLength 200
+   */
+  author?: string;
+  /**
+   * @maxLength 2000
+   * @nullable
+   */
+  description?: string | null;
+  /** @nullable */
+  coverImageUrl?: string | null;
+  /**
+   * @minLength 8
+   * @maxLength 500
+   */
+  fileUrl?: string;
+  /** @nullable */
+  pages?: number | null;
+  /**
+   * @minLength 2
+   * @maxLength 32
+   */
+  language?: string;
+  /**
+   * @minLength 2
+   * @maxLength 60
+   */
+  category?: string;
 }
 
 export interface AdminLoginBody {

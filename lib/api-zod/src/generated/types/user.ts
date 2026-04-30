@@ -11,6 +11,8 @@ export interface User {
   id: number;
   username: string;
   displayName: string;
+  /** @nullable */
+  email?: string | null;
   gender: Gender;
   /** @nullable */
   country?: string | null;

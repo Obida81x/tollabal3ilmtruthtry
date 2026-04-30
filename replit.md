@@ -55,6 +55,14 @@ Express 5 + Drizzle ORM. Routes registered in `src/routes/index.ts`: auth, users
 - Seed data: 6 chat groups (3 brothers / 3 sisters), 8 books (archive.org PDFs), 6 meetings (YouTube + Google Meet), 3 Salafi Aqeedah tests with 18 questions, admin user, 2 welcome posts.
 - Chat groups are gender-restricted server-side (403 on mismatch) and listing is filtered by viewer gender.
 
+### Security & account recovery
+- `helmet` adds `X-Frame-Options: DENY`, `Referrer-Policy: strict-origin-when-cross-origin`, `X-Content-Type-Options: nosniff`, and cross-origin-resource-policy. CSP is disabled to keep it scoped to API responses only.
+- Session cookies are `HttpOnly + SameSite=None + Secure` (Secure follows `NODE_ENV==="production"`).
+- `/api/users` and `/api/users/:id` require a logged-in user.
+- Users have an `email` column (required at registration, editable on profile). `password_resets` table holds sha256-hashed 6-digit codes (30 min TTL). `POST /api/auth/forgot-password` and `POST /api/auth/reset-password` drive the recovery flow.
+- Email is sent via SendGrid HTTP API when `SENDGRID_API_KEY` and `SENDGRID_FROM_EMAIL` are set; otherwise the helper logs the code and the API returns `emailConfigured: false` so the UI tells the admin to read the server log.
+- Admin can manage recorded lessons (`POST/PATCH /api/admin/meetings`) and book downloads (`POST/PATCH/DELETE /api/admin/books`) from the Admin → tabs UI.
+
 ## Local debugging
 
 Use `https://$REPLIT_DEV_DOMAIN/api/...` (HTTPS) when testing endpoints from the shell — cookies flow through the same-origin proxy.

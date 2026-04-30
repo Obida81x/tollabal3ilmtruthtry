@@ -5,6 +5,7 @@ export function serializeUser(u: User) {
     id: u.id,
     username: u.username,
     displayName: u.displayName,
+    email: u.email,
     gender: u.gender as "male" | "female",
     country: u.country,
     bio: u.bio,

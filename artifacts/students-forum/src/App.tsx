@@ -8,6 +8,7 @@ import NotFound from "@/pages/not-found";
 import LandingPage from "@/pages/landing";
 import LoginPage from "@/pages/login";
 import RegisterPage from "@/pages/register";
+import ForgotPasswordPage from "@/pages/forgot-password";
 import HomePage from "@/pages/home";
 import FeedPage from "@/pages/feed";
 import HalaqahListPage from "@/pages/halaqah";
@@ -37,6 +38,7 @@ function Routes() {
       <Route path="/" component={LandingPage} />
       <Route path="/login" component={LoginPage} />
       <Route path="/register" component={RegisterPage} />
+      <Route path="/forgot-password" component={ForgotPasswordPage} />
       <Route path="/home" component={HomePage} />
       <Route path="/feed" component={FeedPage} />
       <Route path="/halaqah" component={HalaqahListPage} />

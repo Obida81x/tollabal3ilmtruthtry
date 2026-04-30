@@ -5,27 +5,19 @@
  * Students of Islamic Law Forum API
  * OpenAPI spec version: 0.1.0
  */
-import type { Gender } from "./gender";
 
-export interface RegisterBody {
-  /**
-   * lowercase letters, numbers, underscores
-   * @minLength 3
-   * @maxLength 32
-   */
-  username: string;
+export interface UpdateProfileBody {
   /**
    * @minLength 2
    * @maxLength 60
    */
-  displayName: string;
+  displayName?: string;
   /** @maxLength 254 */
-  email: string;
-  /** @minLength 6 */
-  password: string;
-  gender: Gender;
+  email?: string;
   /** @nullable */
   country?: string | null;
   /** @nullable */
   bio?: string | null;
+  /** @nullable */
+  avatarUrl?: string | null;
 }

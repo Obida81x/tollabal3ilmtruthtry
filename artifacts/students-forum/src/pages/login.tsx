@@ -109,7 +109,16 @@ export default function LoginPage() {
                 {login.isPending ? t("common.signingIn") : t("common.signIn")}
               </Button>
             </form>
-            <p className="mt-6 text-sm text-center text-muted-foreground">
+            <p className="mt-4 text-sm text-center">
+              <Link
+                href="/forgot-password"
+                className="text-primary hover:underline"
+                data-testid="link-to-forgot-password"
+              >
+                {t("login.forgotPassword")}
+              </Link>
+            </p>
+            <p className="mt-2 text-sm text-center text-muted-foreground">
               {t("login.newHere")}{" "}
               <Link href="/register" className="text-primary hover:underline" data-testid="link-to-register">
                 {t("login.createAccountLink")}

@@ -23,6 +23,8 @@ export const registerBodyUsernameMax = 32;
 export const registerBodyDisplayNameMin = 2;
 export const registerBodyDisplayNameMax = 60;
 
+export const registerBodyEmailMax = 254;
+
 export const registerBodyPasswordMin = 6;
 
 export const RegisterBody = zod.object({
@@ -35,6 +37,7 @@ export const RegisterBody = zod.object({
     .string()
     .min(registerBodyDisplayNameMin)
     .max(registerBodyDisplayNameMax),
+  email: zod.string().email().max(registerBodyEmailMax),
   password: zod.string().min(registerBodyPasswordMin),
   gender: zod.enum(["male", "female"]),
   country: zod.string().nullish(),
@@ -53,6 +56,7 @@ export const LoginResponse = zod.object({
   id: zod.number(),
   username: zod.string(),
   displayName: zod.string(),
+  email: zod.string().email().nullish(),
   gender: zod.enum(["male", "female"]),
   country: zod.string().nullish(),
   bio: zod.string().nullish(),
@@ -73,6 +77,7 @@ export const GetCurrentUserResponse = zod.object({
         id: zod.number(),
         username: zod.string(),
         displayName: zod.string(),
+        email: zod.string().email().nullish(),
         gender: zod.enum(["male", "female"]),
         country: zod.string().nullish(),
         bio: zod.string().nullish(),
@@ -88,7 +93,40 @@ export const GetCurrentUserResponse = zod.object({
 });
 
 /**
- * @summary List members
+ * @summary Send password reset code by email
+ */
+export const ForgotPasswordBody = zod.object({
+  email: zod.string().email(),
+});
+
+export const ForgotPasswordResponse = zod.object({
+  ok: zod.boolean(),
+  emailConfigured: zod.boolean(),
+});
+
+/**
+ * @summary Reset password using a code
+ */
+export const resetPasswordBodyCodeMin = 4;
+export const resetPasswordBodyCodeMax = 12;
+
+export const resetPasswordBodyNewPasswordMin = 6;
+
+export const ResetPasswordBody = zod.object({
+  email: zod.string().email(),
+  code: zod
+    .string()
+    .min(resetPasswordBodyCodeMin)
+    .max(resetPasswordBodyCodeMax),
+  newPassword: zod.string().min(resetPasswordBodyNewPasswordMin),
+});
+
+export const ResetPasswordResponse = zod.object({
+  ok: zod.boolean(),
+});
+
+/**
+ * @summary List members (members only)
  */
 export const ListUsersQueryParams = zod.object({
   gender: zod.enum(["male", "female"]).optional(),
@@ -98,6 +136,7 @@ export const ListUsersResponseItem = zod.object({
   id: zod.number(),
   username: zod.string(),
   displayName: zod.string(),
+  email: zod.string().email().nullish(),
   gender: zod.enum(["male", "female"]),
   country: zod.string().nullish(),
   bio: zod.string().nullish(),
@@ -110,7 +149,42 @@ export const ListUsersResponseItem = zod.object({
 export const ListUsersResponse = zod.array(ListUsersResponseItem);
 
 /**
- * @summary Get user profile
+ * @summary Update my profile
+ */
+export const updateMyProfileBodyDisplayNameMin = 2;
+export const updateMyProfileBodyDisplayNameMax = 60;
+
+export const updateMyProfileBodyEmailMax = 254;
+
+export const UpdateMyProfileBody = zod.object({
+  displayName: zod
+    .string()
+    .min(updateMyProfileBodyDisplayNameMin)
+    .max(updateMyProfileBodyDisplayNameMax)
+    .optional(),
+  email: zod.string().email().max(updateMyProfileBodyEmailMax).optional(),
+  country: zod.string().nullish(),
+  bio: zod.string().nullish(),
+  avatarUrl: zod.string().nullish(),
+});
+
+export const UpdateMyProfileResponse = zod.object({
+  id: zod.number(),
+  username: zod.string(),
+  displayName: zod.string(),
+  email: zod.string().email().nullish(),
+  gender: zod.enum(["male", "female"]),
+  country: zod.string().nullish(),
+  bio: zod.string().nullish(),
+  avatarUrl: zod.string().nullish(),
+  isAdmin: zod.boolean(),
+  isMainAdmin: zod.boolean(),
+  isActive: zod.boolean(),
+  createdAt: zod.coerce.date(),
+});
+
+/**
+ * @summary Get user profile (members only)
  */
 export const GetUserParams = zod.object({
   id: zod.coerce.number(),
@@ -120,6 +194,7 @@ export const GetUserResponse = zod.object({
   id: zod.number(),
   username: zod.string(),
   displayName: zod.string(),
+  email: zod.string().email().nullish(),
   gender: zod.enum(["male", "female"]),
   country: zod.string().nullish(),
   bio: zod.string().nullish(),
@@ -140,6 +215,7 @@ export const ListPostsResponseItem = zod.object({
     id: zod.number(),
     username: zod.string(),
     displayName: zod.string(),
+    email: zod.string().email().nullish(),
     gender: zod.enum(["male", "female"]),
     country: zod.string().nullish(),
     bio: zod.string().nullish(),
@@ -183,6 +259,7 @@ export const TogglePostLikeResponse = zod.object({
     id: zod.number(),
     username: zod.string(),
     displayName: zod.string(),
+    email: zod.string().email().nullish(),
     gender: zod.enum(["male", "female"]),
     country: zod.string().nullish(),
     bio: zod.string().nullish(),
@@ -208,6 +285,7 @@ export const ListStoriesResponseItem = zod.object({
     id: zod.number(),
     username: zod.string(),
     displayName: zod.string(),
+    email: zod.string().email().nullish(),
     gender: zod.enum(["male", "female"]),
     country: zod.string().nullish(),
     bio: zod.string().nullish(),
@@ -290,6 +368,7 @@ export const ListChatMessagesResponseItem = zod.object({
     id: zod.number(),
     username: zod.string(),
     displayName: zod.string(),
+    email: zod.string().email().nullish(),
     gender: zod.enum(["male", "female"]),
     country: zod.string().nullish(),
     bio: zod.string().nullish(),
@@ -532,6 +611,7 @@ export const GetTestLeaderboardResponseItem = zod.object({
     id: zod.number(),
     username: zod.string(),
     displayName: zod.string(),
+    email: zod.string().email().nullish(),
     gender: zod.enum(["male", "female"]),
     country: zod.string().nullish(),
     bio: zod.string().nullish(),
@@ -565,6 +645,7 @@ export const GetDashboardSummaryResponse = zod.object({
         id: zod.number(),
         username: zod.string(),
         displayName: zod.string(),
+        email: zod.string().email().nullish(),
         gender: zod.enum(["male", "female"]),
         country: zod.string().nullish(),
         bio: zod.string().nullish(),
@@ -618,6 +699,7 @@ export const AdminLoginResponse = zod.object({
   id: zod.number(),
   username: zod.string(),
   displayName: zod.string(),
+  email: zod.string().email().nullish(),
   gender: zod.enum(["male", "female"]),
   country: zod.string().nullish(),
   bio: zod.string().nullish(),
@@ -635,6 +717,7 @@ export const AdminListUsersResponseItem = zod.object({
   id: zod.number(),
   username: zod.string(),
   displayName: zod.string(),
+  email: zod.string().email().nullish(),
   gender: zod.enum(["male", "female"]),
   country: zod.string().nullish(),
   bio: zod.string().nullish(),
@@ -661,6 +744,7 @@ export const AdminSetAdminResponse = zod.object({
   id: zod.number(),
   username: zod.string(),
   displayName: zod.string(),
+  email: zod.string().email().nullish(),
   gender: zod.enum(["male", "female"]),
   country: zod.string().nullish(),
   bio: zod.string().nullish(),
@@ -686,6 +770,7 @@ export const AdminSetActiveResponse = zod.object({
   id: zod.number(),
   username: zod.string(),
   displayName: zod.string(),
+  email: zod.string().email().nullish(),
   gender: zod.enum(["male", "female"]),
   country: zod.string().nullish(),
   bio: zod.string().nullish(),
@@ -704,8 +789,216 @@ export const AdminDeletePostParams = zod.object({
 });
 
 /**
+ * @summary Create a live broadcast or recorded lesson (admin only)
+ */
+export const adminCreateMeetingBodyTitleMin = 3;
+export const adminCreateMeetingBodyTitleMax = 200;
+
+export const adminCreateMeetingBodyDescriptionMax = 2000;
+
+export const adminCreateMeetingBodyScholarMin = 2;
+export const adminCreateMeetingBodyScholarMax = 120;
+
+export const adminCreateMeetingBodyLiveUrlMax = 500;
+
+export const adminCreateMeetingBodyVideoUrlMax = 500;
+
+export const AdminCreateMeetingBody = zod.object({
+  title: zod
+    .string()
+    .min(adminCreateMeetingBodyTitleMin)
+    .max(adminCreateMeetingBodyTitleMax),
+  description: zod.string().max(adminCreateMeetingBodyDescriptionMax).nullish(),
+  scholar: zod
+    .string()
+    .min(adminCreateMeetingBodyScholarMin)
+    .max(adminCreateMeetingBodyScholarMax),
+  kind: zod.enum(["live", "recorded"]),
+  liveUrl: zod.string().max(adminCreateMeetingBodyLiveUrlMax).nullish(),
+  videoUrl: zod.string().max(adminCreateMeetingBodyVideoUrlMax).nullish(),
+  scheduledFor: zod.coerce.date().nullish(),
+  durationMinutes: zod.number().nullish(),
+  coverImageUrl: zod.string().nullish(),
+});
+
+/**
+ * @summary Edit a live broadcast or recorded lesson (admin only)
+ */
+export const AdminUpdateMeetingParams = zod.object({
+  id: zod.coerce.number(),
+});
+
+export const adminUpdateMeetingBodyTitleMin = 3;
+export const adminUpdateMeetingBodyTitleMax = 200;
+
+export const adminUpdateMeetingBodyDescriptionMax = 2000;
+
+export const adminUpdateMeetingBodyScholarMin = 2;
+export const adminUpdateMeetingBodyScholarMax = 120;
+
+export const adminUpdateMeetingBodyLiveUrlMax = 500;
+
+export const adminUpdateMeetingBodyVideoUrlMax = 500;
+
+export const AdminUpdateMeetingBody = zod.object({
+  title: zod
+    .string()
+    .min(adminUpdateMeetingBodyTitleMin)
+    .max(adminUpdateMeetingBodyTitleMax)
+    .optional(),
+  description: zod.string().max(adminUpdateMeetingBodyDescriptionMax).nullish(),
+  scholar: zod
+    .string()
+    .min(adminUpdateMeetingBodyScholarMin)
+    .max(adminUpdateMeetingBodyScholarMax)
+    .optional(),
+  kind: zod.enum(["live", "recorded"]).optional(),
+  liveUrl: zod.string().max(adminUpdateMeetingBodyLiveUrlMax).nullish(),
+  videoUrl: zod.string().max(adminUpdateMeetingBodyVideoUrlMax).nullish(),
+  scheduledFor: zod.coerce.date().nullish(),
+  durationMinutes: zod.number().nullish(),
+  coverImageUrl: zod.string().nullish(),
+});
+
+export const AdminUpdateMeetingResponse = zod.object({
+  id: zod.number(),
+  title: zod.string(),
+  description: zod.string().nullish(),
+  scholar: zod.string(),
+  kind: zod.enum(["live", "recorded"]),
+  videoUrl: zod.string().nullish(),
+  liveUrl: zod.string().nullish(),
+  scheduledFor: zod.coerce.date().nullish(),
+  durationMinutes: zod.number().nullish(),
+  coverImageUrl: zod.string().nullish(),
+  createdByUserId: zod.number().nullish(),
+  createdAt: zod.coerce.date(),
+});
+
+/**
  * @summary Delete a live broadcast or sitting (admin only)
  */
 export const AdminDeleteMeetingParams = zod.object({
+  id: zod.coerce.number(),
+});
+
+/**
+ * @summary Add a book download (admin only)
+ */
+export const adminCreateBookBodyTitleMin = 2;
+export const adminCreateBookBodyTitleMax = 200;
+
+export const adminCreateBookBodyAuthorMin = 2;
+export const adminCreateBookBodyAuthorMax = 200;
+
+export const adminCreateBookBodyDescriptionMax = 2000;
+
+export const adminCreateBookBodyFileUrlMin = 8;
+export const adminCreateBookBodyFileUrlMax = 500;
+
+export const adminCreateBookBodyLanguageMin = 2;
+export const adminCreateBookBodyLanguageMax = 32;
+
+export const adminCreateBookBodyCategoryMin = 2;
+export const adminCreateBookBodyCategoryMax = 60;
+
+export const AdminCreateBookBody = zod.object({
+  title: zod
+    .string()
+    .min(adminCreateBookBodyTitleMin)
+    .max(adminCreateBookBodyTitleMax),
+  author: zod
+    .string()
+    .min(adminCreateBookBodyAuthorMin)
+    .max(adminCreateBookBodyAuthorMax),
+  description: zod.string().max(adminCreateBookBodyDescriptionMax).nullish(),
+  coverImageUrl: zod.string().nullish(),
+  fileUrl: zod
+    .string()
+    .min(adminCreateBookBodyFileUrlMin)
+    .max(adminCreateBookBodyFileUrlMax),
+  pages: zod.number().nullish(),
+  language: zod
+    .string()
+    .min(adminCreateBookBodyLanguageMin)
+    .max(adminCreateBookBodyLanguageMax),
+  category: zod
+    .string()
+    .min(adminCreateBookBodyCategoryMin)
+    .max(adminCreateBookBodyCategoryMax),
+});
+
+/**
+ * @summary Edit a book download (admin only)
+ */
+export const AdminUpdateBookParams = zod.object({
+  id: zod.coerce.number(),
+});
+
+export const adminUpdateBookBodyTitleMin = 2;
+export const adminUpdateBookBodyTitleMax = 200;
+
+export const adminUpdateBookBodyAuthorMin = 2;
+export const adminUpdateBookBodyAuthorMax = 200;
+
+export const adminUpdateBookBodyDescriptionMax = 2000;
+
+export const adminUpdateBookBodyFileUrlMin = 8;
+export const adminUpdateBookBodyFileUrlMax = 500;
+
+export const adminUpdateBookBodyLanguageMin = 2;
+export const adminUpdateBookBodyLanguageMax = 32;
+
+export const adminUpdateBookBodyCategoryMin = 2;
+export const adminUpdateBookBodyCategoryMax = 60;
+
+export const AdminUpdateBookBody = zod.object({
+  title: zod
+    .string()
+    .min(adminUpdateBookBodyTitleMin)
+    .max(adminUpdateBookBodyTitleMax)
+    .optional(),
+  author: zod
+    .string()
+    .min(adminUpdateBookBodyAuthorMin)
+    .max(adminUpdateBookBodyAuthorMax)
+    .optional(),
+  description: zod.string().max(adminUpdateBookBodyDescriptionMax).nullish(),
+  coverImageUrl: zod.string().nullish(),
+  fileUrl: zod
+    .string()
+    .min(adminUpdateBookBodyFileUrlMin)
+    .max(adminUpdateBookBodyFileUrlMax)
+    .optional(),
+  pages: zod.number().nullish(),
+  language: zod
+    .string()
+    .min(adminUpdateBookBodyLanguageMin)
+    .max(adminUpdateBookBodyLanguageMax)
+    .optional(),
+  category: zod
+    .string()
+    .min(adminUpdateBookBodyCategoryMin)
+    .max(adminUpdateBookBodyCategoryMax)
+    .optional(),
+});
+
+export const AdminUpdateBookResponse = zod.object({
+  id: zod.number(),
+  title: zod.string(),
+  author: zod.string(),
+  description: zod.string().nullish(),
+  coverImageUrl: zod.string().nullish(),
+  fileUrl: zod.string(),
+  pages: zod.number().nullish(),
+  language: zod.string(),
+  category: zod.string(),
+  createdAt: zod.coerce.date(),
+});
+
+/**
+ * @summary Delete a book download (admin only)
+ */
+export const AdminDeleteBookParams = zod.object({
   id: zod.coerce.number(),
 });

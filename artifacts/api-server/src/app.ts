@@ -1,6 +1,7 @@
 import express, { type Express } from "express";
 import cors from "cors";
 import session from "express-session";
+import helmet from "helmet";
 import pinoHttp from "pino-http";
 import router from "./routes";
 import { logger } from "./lib/logger";
@@ -26,6 +27,18 @@ app.use(
     },
   }),
 );
+
+app.use(
+  helmet({
+    contentSecurityPolicy: false,
+    crossOriginEmbedderPolicy: false,
+    crossOriginResourcePolicy: { policy: "cross-origin" },
+    crossOriginOpenerPolicy: false,
+    frameguard: { action: "deny" },
+    referrerPolicy: { policy: "strict-origin-when-cross-origin" },
+  }),
+);
+
 app.use(cors({ origin: true, credentials: true }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -43,6 +56,7 @@ app.use(
     saveUninitialized: false,
     cookie: {
       httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
       sameSite: "lax",
       maxAge: 1000 * 60 * 60 * 24 * 30,
     },
