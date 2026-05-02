@@ -1,0 +1,15 @@
+# railway.toml — Backend (Express API Server)
+[build]
+builder = "nixpacks"
+buildCommand = "pnpm install && pnpm --filter @workspace/db exec tsc -b && pnpm --filter @workspace/api-zod exec tsc -b && pnpm --filter @workspace/api-server run build"
+
+[deploy]
+startCommand = "node artifacts/api-server/dist/index.js"
+healthcheckPath = "/api/health"
+healthcheckTimeout = 30
+restartPolicyType = "on_failure"
+restartPolicyMaxRetries = 3
+
+[environments.production.variables]
+NODE_ENV = "production"
+PORT = "8080"
