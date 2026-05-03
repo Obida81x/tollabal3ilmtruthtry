@@ -1,0 +1,31 @@
+services:
+  - type: web
+    name: tollabal3ilm-api
+    runtime: node
+    region: oregon
+    plan: free
+
+    buildCommand: |
+      npm install -g pnpm &&
+      pnpm install &&
+      pnpm --filter @workspace/db exec tsc -b &&
+      pnpm --filter @workspace/api-zod exec tsc -b &&
+      pnpm --filter @workspace/api-server run build
+
+    startCommand: node artifacts/api-server/dist/index.js
+
+    healthCheckPath: /api/health
+
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+      - key: DATABASE_URL
+        sync: false
+      - key: SESSION_SECRET
+        generateValue: true
+      - key: CORS_ORIGIN
+        sync: false
+      - key: ADMIN_PANEL_PASSWORD
+        sync: false
