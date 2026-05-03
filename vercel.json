@@ -1,7 +1,7 @@
 {
   "version": 2,
   "buildCommand": "pnpm --filter @workspace/students-forum run build",
-  "outputDirectory": "artifacts/students-forum/dist",
+  "outputDirectory": "dist-frontend",
   "installCommand": "npm install -g pnpm && pnpm install",
   "framework": "vite",
   "rewrites": [
