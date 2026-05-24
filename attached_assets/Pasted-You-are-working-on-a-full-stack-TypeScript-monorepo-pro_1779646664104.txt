@@ -1,0 +1,103 @@
+You are working on a full-stack TypeScript monorepo project with this structure:
+- lib/db: Drizzle ORM database layer
+- lib/api-spec: OpenAPI YAML spec + Orval config
+- lib/api-zod: Zod validation schemas
+- lib/api-client-react: React Query hooks generated from API spec
+- artifacts: Frontend and backend apps
+
+The project uses pnpm workspaces. Read all existing code carefully before making changes. Follow the exact same patterns, naming conventions, and code style already used in the project.
+
+Implement the following 4 features completely and professionally:
+
+---
+
+FEATURE 1: Persistent Login (Remember Me)
+- Add a "تذكرني" (Remember Me) checkbox on the login page
+- When checked: store JWT token in localStorage with no expiry (or very long expiry like 30 days)
+- When unchecked: store token in sessionStorage only (clears when browser closes)
+- On app load: check both localStorage and sessionStorage for existing token and auto-login if valid
+- User stays logged in until they explicitly press logout
+- Add token refresh mechanism: if token is less than 7 days from expiry, auto-refresh it silently
+
+---
+
+FEATURE 2: Audio Posts (Brothers Only)
+- Add a new post type: "فائدة صوتية" (Audio Benefit)
+- This feature is ONLY visible to male users (gender === 'male')
+- Female users cannot see this section at all — not in the feed, not in navigation
+- In the feed for male users: show an audio player card with the recording
+- Allow recording directly in browser using MediaRecorder API (microphone button)
+- OR allow uploading an existing audio file (mp3, wav, ogg — max 50MB)
+- Store audio files using the existing file upload mechanism in the project
+- Audio post card shows: author name, duration, waveform visualization (simple CSS bars), play/pause button, like and comment buttons
+- Add to the DB schema: a new post_type enum value 'audio', and audio_url field
+
+---
+
+FEATURE 3: Voice Messages in Chat Groups
+- In all group chat screens (both male and female communities), add a voice message button next to the text input
+- Hold the microphone button to record, release to send (push-to-talk style)
+- Show recording indicator with timer while recording
+- Sent voice messages appear as audio bubbles in the chat with play/pause and duration
+- Use MediaRecorder API for recording
+- Store voice message files using existing upload mechanism
+- Add audio_url field to the messages table in DB schema
+- This feature is available to ALL users regardless of gender
+
+---
+
+FEATURE 4: Fatawa (Islamic Verdicts) System
+Complete system with these roles: Admin → Mufti → User
+
+USER SIDE:
+- New main navigation item "الفتاوى" visible to all users
+- User fills a form: question text (required), topic/category (dropdown), and TWO options:
+  * "إرسال مجهول" — question sent without revealing identity to mufti
+  * "إرسال باسمي" — question sent with name visible to mufti
+- After mufti answers, user receives notification
+- User can choose to "نشر كفائدة للجميع" — publishes Q&A publicly
+- When published, it appears under the username "فتاوى" (a virtual account/label, not a real user)
+- The original questioner's identity is NEVER revealed publicly regardless of their choice
+
+MUFTI SIDE:
+- Mufti sees incoming questions in a dedicated dashboard panel
+- Each question shows: question text, category, whether sender is anonymous or named (if named, show name)
+- Mufti can answer via: text response OR voice recording (using MediaRecorder API)
+- When mufti submits answer, questioner receives in-app notification
+- Mufti can be assigned by Admin only
+- Mufti can assign additional muftis (sub-muftis)
+- Multiple muftis can exist simultaneously
+- Mufti must already be a moderator or admin before being assigned as mufti
+
+ADMIN SIDE:
+- In admin panel: new section to manage muftis
+- Can assign any moderator/admin as mufti
+- Can revoke mufti status
+- Can see all fatawa (questions + answers)
+
+DB CHANGES NEEDED:
+- New table: fatawa (id, question_text, category, is_anonymous, user_id, mufti_id, answer_text, answer_audio_url, status: pending/answered/published, created_at, answered_at)
+- New table: fatawa_notifications (id, user_id, fatwa_id, type: question_received/answer_ready, is_read, created_at)
+- Add to users table: role field upgrade to include 'mufti' as a possible role alongside existing roles
+- Mufti assignment table: mufti_assignments (id, user_id, assigned_by, assigned_at, is_active)
+
+NOTIFICATIONS:
+- When question arrives: mufti gets notification badge on their dashboard
+- When answer is submitted: questioner gets notification badge
+- Use existing notification mechanism if present, otherwise create a simple polling system (check every 30 seconds)
+
+---
+
+GENERAL RULES FOR ALL FEATURES:
+1. Read existing DB schema first and extend it — do NOT rewrite it
+2. Read existing API spec (openapi.yaml) and ADD new endpoints — do NOT remove existing ones
+3. Follow exact same TypeScript patterns already in the codebase
+4. Use Drizzle ORM for all DB operations following existing patterns in lib/db/src
+5. Add Zod schemas in lib/api-zod following existing patterns
+6. Generate new React Query hooks via Orval after updating the API spec
+7. Handle all errors gracefully with Arabic error messages matching existing UI language
+8. All new UI text must be in Arabic, RTL layout, matching existing design system
+9. Make sure gender-based visibility is enforced on BOTH frontend and backend
+10. Test that existing features still work after your changes
+
+Start by reading the existing code structure, then implement each feature one by one.
