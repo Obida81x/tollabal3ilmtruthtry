@@ -1,0 +1,1427 @@
+openapi: 3.1.0
+info:
+  # Do not change the title, if the title changes, the import paths will be broken
+  title: Api
+  version: 0.1.0
+  description: Students of Islamic Law Forum API
+servers:
+  - url: /api
+    description: Base API path
+tags:
+  - name: health
+  - name: auth
+  - name: users
+  - name: posts
+  - name: stories
+  - name: chat
+  - name: meetings
+  - name: books
+  - name: tests
+  - name: dashboard
+  - name: admin
+  - name: storage
+
+paths:
+  /healthz:
+    get:
+      operationId: healthCheck
+      tags: [health]
+      summary: Health check
+      responses:
+        "200":
+          description: Healthy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthStatus"
+
+  /auth/register:
+    post:
+      operationId: register
+      tags: [auth]
+      summary: Register a new student account
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RegisterBody"
+      responses:
+        "201":
+          description: Registered
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        "400":
+          description: Invalid
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorResponse" }
+        "409":
+          description: Username taken
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorResponse" }
+
+  /auth/login:
+    post:
+      operationId: login
+      tags: [auth]
+      summary: Sign in
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginBody"
+      responses:
+        "200":
+          description: Signed in
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/User" }
+        "401":
+          description: Invalid credentials
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorResponse" }
+
+  /auth/logout:
+    post:
+      operationId: logout
+      tags: [auth]
+      summary: Sign out
+      responses:
+        "204":
+          description: Signed out
+
+  /auth/me:
+    get:
+      operationId: getCurrentUser
+      tags: [auth]
+      summary: Get current user
+      responses:
+        "200":
+          description: Current user (or null if signed out)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/CurrentUserResponse" }
+
+  /auth/forgot-password:
+    post:
+      operationId: forgotPassword
+      tags: [auth]
+      summary: Send password reset code by email
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ForgotPasswordBody"
+      responses:
+        "200":
+          description: Reset code sent (always returns ok to prevent enumeration)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ForgotPasswordResponse"
+
+  /auth/reset-password:
+    post:
+      operationId: resetPassword
+      tags: [auth]
+      summary: Reset password using a code
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ResetPasswordBody"
+      responses:
+        "200":
+          description: Password reset
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OkResponse"
+        "400":
+          description: Invalid code
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorResponse" }
+
+  /users:
+    get:
+      operationId: listUsers
+      tags: [users]
+      summary: List members (members only)
+      parameters:
+        - in: query
+          name: gender
+          schema:
+            type: string
+            enum: [male, female]
+      responses:
+        "200":
+          description: Members
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/User" }
+        "401":
+          description: Authentication required
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorResponse" }
+
+  /users/me:
+    patch:
+      operationId: updateMyProfile
+      tags: [users]
+      summary: Update my profile
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateProfileBody"
+      responses:
+        "200":
+          description: Updated user
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/User" }
+        "400":
+          description: Invalid
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorResponse" }
+        "401":
+          description: Authentication required
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorResponse" }
+        "409":
+          description: Email already in use
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorResponse" }
+
+  /users/{id}:
+    get:
+      operationId: getUser
+      tags: [users]
+      summary: Get user profile (members only)
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+      responses:
+        "200":
+          description: User
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/User" }
+        "401":
+          description: Authentication required
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorResponse" }
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorResponse" }
+
+  /posts:
+    get:
+      operationId: listPosts
+      tags: [posts]
+      summary: Feed of beneficial posts (visible to all)
+      responses:
+        "200":
+          description: Posts
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/Post" }
+    post:
+      operationId: createPost
+      tags: [posts]
+      summary: Create a post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/CreatePostBody" }
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Post" }
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorResponse" }
+
+  /posts/{id}/like:
+    post:
+      operationId: togglePostLike
+      tags: [posts]
+      summary: Toggle like on a post
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+      responses:
+        "200":
+          description: New like state
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Post" }
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorResponse" }
+
+  /stories:
+    get:
+      operationId: listStories
+      tags: [stories]
+      summary: Active stories grouped by author (last 24h)
+      responses:
+        "200":
+          description: Stories
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/UserStories" }
+    post:
+      operationId: createStory
+      tags: [stories]
+      summary: Post a 24-hour story
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/CreateStoryBody" }
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Story" }
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorResponse" }
+
+  /chat/groups:
+    get:
+      operationId: listChatGroups
+      tags: [chat]
+      summary: List chat groups available to the current user (filtered by gender)
+      responses:
+        "200":
+          description: Groups
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/ChatGroup" }
+
+  /chat/groups/{id}:
+    get:
+      operationId: getChatGroup
+      tags: [chat]
+      summary: Get chat group details
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+      responses:
+        "200":
+          description: Group
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ChatGroup" }
+        "403":
+          description: Forbidden (gender restricted)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorResponse" }
+
+  /chat/groups/{id}/messages:
+    get:
+      operationId: listChatMessages
+      tags: [chat]
+      summary: Messages in a chat group
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+      responses:
+        "200":
+          description: Messages
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/ChatMessage" }
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorResponse" }
+    post:
+      operationId: postChatMessage
+      tags: [chat]
+      summary: Post a chat message
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/CreateChatMessageBody" }
+      responses:
+        "201":
+          description: Posted
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ChatMessage" }
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorResponse" }
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorResponse" }
+
+  /meetings:
+    get:
+      operationId: listMeetings
+      tags: [meetings]
+      summary: All scholarly sessions (live and recorded)
+      parameters:
+        - in: query
+          name: kind
+          schema:
+            type: string
+            enum: [live, recorded]
+      responses:
+        "200":
+          description: Meetings
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/Meeting" }
+    post:
+      operationId: createMeeting
+      tags: [meetings]
+      summary: Create a live broadcast (Google Meet link)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/CreateMeetingBody" }
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Meeting" }
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorResponse" }
+
+  /meetings/upcoming:
+    get:
+      operationId: listUpcomingMeetings
+      tags: [meetings]
+      summary: Upcoming live sessions
+      responses:
+        "200":
+          description: Meetings
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/Meeting" }
+
+  /meetings/{id}:
+    get:
+      operationId: getMeeting
+      tags: [meetings]
+      summary: Meeting details
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+      responses:
+        "200":
+          description: Meeting
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Meeting" }
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorResponse" }
+
+  /books:
+    get:
+      operationId: listBooks
+      tags: [books]
+      summary: Library of religious books
+      parameters:
+        - in: query
+          name: category
+          schema: { type: string }
+      responses:
+        "200":
+          description: Books
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/Book" }
+
+  /books/{id}:
+    get:
+      operationId: getBook
+      tags: [books]
+      summary: Book details
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+      responses:
+        "200":
+          description: Book
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Book" }
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorResponse" }
+
+  /tests:
+    get:
+      operationId: listTests
+      tags: [tests]
+      summary: Aqeedah tests on the Salafi methodology
+      responses:
+        "200":
+          description: Tests
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/TestSummary" }
+
+  /tests/{id}:
+    get:
+      operationId: getTest
+      tags: [tests]
+      summary: Test with full questions
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+      responses:
+        "200":
+          description: Test
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/TestDetail" }
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorResponse" }
+
+  /tests/{id}/attempt:
+    post:
+      operationId: submitTestAttempt
+      tags: [tests]
+      summary: Submit answers for a test
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/SubmitTestAttemptBody" }
+      responses:
+        "200":
+          description: Result
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/TestAttemptResult" }
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorResponse" }
+
+  /tests/leaderboard:
+    get:
+      operationId: getTestLeaderboard
+      tags: [tests]
+      summary: Top scoring students across all tests
+      responses:
+        "200":
+          description: Leaderboard
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/LeaderboardEntry" }
+
+  /dashboard/summary:
+    get:
+      operationId: getDashboardSummary
+      tags: [dashboard]
+      summary: Forum-wide summary
+      responses:
+        "200":
+          description: Summary
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/DashboardSummary" }
+
+  /storage/uploads:
+    post:
+      operationId: uploadFile
+      tags: [storage]
+      summary: Upload an image or video file (multipart/form-data)
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [file]
+              properties:
+                file:
+                  type: string
+                  format: binary
+      responses:
+        "201":
+          description: Uploaded
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/UploadResponse" }
+        "400":
+          description: Invalid file
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorResponse" }
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorResponse" }
+
+  /admin/login:
+    post:
+      operationId: adminLogin
+      tags: [admin]
+      summary: Verify admin password and elevate the current session
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/AdminLoginBody" }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/User" }
+        "401":
+          description: Invalid
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorResponse" }
+
+  /admin/users:
+    get:
+      operationId: adminListUsers
+      tags: [admin]
+      summary: List all members (admin only)
+      responses:
+        "200":
+          description: Members
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/User" }
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorResponse" }
+
+  /admin/users/{id}/admin:
+    post:
+      operationId: adminSetAdmin
+      tags: [admin]
+      summary: Grant or revoke admin role (main admin only)
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/AdminToggleBody" }
+      responses:
+        "200":
+          description: Updated user
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/User" }
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorResponse" }
+
+  /admin/users/{id}/active:
+    post:
+      operationId: adminSetActive
+      tags: [admin]
+      summary: Activate or deactivate a member (admin only)
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/AdminToggleBody" }
+      responses:
+        "200":
+          description: Updated user
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/User" }
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorResponse" }
+
+  /admin/posts/{id}:
+    delete:
+      operationId: adminDeletePost
+      tags: [admin]
+      summary: Delete a post (admin only)
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+      responses:
+        "204":
+          description: Deleted
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorResponse" }
+
+  /admin/meetings:
+    post:
+      operationId: adminCreateMeeting
+      tags: [admin]
+      summary: Create a live broadcast or recorded lesson (admin only)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/AdminCreateMeetingBody" }
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Meeting" }
+        "400":
+          description: Invalid
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorResponse" }
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorResponse" }
+
+  /admin/meetings/{id}:
+    patch:
+      operationId: adminUpdateMeeting
+      tags: [admin]
+      summary: Edit a live broadcast or recorded lesson (admin only)
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/AdminUpdateMeetingBody" }
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Meeting" }
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorResponse" }
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorResponse" }
+    delete:
+      operationId: adminDeleteMeeting
+      tags: [admin]
+      summary: Delete a live broadcast or sitting (admin only)
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+      responses:
+        "204":
+          description: Deleted
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorResponse" }
+
+  /admin/books:
+    post:
+      operationId: adminCreateBook
+      tags: [admin]
+      summary: Add a book download (admin only)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/AdminCreateBookBody" }
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Book" }
+        "400":
+          description: Invalid
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorResponse" }
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorResponse" }
+
+  /admin/books/{id}:
+    patch:
+      operationId: adminUpdateBook
+      tags: [admin]
+      summary: Edit a book download (admin only)
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/AdminUpdateBookBody" }
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Book" }
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorResponse" }
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorResponse" }
+    delete:
+      operationId: adminDeleteBook
+      tags: [admin]
+      summary: Delete a book download (admin only)
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+      responses:
+        "204":
+          description: Deleted
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorResponse" }
+
+components:
+  schemas:
+    HealthStatus:
+      type: object
+      required: [status]
+      properties:
+        status: { type: string }
+
+    ErrorResponse:
+      type: object
+      required: [error]
+      properties:
+        error: { type: string }
+
+    Gender:
+      type: string
+      enum: [male, female]
+
+    User:
+      type: object
+      required: [id, username, displayName, gender, isAdmin, isMainAdmin, isActive, createdAt]
+      properties:
+        id: { type: integer }
+        username: { type: string }
+        displayName: { type: string }
+        email:
+          type: ["string", "null"]
+          format: email
+        gender: { $ref: "#/components/schemas/Gender" }
+        country:
+          type: ["string", "null"]
+        bio:
+          type: ["string", "null"]
+        avatarUrl:
+          type: ["string", "null"]
+        isAdmin: { type: boolean }
+        isMainAdmin: { type: boolean }
+        isActive: { type: boolean }
+        createdAt: { type: string, format: date-time }
+
+    CurrentUserResponse:
+      type: object
+      properties:
+        user:
+          oneOf:
+            - $ref: "#/components/schemas/User"
+            - type: "null"
+
+    RegisterBody:
+      type: object
+      required: [username, displayName, email, password, gender]
+      properties:
+        username:
+          type: string
+          minLength: 3
+          maxLength: 32
+          description: lowercase letters, numbers, underscores
+        displayName:
+          type: string
+          minLength: 2
+          maxLength: 60
+        email:
+          type: string
+          format: email
+          maxLength: 254
+        password:
+          type: string
+          minLength: 6
+        gender: { $ref: "#/components/schemas/Gender" }
+        country:
+          type: ["string", "null"]
+        bio:
+          type: ["string", "null"]
+
+    LoginBody:
+      type: object
+      required: [username, password]
+      properties:
+        username: { type: string }
+        password: { type: string }
+
+    ForgotPasswordBody:
+      type: object
+      required: [email]
+      properties:
+        email: { type: string, format: email }
+
+    ForgotPasswordResponse:
+      type: object
+      required: [ok, emailConfigured]
+      properties:
+        ok: { type: boolean }
+        emailConfigured: { type: boolean }
+
+    ResetPasswordBody:
+      type: object
+      required: [email, code, newPassword]
+      properties:
+        email: { type: string, format: email }
+        code: { type: string, minLength: 4, maxLength: 12 }
+        newPassword: { type: string, minLength: 6 }
+
+    OkResponse:
+      type: object
+      required: [ok]
+      properties:
+        ok: { type: boolean }
+
+    UpdateProfileBody:
+      type: object
+      properties:
+        displayName:
+          type: string
+          minLength: 2
+          maxLength: 60
+        email:
+          type: string
+          format: email
+          maxLength: 254
+        country:
+          type: ["string", "null"]
+        bio:
+          type: ["string", "null"]
+        avatarUrl:
+          type: ["string", "null"]
+
+    Post:
+      type: object
+      required: [id, userId, author, content, likeCount, likedByMe, createdAt]
+      properties:
+        id: { type: integer }
+        userId: { type: integer }
+        author: { $ref: "#/components/schemas/User" }
+        content: { type: string }
+        imageUrl:
+          type: ["string", "null"]
+        videoUrl:
+          type: ["string", "null"]
+        likeCount: { type: integer }
+        likedByMe: { type: boolean }
+        createdAt: { type: string, format: date-time }
+
+    CreatePostBody:
+      type: object
+      required: [content]
+      properties:
+        content:
+          type: string
+          minLength: 1
+          maxLength: 2000
+        imageUrl:
+          type: ["string", "null"]
+        videoUrl:
+          type: ["string", "null"]
+
+    Story:
+      type: object
+      required: [id, userId, content, expiresAt, createdAt]
+      properties:
+        id: { type: integer }
+        userId: { type: integer }
+        content: { type: string }
+        imageUrl:
+          type: ["string", "null"]
+        videoUrl:
+          type: ["string", "null"]
+        expiresAt: { type: string, format: date-time }
+        createdAt: { type: string, format: date-time }
+
+    UserStories:
+      type: object
+      required: [user, stories]
+      properties:
+        user: { $ref: "#/components/schemas/User" }
+        stories:
+          type: array
+          items: { $ref: "#/components/schemas/Story" }
+
+    CreateStoryBody:
+      type: object
+      required: [content]
+      properties:
+        content:
+          type: string
+          minLength: 1
+          maxLength: 500
+        imageUrl:
+          type: ["string", "null"]
+        videoUrl:
+          type: ["string", "null"]
+
+    ChatGroup:
+      type: object
+      required: [id, name, gender, memberCount, lastMessageAt, createdAt]
+      properties:
+        id: { type: integer }
+        name: { type: string }
+        description:
+          type: ["string", "null"]
+        gender: { $ref: "#/components/schemas/Gender" }
+        coverImageUrl:
+          type: ["string", "null"]
+        memberCount: { type: integer }
+        lastMessageAt:
+          type: ["string", "null"]
+          format: date-time
+        createdAt: { type: string, format: date-time }
+
+    ChatMessage:
+      type: object
+      required: [id, groupId, userId, author, content, createdAt]
+      properties:
+        id: { type: integer }
+        groupId: { type: integer }
+        userId: { type: integer }
+        author: { $ref: "#/components/schemas/User" }
+        content: { type: string }
+        createdAt: { type: string, format: date-time }
+
+    CreateChatMessageBody:
+      type: object
+      required: [content]
+      properties:
+        content:
+          type: string
+          minLength: 1
+          maxLength: 1000
+
+    Meeting:
+      type: object
+      required: [id, title, scholar, kind, createdAt]
+      properties:
+        id: { type: integer }
+        title: { type: string }
+        description:
+          type: ["string", "null"]
+        scholar: { type: string }
+        kind:
+          type: string
+          enum: [live, recorded]
+        videoUrl:
+          type: ["string", "null"]
+        liveUrl:
+          type: ["string", "null"]
+        scheduledFor:
+          type: ["string", "null"]
+          format: date-time
+        durationMinutes:
+          type: ["integer", "null"]
+        coverImageUrl:
+          type: ["string", "null"]
+        createdByUserId:
+          type: ["integer", "null"]
+        createdAt: { type: string, format: date-time }
+
+    CreateMeetingBody:
+      type: object
+      required: [title, scholar, liveUrl]
+      properties:
+        title:
+          type: string
+          minLength: 3
+          maxLength: 200
+        description:
+          type: ["string", "null"]
+          maxLength: 2000
+        scholar:
+          type: string
+          minLength: 2
+          maxLength: 120
+        liveUrl:
+          type: string
+          minLength: 5
+          maxLength: 500
+          description: A Google Meet link
+        scheduledFor:
+          type: ["string", "null"]
+          format: date-time
+        durationMinutes:
+          type: ["integer", "null"]
+
+    UploadResponse:
+      type: object
+      required: [objectPath, url, kind, contentType]
+      properties:
+        objectPath: { type: string }
+        url: { type: string }
+        kind:
+          type: string
+          enum: [image, video]
+        contentType: { type: string }
+
+    AdminCreateMeetingBody:
+      type: object
+      required: [title, scholar, kind]
+      properties:
+        title: { type: string, minLength: 3, maxLength: 200 }
+        description:
+          type: ["string", "null"]
+          maxLength: 2000
+        scholar: { type: string, minLength: 2, maxLength: 120 }
+        kind:
+          type: string
+          enum: [live, recorded]
+        liveUrl:
+          type: ["string", "null"]
+          maxLength: 500
+        videoUrl:
+          type: ["string", "null"]
+          maxLength: 500
+        scheduledFor:
+          type: ["string", "null"]
+          format: date-time
+        durationMinutes:
+          type: ["integer", "null"]
+        coverImageUrl:
+          type: ["string", "null"]
+
+    AdminUpdateMeetingBody:
+      type: object
+      properties:
+        title: { type: string, minLength: 3, maxLength: 200 }
+        description:
+          type: ["string", "null"]
+          maxLength: 2000
+        scholar: { type: string, minLength: 2, maxLength: 120 }
+        kind:
+          type: string
+          enum: [live, recorded]
+        liveUrl:
+          type: ["string", "null"]
+          maxLength: 500
+        videoUrl:
+          type: ["string", "null"]
+          maxLength: 500
+        scheduledFor:
+          type: ["string", "null"]
+          format: date-time
+        durationMinutes:
+          type: ["integer", "null"]
+        coverImageUrl:
+          type: ["string", "null"]
+
+    AdminCreateBookBody:
+      type: object
+      required: [title, author, fileUrl, language, category]
+      properties:
+        title: { type: string, minLength: 2, maxLength: 200 }
+        author: { type: string, minLength: 2, maxLength: 200 }
+        description:
+          type: ["string", "null"]
+          maxLength: 2000
+        coverImageUrl:
+          type: ["string", "null"]
+        fileUrl: { type: string, minLength: 8, maxLength: 500 }
+        pages:
+          type: ["integer", "null"]
+        language: { type: string, minLength: 2, maxLength: 32 }
+        category: { type: string, minLength: 2, maxLength: 60 }
+
+    AdminUpdateBookBody:
+      type: object
+      properties:
+        title: { type: string, minLength: 2, maxLength: 200 }
+        author: { type: string, minLength: 2, maxLength: 200 }
+        description:
+          type: ["string", "null"]
+          maxLength: 2000
+        coverImageUrl:
+          type: ["string", "null"]
+        fileUrl: { type: string, minLength: 8, maxLength: 500 }
+        pages:
+          type: ["integer", "null"]
+        language: { type: string, minLength: 2, maxLength: 32 }
+        category: { type: string, minLength: 2, maxLength: 60 }
+
+    AdminLoginBody:
+      type: object
+      required: [password]
+      properties:
+        password: { type: string }
+
+    AdminToggleBody:
+      type: object
+      required: [value]
+      properties:
+        value: { type: boolean }
+
+    Book:
+      type: object
+      required: [id, title, author, fileUrl, language, category, createdAt]
+      properties:
+        id: { type: integer }
+        title: { type: string }
+        author: { type: string }
+        description:
+          type: ["string", "null"]
+        coverImageUrl:
+          type: ["string", "null"]
+        fileUrl: { type: string }
+        pages:
+          type: ["integer", "null"]
+        language: { type: string }
+        category: { type: string }
+        createdAt: { type: string, format: date-time }
+
+    TestSummary:
+      type: object
+      required: [id, title, level, questionCount, createdAt]
+      properties:
+        id: { type: integer }
+        title: { type: string }
+        description:
+          type: ["string", "null"]
+        level:
+          type: string
+          enum: [beginner, intermediate, advanced]
+        questionCount: { type: integer }
+        createdAt: { type: string, format: date-time }
+
+    TestQuestion:
+      type: object
+      required: [id, prompt, options, order]
+      properties:
+        id: { type: integer }
+        prompt: { type: string }
+        options:
+          type: array
+          items: { type: string }
+        order: { type: integer }
+
+    TestDetail:
+      type: object
+      required: [id, title, level, questions, createdAt]
+      properties:
+        id: { type: integer }
+        title: { type: string }
+        description:
+          type: ["string", "null"]
+        level:
+          type: string
+          enum: [beginner, intermediate, advanced]
+        questions:
+          type: array
+          items: { $ref: "#/components/schemas/TestQuestion" }
+        createdAt: { type: string, format: date-time }
+
+    SubmitTestAttemptBody:
+      type: object
+      required: [answers]
+      properties:
+        answers:
+          type: array
+          description: For each question (in order), the index of the chosen option
+          items:
+            type: integer
+
+    QuestionResult:
+      type: object
+      required: [questionId, prompt, chosenIndex, correctIndex, isCorrect]
+      properties:
+        questionId: { type: integer }
+        prompt: { type: string }
+        chosenIndex: { type: integer }
+        correctIndex: { type: integer }
+        isCorrect: { type: boolean }
+        explanation:
+          type: ["string", "null"]
+
+    TestAttemptResult:
+      type: object
+      required: [testId, score, totalQuestions, percentage, results, completedAt]
+      properties:
+        testId: { type: integer }
+        score: { type: integer }
+        totalQuestions: { type: integer }
+        percentage: { type: integer }
+        results:
+          type: array
+          items: { $ref: "#/components/schemas/QuestionResult" }
+        completedAt: { type: string, format: date-time }
+
+    LeaderboardEntry:
+      type: object
+      required: [user, totalScore, attemptsCount, bestPercentage]
+      properties:
+        user: { $ref: "#/components/schemas/User" }
+        totalScore: { type: integer }
+        attemptsCount: { type: integer }
+        bestPercentage: { type: integer }
+
+    DashboardSummary:
+      type: object
+      required: [memberCount, postCount, bookCount, meetingCount, recentPosts, upcomingMeetings]
+      properties:
+        memberCount: { type: integer }
+        postCount: { type: integer }
+        bookCount: { type: integer }
+        meetingCount: { type: integer }
+        recentPosts:
+          type: array
+          items: { $ref: "#/components/schemas/Post" }
+        upcomingMeetings:
+          type: array
+          items: { $ref: "#/components/schemas/Meeting" }
