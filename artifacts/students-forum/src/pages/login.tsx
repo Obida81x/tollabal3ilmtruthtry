@@ -21,13 +21,14 @@ export default function LoginPage() {
   const { t } = useTranslation();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [rememberMe, setRememberMe] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
     login.mutate(
-      { data: { username: username.trim(), password } },
+      { data: { username: username.trim(), password, rememberMe } },
       {
         onSuccess: () => {
           queryClient.invalidateQueries({ queryKey: getGetCurrentUserQueryKey() });
@@ -94,6 +95,19 @@ export default function LoginPage() {
                   autoComplete="current-password"
                   data-testid="input-login-password"
                 />
+              </div>
+              <div className="flex items-center gap-2">
+                <input
+                  id="rememberMe"
+                  type="checkbox"
+                  checked={rememberMe}
+                  onChange={(e) => setRememberMe(e.target.checked)}
+                  className="w-4 h-4 accent-primary cursor-pointer"
+                  data-testid="checkbox-remember-me"
+                />
+                <label htmlFor="rememberMe" className="text-sm text-muted-foreground cursor-pointer select-none">
+                  {t("login.rememberMe")}
+                </label>
               </div>
               {error && (
                 <div className="text-sm text-destructive" data-testid="text-login-error">

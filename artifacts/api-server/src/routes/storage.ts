@@ -15,6 +15,14 @@ const ALLOWED = new Set([
   "video/webm",
   "video/quicktime",
   "video/ogg",
+  "audio/mpeg",
+  "audio/mp3",
+  "audio/wav",
+  "audio/wave",
+  "audio/ogg",
+  "audio/webm",
+  "audio/mp4",
+  "audio/aac",
 ]);
 
 const upload = multer({
@@ -42,7 +50,11 @@ router.post(
         file.mimetype,
         file.originalname,
       );
-      const kind = file.mimetype.startsWith("video/") ? "video" : "image";
+      const kind = file.mimetype.startsWith("video/")
+        ? "video"
+        : file.mimetype.startsWith("audio/")
+          ? "audio"
+          : "image";
       res.status(201).json({ objectPath, url, kind, contentType: file.mimetype });
     } catch (err) {
       req.log?.error({ err }, "Upload failed");

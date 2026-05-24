@@ -1,5 +1,5 @@
 import { useRef, useState } from "react";
-import { ImagePlus, Video as VideoIcon, X, Loader2 } from "lucide-react";
+import { ImagePlus, Video as VideoIcon, Mic, X, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { uploadMedia, MAX_UPLOAD_BYTES, type UploadResult } from "@/lib/upload";
 import { useTranslation } from "@/lib/i18n";
@@ -55,12 +55,19 @@ export function MediaUploadButton({
               className="max-h-64 rounded-md border border-card-border object-cover"
               data-testid={`${testIdPrefix}-preview-image`}
             />
-          ) : (
+          ) : value.kind === "video" ? (
             <video
               src={value.url}
               controls
               className="max-h-64 rounded-md border border-card-border"
               data-testid={`${testIdPrefix}-preview-video`}
+            />
+          ) : (
+            <audio
+              src={value.url}
+              controls
+              className="w-64"
+              data-testid={`${testIdPrefix}-preview-audio`}
             />
           )}
           <button
@@ -82,12 +89,12 @@ export function MediaUploadButton({
       <input
         ref={inputRef}
         type="file"
-        accept="image/*,video/*"
+        accept="image/*,video/*,audio/*"
         className="hidden"
         onChange={handleChange}
         data-testid={`${testIdPrefix}-input`}
       />
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-2 flex-wrap">
         <Button
           type="button"
           variant="ghost"
@@ -106,6 +113,9 @@ export function MediaUploadButton({
         </Button>
         <span className="text-muted-foreground text-xs flex items-center gap-1">
           <VideoIcon className="h-3 w-3" /> {t("upload.videoOk")}
+        </span>
+        <span className="text-muted-foreground text-xs flex items-center gap-1">
+          <Mic className="h-3 w-3" /> {t("upload.audioOk")}
         </span>
       </div>
       {error && (

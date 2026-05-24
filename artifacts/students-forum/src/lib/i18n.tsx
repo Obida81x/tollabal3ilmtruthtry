@@ -362,6 +362,60 @@ const en: Dict = {
   "admin.lessons.addTitle": "Add recorded lesson",
   "admin.confirmDeletePost":
     "Delete this post? This cannot be undone.",
+
+  // Remember me
+  "login.rememberMe": "Remember me",
+
+  // Audio upload
+  "upload.audioOk": "Audio welcome",
+
+  // Voice messages in chat
+  "halaqah.voiceMessage": "Voice message",
+  "halaqah.recording": "Recording…",
+  "halaqah.stopRecording": "Stop",
+  "halaqah.recordError": "Could not record audio. Check microphone access.",
+
+  // Fatawa
+  "nav.fatawa": "Fatawa",
+  "ar.fatawa": "الفتاوى",
+  "ar.adminPanel": "لوحة الإدارة",
+  "fatawa.title": "Fatawa (Islamic Verdicts)",
+  "fatawa.subtitle": "Submit a question for ruling by our muftis.",
+  "fatawa.ask": "Ask a question",
+  "fatawa.question": "Your question",
+  "fatawa.questionPlaceholder": "Describe your question in detail — include relevant circumstances…",
+  "fatawa.category": "Category",
+  "fatawa.categoryPlaceholder": "e.g. Fiqh, Aqeedah, Taharah",
+  "fatawa.optional": "optional",
+  "fatawa.submit": "Submit question",
+  "fatawa.submitting": "Submitting…",
+  "fatawa.ruling": "Ruling",
+  "fatawa.empty": "No fatawa yet. Be the first to ask.",
+  "fatawa.status.pending": "Awaiting review",
+  "fatawa.status.assigned": "Under review",
+  "fatawa.status.answered": "Answered",
+  "fatawa.status.closed": "Closed",
+
+  // Admin — Muftis
+  "admin.tabs.muftis": "Muftis",
+  "admin.tabs.fatawa": "Fatawa queue",
+  "admin.muftis.heading": "Mufti assignments",
+  "admin.muftis.subtitle": "Muftis can answer fatawa questions.",
+  "admin.muftis.grant": "Grant Mufti",
+  "admin.muftis.revoke": "Revoke Mufti",
+  "admin.muftis.isMufti": "Mufti",
+
+  // Admin — Fatawa queue
+  "admin.fatawa.heading": "Fatawa queue",
+  "admin.fatawa.subtitle": "Review and answer pending questions.",
+  "admin.fatawa.empty": "No fatawa in the queue.",
+  "admin.fatawa.answer": "Answer",
+  "admin.fatawa.answerLabel": "Your ruling",
+  "admin.fatawa.answerPlaceholder": "Write your ruling based on the Quran and Sunnah…",
+  "admin.fatawa.publish": "Publish",
+  "admin.fatawa.publishing": "Publishing…",
+  "admin.fatawa.saving": "Saving…",
+  "admin.fatawa.published": "Published",
 };
 
 const ar: Dict = {
@@ -711,6 +765,49 @@ const ar: Dict = {
   "admin.books.addTitle": "إضافة كتاب",
   "admin.confirmDeletePost":
     "هل تريد حذف هذا المنشور؟ لا يمكن التراجع عن ذلك.",
+
+  "login.rememberMe": "تذكّرني",
+  "upload.audioOk": "الصوت مقبول",
+  "halaqah.voiceMessage": "رسالة صوتية",
+  "halaqah.recording": "جارٍ التسجيل…",
+  "halaqah.stopRecording": "إيقاف",
+  "halaqah.recordError": "تعذّر التسجيل. تحقّق من إذن الميكروفون.",
+  "nav.fatawa": "الفتاوى",
+  "ar.fatawa": "الفتاوى",
+  "ar.adminPanel": "لوحة الإدارة",
+  "fatawa.title": "الفتاوى",
+  "fatawa.subtitle": "أرسل سؤالاً للإفتاء من قِبَل المفتين لدينا.",
+  "fatawa.ask": "اطرح سؤالاً",
+  "fatawa.question": "سؤالك",
+  "fatawa.questionPlaceholder": "اشرح سؤالك بالتفصيل مع ذكر الملابسات…",
+  "fatawa.category": "التصنيف",
+  "fatawa.categoryPlaceholder": "مثال: فقه، عقيدة، طهارة",
+  "fatawa.optional": "اختياري",
+  "fatawa.submit": "إرسال السؤال",
+  "fatawa.submitting": "جارٍ الإرسال…",
+  "fatawa.ruling": "الحكم",
+  "fatawa.empty": "لا توجد فتاوى بعد. كن أول من يسأل.",
+  "fatawa.status.pending": "في انتظار المراجعة",
+  "fatawa.status.assigned": "قيد المراجعة",
+  "fatawa.status.answered": "تمّت الإجابة",
+  "fatawa.status.closed": "مغلق",
+  "admin.tabs.muftis": "المفتون",
+  "admin.tabs.fatawa": "قائمة الفتاوى",
+  "admin.muftis.heading": "تعيين المفتين",
+  "admin.muftis.subtitle": "المفتون بإمكانهم الإجابة على أسئلة الفتاوى.",
+  "admin.muftis.grant": "تعيين مفتياً",
+  "admin.muftis.revoke": "إلغاء التعيين",
+  "admin.muftis.isMufti": "مفتي",
+  "admin.fatawa.heading": "قائمة الفتاوى",
+  "admin.fatawa.subtitle": "مراجعة الأسئلة والإجابة عليها.",
+  "admin.fatawa.empty": "لا توجد فتاوى في القائمة.",
+  "admin.fatawa.answer": "إجابة",
+  "admin.fatawa.answerLabel": "حكمك الشرعي",
+  "admin.fatawa.answerPlaceholder": "اكتب حكمك بناءً على الكتاب والسنة…",
+  "admin.fatawa.publish": "نشر",
+  "admin.fatawa.publishing": "جارٍ النشر…",
+  "admin.fatawa.saving": "جارٍ الحفظ…",
+  "admin.fatawa.published": "منشور",
 };
 
 const dictionaries: Record<Language, Dict> = { en, ar };

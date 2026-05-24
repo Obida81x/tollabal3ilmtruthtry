@@ -120,6 +120,12 @@ router.post("/auth/login", async (req, res): Promise<void> => {
     return;
   }
   req.session.userId = user.id;
+  // rememberMe=false → session cookie (cleared on browser close)
+  const rememberMe = (req.body as { rememberMe?: boolean }).rememberMe;
+  if (rememberMe === false) {
+    (req.session.cookie as Record<string, unknown>).maxAge = undefined;
+    (req.session.cookie as Record<string, unknown>).expires = undefined;
+  }
   res.json(serializeUser(user));
 });
 

@@ -25,6 +25,7 @@ type Post = {
   content: string;
   imageUrl?: string | null;
   videoUrl?: string | null;
+  audioUrl?: string | null;
   likeCount: number;
   likedByMe: boolean;
   createdAt: string | Date;
@@ -118,6 +119,20 @@ export function PostCard({ post }: { post: Post }) {
             className="mt-4 rounded-md border border-card-border max-h-[480px] w-full bg-black"
             data-testid={`video-post-${post.id}`}
           />
+        )}
+        {post.audioUrl && (
+          <div
+            className="mt-4 flex items-center gap-3 p-3 rounded-lg bg-primary/8 border border-primary/20"
+            data-testid={`audio-post-${post.id}`}
+          >
+            <span className="text-primary text-xs font-medium uppercase tracking-wide">Audio</span>
+            <audio
+              src={post.audioUrl}
+              controls
+              className="flex-1 h-8"
+              style={{ minWidth: 0 }}
+            />
+          </div>
         )}
         <div className="mt-4 flex items-center justify-between">
           <Button

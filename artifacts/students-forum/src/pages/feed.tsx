@@ -39,6 +39,7 @@ export default function FeedPage() {
           content: content.trim(),
           imageUrl: media?.kind === "image" ? media.url : null,
           videoUrl: media?.kind === "video" ? media.url : null,
+          audioUrl: media?.kind === "audio" ? media.url : null,
         },
       },
       {

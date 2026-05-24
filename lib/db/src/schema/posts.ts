@@ -21,6 +21,7 @@ export const postsTable = pgTable(
     content: text("content").notNull(),
     imageUrl: text("image_url"),
     videoUrl: text("video_url"),
+    audioUrl: text("audio_url"),
     createdAt: timestamp("created_at", { withTimezone: true })
       .notNull()
       .defaultNow(),

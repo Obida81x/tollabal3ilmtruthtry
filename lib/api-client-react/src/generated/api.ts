@@ -20,22 +20,27 @@ import type {
 } from '@tanstack/react-query';
 
 import type {
+  AdminAssignMuftiBody,
   AdminCreateBookBody,
   AdminCreateMeetingBody,
   AdminLoginBody,
   AdminToggleBody,
   AdminUpdateBookBody,
   AdminUpdateMeetingBody,
+  AnswerFatwaBody,
   Book,
   ChatGroup,
   ChatMessage,
   CreateChatMessageBody,
+  CreateFatwaBody,
   CreateMeetingBody,
   CreatePostBody,
   CreateStoryBody,
   CurrentUserResponse,
   DashboardSummary,
   ErrorResponse,
+  FatawaNotification,
+  Fatwa,
   ForgotPasswordBody,
   ForgotPasswordResponse,
   HealthStatus,
@@ -45,8 +50,10 @@ import type {
   ListUsersParams,
   LoginBody,
   Meeting,
+  MuftiAssignment,
   OkResponse,
   Post,
+  PublicFatwa,
   RegisterBody,
   ResetPasswordBody,
   Story,
@@ -3192,4 +3199,890 @@ export const useAdminDeleteBook = <TError = ErrorType<ErrorResponse>,
       > => {
       return useMutation(getAdminDeleteBookMutationOptions(options));
     }
+
+export const getListFatawaUrl = () => {
+
+
+
+
+  return `/api/fatawa`
+}
+
+/**
+ * @summary List fatawa (user sees own, mufti/admin sees all)
+ */
+export const listFatawa = async ( options?: RequestInit): Promise<Fatwa[]> => {
+
+  return customFetch<Fatwa[]>(getListFatawaUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getListFatawaQueryKey = () => {
+    return [
+    `/api/fatawa`
+    ] as const;
+    }
+
+
+export const getListFatawaQueryOptions = <TData = Awaited<ReturnType<typeof listFatawa>>, TError = ErrorType<ErrorResponse>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listFatawa>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getListFatawaQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listFatawa>>> = ({ signal }) => listFatawa({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listFatawa>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type ListFatawaQueryResult = NonNullable<Awaited<ReturnType<typeof listFatawa>>>
+export type ListFatawaQueryError = ErrorType<ErrorResponse>
+
+
+/**
+ * @summary List fatawa (user sees own, mufti/admin sees all)
+ */
+
+export function useListFatawa<TData = Awaited<ReturnType<typeof listFatawa>>, TError = ErrorType<ErrorResponse>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listFatawa>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getListFatawaQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+export const getCreateFatwaUrl = () => {
+
+
+
+
+  return `/api/fatawa`
+}
+
+/**
+ * @summary Submit a question to the mufti
+ */
+export const createFatwa = async (createFatwaBody: CreateFatwaBody, options?: RequestInit): Promise<Fatwa> => {
+
+  return customFetch<Fatwa>(getCreateFatwaUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      createFatwaBody,)
+  }
+);}
+
+
+
+
+export const getCreateFatwaMutationOptions = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createFatwa>>, TError,{data: BodyType<CreateFatwaBody>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof createFatwa>>, TError,{data: BodyType<CreateFatwaBody>}, TContext> => {
+
+const mutationKey = ['createFatwa'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createFatwa>>, {data: BodyType<CreateFatwaBody>}> = (props) => {
+          const {data} = props ?? {};
+
+          return  createFatwa(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CreateFatwaMutationResult = NonNullable<Awaited<ReturnType<typeof createFatwa>>>
+    export type CreateFatwaMutationBody = BodyType<CreateFatwaBody>
+    export type CreateFatwaMutationError = ErrorType<ErrorResponse>
+
+    /**
+ * @summary Submit a question to the mufti
+ */
+export const useCreateFatwa = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createFatwa>>, TError,{data: BodyType<CreateFatwaBody>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof createFatwa>>,
+        TError,
+        {data: BodyType<CreateFatwaBody>},
+        TContext
+      > => {
+      return useMutation(getCreateFatwaMutationOptions(options));
+    }
+
+export const getListFatawaNotificationsUrl = () => {
+
+
+
+
+  return `/api/fatawa/notifications`
+}
+
+/**
+ * @summary List unread fatawa notifications for the current user
+ */
+export const listFatawaNotifications = async ( options?: RequestInit): Promise<FatawaNotification[]> => {
+
+  return customFetch<FatawaNotification[]>(getListFatawaNotificationsUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getListFatawaNotificationsQueryKey = () => {
+    return [
+    `/api/fatawa/notifications`
+    ] as const;
+    }
+
+
+export const getListFatawaNotificationsQueryOptions = <TData = Awaited<ReturnType<typeof listFatawaNotifications>>, TError = ErrorType<ErrorResponse>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listFatawaNotifications>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getListFatawaNotificationsQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listFatawaNotifications>>> = ({ signal }) => listFatawaNotifications({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listFatawaNotifications>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type ListFatawaNotificationsQueryResult = NonNullable<Awaited<ReturnType<typeof listFatawaNotifications>>>
+export type ListFatawaNotificationsQueryError = ErrorType<ErrorResponse>
+
+
+/**
+ * @summary List unread fatawa notifications for the current user
+ */
+
+export function useListFatawaNotifications<TData = Awaited<ReturnType<typeof listFatawaNotifications>>, TError = ErrorType<ErrorResponse>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listFatawaNotifications>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getListFatawaNotificationsQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+export const getMarkFatawaNotificationsReadUrl = () => {
+
+
+
+
+  return `/api/fatawa/notifications/read`
+}
+
+/**
+ * @summary Mark all fatawa notifications as read
+ */
+export const markFatawaNotificationsRead = async ( options?: RequestInit): Promise<OkResponse> => {
+
+  return customFetch<OkResponse>(getMarkFatawaNotificationsReadUrl(),
+  {
+    ...options,
+    method: 'POST'
+
+
+  }
+);}
+
+
+
+
+export const getMarkFatawaNotificationsReadMutationOptions = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof markFatawaNotificationsRead>>, TError,void, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof markFatawaNotificationsRead>>, TError,void, TContext> => {
+
+const mutationKey = ['markFatawaNotificationsRead'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof markFatawaNotificationsRead>>, void> = () => {
+
+
+          return  markFatawaNotificationsRead(requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type MarkFatawaNotificationsReadMutationResult = NonNullable<Awaited<ReturnType<typeof markFatawaNotificationsRead>>>
+
+    export type MarkFatawaNotificationsReadMutationError = ErrorType<ErrorResponse>
+
+    /**
+ * @summary Mark all fatawa notifications as read
+ */
+export const useMarkFatawaNotificationsRead = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof markFatawaNotificationsRead>>, TError,void, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof markFatawaNotificationsRead>>,
+        TError,
+        void,
+        TContext
+      > => {
+      return useMutation(getMarkFatawaNotificationsReadMutationOptions(options));
+    }
+
+export const getGetFatwaUrl = (id: number,) => {
+
+
+
+
+  return `/api/fatawa/${id}`
+}
+
+/**
+ * @summary Get a single fatwa
+ */
+export const getFatwa = async (id: number, options?: RequestInit): Promise<Fatwa> => {
+
+  return customFetch<Fatwa>(getGetFatwaUrl(id),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetFatwaQueryKey = (id: number,) => {
+    return [
+    `/api/fatawa/${id}`
+    ] as const;
+    }
+
+
+export const getGetFatwaQueryOptions = <TData = Awaited<ReturnType<typeof getFatwa>>, TError = ErrorType<ErrorResponse>>(id: number, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getFatwa>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetFatwaQueryKey(id);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getFatwa>>> = ({ signal }) => getFatwa(id, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: !!(id), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getFatwa>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetFatwaQueryResult = NonNullable<Awaited<ReturnType<typeof getFatwa>>>
+export type GetFatwaQueryError = ErrorType<ErrorResponse>
+
+
+/**
+ * @summary Get a single fatwa
+ */
+
+export function useGetFatwa<TData = Awaited<ReturnType<typeof getFatwa>>, TError = ErrorType<ErrorResponse>>(
+ id: number, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getFatwa>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetFatwaQueryOptions(id,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+export const getAnswerFatwaUrl = (id: number,) => {
+
+
+
+
+  return `/api/fatawa/${id}/answer`
+}
+
+/**
+ * @summary Mufti submits an answer
+ */
+export const answerFatwa = async (id: number,
+    answerFatwaBody: AnswerFatwaBody, options?: RequestInit): Promise<Fatwa> => {
+
+  return customFetch<Fatwa>(getAnswerFatwaUrl(id),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      answerFatwaBody,)
+  }
+);}
+
+
+
+
+export const getAnswerFatwaMutationOptions = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof answerFatwa>>, TError,{id: number;data: BodyType<AnswerFatwaBody>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof answerFatwa>>, TError,{id: number;data: BodyType<AnswerFatwaBody>}, TContext> => {
+
+const mutationKey = ['answerFatwa'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof answerFatwa>>, {id: number;data: BodyType<AnswerFatwaBody>}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  answerFatwa(id,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type AnswerFatwaMutationResult = NonNullable<Awaited<ReturnType<typeof answerFatwa>>>
+    export type AnswerFatwaMutationBody = BodyType<AnswerFatwaBody>
+    export type AnswerFatwaMutationError = ErrorType<ErrorResponse>
+
+    /**
+ * @summary Mufti submits an answer
+ */
+export const useAnswerFatwa = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof answerFatwa>>, TError,{id: number;data: BodyType<AnswerFatwaBody>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof answerFatwa>>,
+        TError,
+        {id: number;data: BodyType<AnswerFatwaBody>},
+        TContext
+      > => {
+      return useMutation(getAnswerFatwaMutationOptions(options));
+    }
+
+export const getPublishFatwaUrl = (id: number,) => {
+
+
+
+
+  return `/api/fatawa/${id}/publish`
+}
+
+/**
+ * @summary Questioner publishes Q&A publicly (identity hidden)
+ */
+export const publishFatwa = async (id: number, options?: RequestInit): Promise<Fatwa> => {
+
+  return customFetch<Fatwa>(getPublishFatwaUrl(id),
+  {
+    ...options,
+    method: 'POST'
+
+
+  }
+);}
+
+
+
+
+export const getPublishFatwaMutationOptions = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof publishFatwa>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof publishFatwa>>, TError,{id: number}, TContext> => {
+
+const mutationKey = ['publishFatwa'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof publishFatwa>>, {id: number}> = (props) => {
+          const {id} = props ?? {};
+
+          return  publishFatwa(id,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PublishFatwaMutationResult = NonNullable<Awaited<ReturnType<typeof publishFatwa>>>
+
+    export type PublishFatwaMutationError = ErrorType<ErrorResponse>
+
+    /**
+ * @summary Questioner publishes Q&A publicly (identity hidden)
+ */
+export const usePublishFatwa = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof publishFatwa>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof publishFatwa>>,
+        TError,
+        {id: number},
+        TContext
+      > => {
+      return useMutation(getPublishFatwaMutationOptions(options));
+    }
+
+export const getListPublicFatawaUrl = () => {
+
+
+
+
+  return `/api/fatawa/public`
+}
+
+/**
+ * @summary List published fatawa visible to all (identity hidden)
+ */
+export const listPublicFatawa = async ( options?: RequestInit): Promise<PublicFatwa[]> => {
+
+  return customFetch<PublicFatwa[]>(getListPublicFatawaUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getListPublicFatawaQueryKey = () => {
+    return [
+    `/api/fatawa/public`
+    ] as const;
+    }
+
+
+export const getListPublicFatawaQueryOptions = <TData = Awaited<ReturnType<typeof listPublicFatawa>>, TError = ErrorType<unknown>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listPublicFatawa>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getListPublicFatawaQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listPublicFatawa>>> = ({ signal }) => listPublicFatawa({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listPublicFatawa>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type ListPublicFatawaQueryResult = NonNullable<Awaited<ReturnType<typeof listPublicFatawa>>>
+export type ListPublicFatawaQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary List published fatawa visible to all (identity hidden)
+ */
+
+export function useListPublicFatawa<TData = Awaited<ReturnType<typeof listPublicFatawa>>, TError = ErrorType<unknown>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listPublicFatawa>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getListPublicFatawaQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+export const getAdminListMuftisUrl = () => {
+
+
+
+
+  return `/api/admin/muftis`
+}
+
+/**
+ * @summary List mufti assignments (admin only)
+ */
+export const adminListMuftis = async ( options?: RequestInit): Promise<MuftiAssignment[]> => {
+
+  return customFetch<MuftiAssignment[]>(getAdminListMuftisUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getAdminListMuftisQueryKey = () => {
+    return [
+    `/api/admin/muftis`
+    ] as const;
+    }
+
+
+export const getAdminListMuftisQueryOptions = <TData = Awaited<ReturnType<typeof adminListMuftis>>, TError = ErrorType<ErrorResponse>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof adminListMuftis>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getAdminListMuftisQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof adminListMuftis>>> = ({ signal }) => adminListMuftis({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof adminListMuftis>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type AdminListMuftisQueryResult = NonNullable<Awaited<ReturnType<typeof adminListMuftis>>>
+export type AdminListMuftisQueryError = ErrorType<ErrorResponse>
+
+
+/**
+ * @summary List mufti assignments (admin only)
+ */
+
+export function useAdminListMuftis<TData = Awaited<ReturnType<typeof adminListMuftis>>, TError = ErrorType<ErrorResponse>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof adminListMuftis>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getAdminListMuftisQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+export const getAdminAssignMuftiUrl = () => {
+
+
+
+
+  return `/api/admin/muftis`
+}
+
+/**
+ * @summary Assign a user as mufti (admin only)
+ */
+export const adminAssignMufti = async (adminAssignMuftiBody: AdminAssignMuftiBody, options?: RequestInit): Promise<MuftiAssignment> => {
+
+  return customFetch<MuftiAssignment>(getAdminAssignMuftiUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      adminAssignMuftiBody,)
+  }
+);}
+
+
+
+
+export const getAdminAssignMuftiMutationOptions = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminAssignMufti>>, TError,{data: BodyType<AdminAssignMuftiBody>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof adminAssignMufti>>, TError,{data: BodyType<AdminAssignMuftiBody>}, TContext> => {
+
+const mutationKey = ['adminAssignMufti'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof adminAssignMufti>>, {data: BodyType<AdminAssignMuftiBody>}> = (props) => {
+          const {data} = props ?? {};
+
+          return  adminAssignMufti(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type AdminAssignMuftiMutationResult = NonNullable<Awaited<ReturnType<typeof adminAssignMufti>>>
+    export type AdminAssignMuftiMutationBody = BodyType<AdminAssignMuftiBody>
+    export type AdminAssignMuftiMutationError = ErrorType<ErrorResponse>
+
+    /**
+ * @summary Assign a user as mufti (admin only)
+ */
+export const useAdminAssignMufti = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminAssignMufti>>, TError,{data: BodyType<AdminAssignMuftiBody>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof adminAssignMufti>>,
+        TError,
+        {data: BodyType<AdminAssignMuftiBody>},
+        TContext
+      > => {
+      return useMutation(getAdminAssignMuftiMutationOptions(options));
+    }
+
+export const getAdminRevokeMuftiUrl = (userId: number,) => {
+
+
+
+
+  return `/api/admin/muftis/${userId}`
+}
+
+/**
+ * @summary Revoke mufti status (admin only)
+ */
+export const adminRevokeMufti = async (userId: number, options?: RequestInit): Promise<void> => {
+
+  return customFetch<void>(getAdminRevokeMuftiUrl(userId),
+  {
+    ...options,
+    method: 'DELETE'
+
+
+  }
+);}
+
+
+
+
+export const getAdminRevokeMuftiMutationOptions = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminRevokeMufti>>, TError,{userId: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof adminRevokeMufti>>, TError,{userId: number}, TContext> => {
+
+const mutationKey = ['adminRevokeMufti'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof adminRevokeMufti>>, {userId: number}> = (props) => {
+          const {userId} = props ?? {};
+
+          return  adminRevokeMufti(userId,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type AdminRevokeMuftiMutationResult = NonNullable<Awaited<ReturnType<typeof adminRevokeMufti>>>
+
+    export type AdminRevokeMuftiMutationError = ErrorType<ErrorResponse>
+
+    /**
+ * @summary Revoke mufti status (admin only)
+ */
+export const useAdminRevokeMufti = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminRevokeMufti>>, TError,{userId: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof adminRevokeMufti>>,
+        TError,
+        {userId: number},
+        TContext
+      > => {
+      return useMutation(getAdminRevokeMuftiMutationOptions(options));
+    }
+
+export const getAdminListFatawaUrl = () => {
+
+
+
+
+  return `/api/admin/fatawa`
+}
+
+/**
+ * @summary Admin view of all fatawa
+ */
+export const adminListFatawa = async ( options?: RequestInit): Promise<Fatwa[]> => {
+
+  return customFetch<Fatwa[]>(getAdminListFatawaUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getAdminListFatawaQueryKey = () => {
+    return [
+    `/api/admin/fatawa`
+    ] as const;
+    }
+
+
+export const getAdminListFatawaQueryOptions = <TData = Awaited<ReturnType<typeof adminListFatawa>>, TError = ErrorType<ErrorResponse>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof adminListFatawa>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getAdminListFatawaQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof adminListFatawa>>> = ({ signal }) => adminListFatawa({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof adminListFatawa>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type AdminListFatawaQueryResult = NonNullable<Awaited<ReturnType<typeof adminListFatawa>>>
+export type AdminListFatawaQueryError = ErrorType<ErrorResponse>
+
+
+/**
+ * @summary Admin view of all fatawa
+ */
+
+export function useAdminListFatawa<TData = Awaited<ReturnType<typeof adminListFatawa>>, TError = ErrorType<ErrorResponse>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof adminListFatawa>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getAdminListFatawaQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
 

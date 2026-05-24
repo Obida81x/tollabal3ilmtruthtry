@@ -1,7 +1,7 @@
 export type UploadResult = {
   objectPath: string;
   url: string;
-  kind: "image" | "video";
+  kind: "image" | "video" | "audio";
   contentType: string;
 };
 

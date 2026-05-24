@@ -20,6 +20,7 @@ tags:
   - name: dashboard
   - name: admin
   - name: storage
+  - name: fatawa
 
 paths:
   /healthz:
@@ -920,6 +921,258 @@ paths:
             application/json:
               schema: { $ref: "#/components/schemas/ErrorResponse" }
 
+  /fatawa:
+    get:
+      operationId: listFatawa
+      tags: [fatawa]
+      summary: List fatawa (user sees own, mufti/admin sees all)
+      responses:
+        "200":
+          description: Fatawa list
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/Fatwa" }
+        "401":
+          description: Authentication required
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorResponse" }
+    post:
+      operationId: createFatwa
+      tags: [fatawa]
+      summary: Submit a question to the mufti
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/CreateFatwaBody" }
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Fatwa" }
+        "401":
+          description: Authentication required
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorResponse" }
+
+  /fatawa/notifications:
+    get:
+      operationId: listFatawaNotifications
+      tags: [fatawa]
+      summary: List unread fatawa notifications for the current user
+      responses:
+        "200":
+          description: Notifications
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/FatawaNotification" }
+        "401":
+          description: Authentication required
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorResponse" }
+
+  /fatawa/notifications/read:
+    post:
+      operationId: markFatawaNotificationsRead
+      tags: [fatawa]
+      summary: Mark all fatawa notifications as read
+      responses:
+        "200":
+          description: Marked read
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/OkResponse" }
+        "401":
+          description: Authentication required
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorResponse" }
+
+  /fatawa/{id}:
+    get:
+      operationId: getFatwa
+      tags: [fatawa]
+      summary: Get a single fatwa
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+      responses:
+        "200":
+          description: Fatwa
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Fatwa" }
+        "401":
+          description: Authentication required
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorResponse" }
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorResponse" }
+
+  /fatawa/{id}/answer:
+    post:
+      operationId: answerFatwa
+      tags: [fatawa]
+      summary: Mufti submits an answer
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/AnswerFatwaBody" }
+      responses:
+        "200":
+          description: Answered
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Fatwa" }
+        "401":
+          description: Authentication required
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorResponse" }
+        "403":
+          description: Mufti only
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorResponse" }
+
+  /fatawa/{id}/publish:
+    post:
+      operationId: publishFatwa
+      tags: [fatawa]
+      summary: Questioner publishes Q&A publicly (identity hidden)
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+      responses:
+        "200":
+          description: Published
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Fatwa" }
+        "401":
+          description: Authentication required
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorResponse" }
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorResponse" }
+
+  /fatawa/public:
+    get:
+      operationId: listPublicFatawa
+      tags: [fatawa]
+      summary: List published fatawa visible to all (identity hidden)
+      responses:
+        "200":
+          description: Published fatawa
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/PublicFatwa" }
+
+  /admin/muftis:
+    get:
+      operationId: adminListMuftis
+      tags: [admin]
+      summary: List mufti assignments (admin only)
+      responses:
+        "200":
+          description: Muftis
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/MuftiAssignment" }
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorResponse" }
+    post:
+      operationId: adminAssignMufti
+      tags: [admin]
+      summary: Assign a user as mufti (admin only)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/AdminAssignMuftiBody" }
+      responses:
+        "201":
+          description: Assigned
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/MuftiAssignment" }
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorResponse" }
+
+  /admin/muftis/{userId}:
+    delete:
+      operationId: adminRevokeMufti
+      tags: [admin]
+      summary: Revoke mufti status (admin only)
+      parameters:
+        - in: path
+          name: userId
+          required: true
+          schema: { type: integer }
+      responses:
+        "204":
+          description: Revoked
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorResponse" }
+
+  /admin/fatawa:
+    get:
+      operationId: adminListFatawa
+      tags: [admin]
+      summary: Admin view of all fatawa
+      responses:
+        "200":
+          description: All fatawa
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/Fatwa" }
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorResponse" }
+
 components:
   schemas:
     HealthStatus:
@@ -940,7 +1193,7 @@ components:
 
     User:
       type: object
-      required: [id, username, displayName, gender, isAdmin, isMainAdmin, isActive, createdAt]
+      required: [id, username, displayName, gender, isAdmin, isMainAdmin, isMufti, isActive, createdAt]
       properties:
         id: { type: integer }
         username: { type: string }
@@ -957,6 +1210,7 @@ components:
           type: ["string", "null"]
         isAdmin: { type: boolean }
         isMainAdmin: { type: boolean }
+        isMufti: { type: boolean }
         isActive: { type: boolean }
         createdAt: { type: string, format: date-time }
 
@@ -1000,6 +1254,9 @@ components:
       properties:
         username: { type: string }
         password: { type: string }
+        rememberMe:
+          type: boolean
+          default: false
 
     ForgotPasswordBody:
       type: object
@@ -1058,6 +1315,8 @@ components:
           type: ["string", "null"]
         videoUrl:
           type: ["string", "null"]
+        audioUrl:
+          type: ["string", "null"]
         likeCount: { type: integer }
         likedByMe: { type: boolean }
         createdAt: { type: string, format: date-time }
@@ -1073,6 +1332,8 @@ components:
         imageUrl:
           type: ["string", "null"]
         videoUrl:
+          type: ["string", "null"]
+        audioUrl:
           type: ["string", "null"]
 
     Story:
@@ -1130,23 +1391,25 @@ components:
 
     ChatMessage:
       type: object
-      required: [id, groupId, userId, author, content, createdAt]
+      required: [id, groupId, userId, author, createdAt]
       properties:
         id: { type: integer }
         groupId: { type: integer }
         userId: { type: integer }
         author: { $ref: "#/components/schemas/User" }
         content: { type: string }
+        audioUrl:
+          type: ["string", "null"]
         createdAt: { type: string, format: date-time }
 
     CreateChatMessageBody:
       type: object
-      required: [content]
       properties:
         content:
           type: string
-          minLength: 1
           maxLength: 1000
+        audioUrl:
+          type: ["string", "null"]
 
     Meeting:
       type: object
@@ -1209,7 +1472,7 @@ components:
         url: { type: string }
         kind:
           type: string
-          enum: [image, video]
+          enum: [image, video, audio]
         contentType: { type: string }
 
     AdminCreateMeetingBody:
@@ -1425,3 +1688,102 @@ components:
         upcomingMeetings:
           type: array
           items: { $ref: "#/components/schemas/Meeting" }
+
+    Fatwa:
+      type: object
+      required: [id, userId, questionText, category, isAnonymous, status, createdAt]
+      properties:
+        id: { type: integer }
+        userId: { type: integer }
+        muftiId:
+          type: ["integer", "null"]
+        questionText: { type: string }
+        category: { type: string }
+        isAnonymous: { type: boolean }
+        answerText:
+          type: ["string", "null"]
+        answerAudioUrl:
+          type: ["string", "null"]
+        status:
+          type: string
+          enum: [pending, answered, published]
+        askerName:
+          type: ["string", "null"]
+        createdAt: { type: string, format: date-time }
+        answeredAt:
+          type: ["string", "null"]
+          format: date-time
+
+    PublicFatwa:
+      type: object
+      required: [id, questionText, category, status, createdAt]
+      properties:
+        id: { type: integer }
+        questionText: { type: string }
+        category: { type: string }
+        answerText:
+          type: ["string", "null"]
+        answerAudioUrl:
+          type: ["string", "null"]
+        status:
+          type: string
+          enum: [published]
+        createdAt: { type: string, format: date-time }
+        answeredAt:
+          type: ["string", "null"]
+          format: date-time
+
+    FatawaNotification:
+      type: object
+      required: [id, userId, fatwaId, type, isRead, createdAt]
+      properties:
+        id: { type: integer }
+        userId: { type: integer }
+        fatwaId: { type: integer }
+        type:
+          type: string
+          enum: [question_received, answer_ready]
+        isRead: { type: boolean }
+        createdAt: { type: string, format: date-time }
+
+    CreateFatwaBody:
+      type: object
+      required: [questionText, category]
+      properties:
+        questionText:
+          type: string
+          minLength: 10
+          maxLength: 3000
+        category:
+          type: string
+          minLength: 2
+          maxLength: 100
+        isAnonymous:
+          type: boolean
+          default: false
+
+    AnswerFatwaBody:
+      type: object
+      properties:
+        answerText:
+          type: ["string", "null"]
+          maxLength: 10000
+        answerAudioUrl:
+          type: ["string", "null"]
+
+    MuftiAssignment:
+      type: object
+      required: [id, userId, assignedBy, assignedAt, isActive]
+      properties:
+        id: { type: integer }
+        userId: { type: integer }
+        assignedBy: { type: integer }
+        assignedAt: { type: string, format: date-time }
+        isActive: { type: boolean }
+        user: { $ref: "#/components/schemas/User" }
+
+    AdminAssignMuftiBody:
+      type: object
+      required: [userId]
+      properties:
+        userId: { type: integer }

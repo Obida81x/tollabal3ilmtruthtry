@@ -36,6 +36,7 @@ export interface User {
   avatarUrl?: string | null;
   isAdmin: boolean;
   isMainAdmin: boolean;
+  isMufti: boolean;
   isActive: boolean;
   createdAt: string;
 }
@@ -70,6 +71,7 @@ export interface RegisterBody {
 export interface LoginBody {
   username: string;
   password: string;
+  rememberMe?: boolean;
 }
 
 export interface ForgotPasswordBody {
@@ -121,6 +123,8 @@ export interface Post {
   imageUrl?: string | null;
   /** @nullable */
   videoUrl?: string | null;
+  /** @nullable */
+  audioUrl?: string | null;
   likeCount: number;
   likedByMe: boolean;
   createdAt: string;
@@ -136,6 +140,8 @@ export interface CreatePostBody {
   imageUrl?: string | null;
   /** @nullable */
   videoUrl?: string | null;
+  /** @nullable */
+  audioUrl?: string | null;
 }
 
 export interface Story {
@@ -186,16 +192,17 @@ export interface ChatMessage {
   groupId: number;
   userId: number;
   author: User;
-  content: string;
+  content?: string;
+  /** @nullable */
+  audioUrl?: string | null;
   createdAt: string;
 }
 
 export interface CreateChatMessageBody {
-  /**
-     * @minLength 1
-     * @maxLength 1000
-     */
-  content: string;
+  /** @maxLength 1000 */
+  content?: string;
+  /** @nullable */
+  audioUrl?: string | null;
 }
 
 export type MeetingKind = typeof MeetingKind[keyof typeof MeetingKind];
@@ -262,6 +269,7 @@ export type UploadResponseKind = typeof UploadResponseKind[keyof typeof UploadRe
 export const UploadResponseKind = {
   image: 'image',
   video: 'video',
+  audio: 'audio',
 } as const;
 
 export interface UploadResponse {
@@ -538,6 +546,110 @@ export interface DashboardSummary {
   meetingCount: number;
   recentPosts: Post[];
   upcomingMeetings: Meeting[];
+}
+
+export type FatwaStatus = typeof FatwaStatus[keyof typeof FatwaStatus];
+
+
+export const FatwaStatus = {
+  pending: 'pending',
+  answered: 'answered',
+  published: 'published',
+} as const;
+
+export interface Fatwa {
+  id: number;
+  userId: number;
+  /** @nullable */
+  muftiId?: number | null;
+  questionText: string;
+  category: string;
+  isAnonymous: boolean;
+  /** @nullable */
+  answerText?: string | null;
+  /** @nullable */
+  answerAudioUrl?: string | null;
+  status: FatwaStatus;
+  /** @nullable */
+  askerName?: string | null;
+  createdAt: string;
+  /** @nullable */
+  answeredAt?: string | null;
+}
+
+export type PublicFatwaStatus = typeof PublicFatwaStatus[keyof typeof PublicFatwaStatus];
+
+
+export const PublicFatwaStatus = {
+  published: 'published',
+} as const;
+
+export interface PublicFatwa {
+  id: number;
+  questionText: string;
+  category: string;
+  /** @nullable */
+  answerText?: string | null;
+  /** @nullable */
+  answerAudioUrl?: string | null;
+  status: PublicFatwaStatus;
+  createdAt: string;
+  /** @nullable */
+  answeredAt?: string | null;
+}
+
+export type FatawaNotificationType = typeof FatawaNotificationType[keyof typeof FatawaNotificationType];
+
+
+export const FatawaNotificationType = {
+  question_received: 'question_received',
+  answer_ready: 'answer_ready',
+} as const;
+
+export interface FatawaNotification {
+  id: number;
+  userId: number;
+  fatwaId: number;
+  type: FatawaNotificationType;
+  isRead: boolean;
+  createdAt: string;
+}
+
+export interface CreateFatwaBody {
+  /**
+     * @minLength 10
+     * @maxLength 3000
+     */
+  questionText: string;
+  /**
+     * @minLength 2
+     * @maxLength 100
+     */
+  category: string;
+  isAnonymous?: boolean;
+}
+
+export interface AnswerFatwaBody {
+  /**
+     * @maxLength 10000
+     * @nullable
+     */
+  answerText?: string | null;
+  /** @nullable */
+  answerAudioUrl?: string | null;
+}
+
+export interface MuftiAssignment {
+  id: number;
+  userId: number;
+  assignedBy: number;
+  assignedAt: string;
+  isActive: boolean;
+  user?: User;
+}
+
+export interface AdminAssignMuftiBody {
+  userId: number;
 }
 
 export type ListUsersParams = {

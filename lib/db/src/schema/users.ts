@@ -23,6 +23,7 @@ export const usersTable = pgTable(
     avatarUrl: text("avatar_url"),
     isAdmin: boolean("is_admin").notNull().default(false),
     isMainAdmin: boolean("is_main_admin").notNull().default(false),
+    isMufti: boolean("is_mufti").notNull().default(false),
     isActive: boolean("is_active").notNull().default(true),
     passwordHash: text("password_hash").notNull(),
     passwordSalt: text("password_salt").notNull(),

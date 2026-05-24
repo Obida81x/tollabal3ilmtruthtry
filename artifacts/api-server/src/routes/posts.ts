@@ -71,6 +71,7 @@ async function fetchPostsWithMeta(postIds: number[], viewerId: number | null) {
       content: r.post.content,
       imageUrl: r.post.imageUrl,
       videoUrl: r.post.videoUrl,
+      audioUrl: r.post.audioUrl,
       likeCount: countMap.get(r.post.id) ?? 0,
       likedByMe: likedSet.has(r.post.id),
       createdAt: r.post.createdAt,
@@ -101,6 +102,19 @@ router.post("/posts", requireUser, async (req, res): Promise<void> => {
     res.status(401).json({ error: "Authentication required" });
     return;
   }
+  const audioUrl = (parsed.data as Record<string, unknown>).audioUrl as string | null ?? null;
+  // Audio posts are Brothers Only
+  if (audioUrl) {
+    const [poster] = await db
+      .select({ gender: usersTable.gender })
+      .from(usersTable)
+      .where(eq(usersTable.id, userId))
+      .limit(1);
+    if (poster?.gender !== "male") {
+      res.status(403).json({ error: "Audio posts are for brothers only" });
+      return;
+    }
+  }
   const [post] = await db
     .insert(postsTable)
     .values({
@@ -108,6 +122,7 @@ router.post("/posts", requireUser, async (req, res): Promise<void> => {
       content: parsed.data.content,
       imageUrl: parsed.data.imageUrl ?? null,
       videoUrl: parsed.data.videoUrl ?? null,
+      audioUrl,
     })
     .returning();
   if (!post) {

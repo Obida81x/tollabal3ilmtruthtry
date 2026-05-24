@@ -7,7 +7,6 @@
  */
 import * as zod from 'zod';
 
-
 /**
  * @summary Health check
  */
@@ -45,9 +44,12 @@ export const RegisterBody = zod.object({
 /**
  * @summary Sign in
  */
+export const loginBodyRememberMeDefault = false;
+
 export const LoginBody = zod.object({
   "username": zod.string(),
-  "password": zod.string()
+  "password": zod.string(),
+  "rememberMe": zod.boolean().default(loginBodyRememberMeDefault)
 })
 
 export const LoginResponse = zod.object({
@@ -61,6 +63,7 @@ export const LoginResponse = zod.object({
   "avatarUrl": zod.string().nullish(),
   "isAdmin": zod.boolean(),
   "isMainAdmin": zod.boolean(),
+  "isMufti": zod.boolean(),
   "isActive": zod.boolean(),
   "createdAt": zod.coerce.date()
 })
@@ -81,6 +84,7 @@ export const GetCurrentUserResponse = zod.object({
   "avatarUrl": zod.string().nullish(),
   "isAdmin": zod.boolean(),
   "isMainAdmin": zod.boolean(),
+  "isMufti": zod.boolean(),
   "isActive": zod.boolean(),
   "createdAt": zod.coerce.date()
 }),zod.null()]).optional()
@@ -139,6 +143,7 @@ export const ListUsersResponseItem = zod.object({
   "avatarUrl": zod.string().nullish(),
   "isAdmin": zod.boolean(),
   "isMainAdmin": zod.boolean(),
+  "isMufti": zod.boolean(),
   "isActive": zod.boolean(),
   "createdAt": zod.coerce.date()
 })
@@ -174,6 +179,7 @@ export const UpdateMyProfileResponse = zod.object({
   "avatarUrl": zod.string().nullish(),
   "isAdmin": zod.boolean(),
   "isMainAdmin": zod.boolean(),
+  "isMufti": zod.boolean(),
   "isActive": zod.boolean(),
   "createdAt": zod.coerce.date()
 })
@@ -197,6 +203,7 @@ export const GetUserResponse = zod.object({
   "avatarUrl": zod.string().nullish(),
   "isAdmin": zod.boolean(),
   "isMainAdmin": zod.boolean(),
+  "isMufti": zod.boolean(),
   "isActive": zod.boolean(),
   "createdAt": zod.coerce.date()
 })
@@ -219,12 +226,14 @@ export const ListPostsResponseItem = zod.object({
   "avatarUrl": zod.string().nullish(),
   "isAdmin": zod.boolean(),
   "isMainAdmin": zod.boolean(),
+  "isMufti": zod.boolean(),
   "isActive": zod.boolean(),
   "createdAt": zod.coerce.date()
 }),
   "content": zod.string(),
   "imageUrl": zod.string().nullish(),
   "videoUrl": zod.string().nullish(),
+  "audioUrl": zod.string().nullish(),
   "likeCount": zod.number(),
   "likedByMe": zod.boolean(),
   "createdAt": zod.coerce.date()
@@ -242,7 +251,8 @@ export const createPostBodyContentMax = 2000;
 export const CreatePostBody = zod.object({
   "content": zod.string().min(1).max(createPostBodyContentMax),
   "imageUrl": zod.string().nullish(),
-  "videoUrl": zod.string().nullish()
+  "videoUrl": zod.string().nullish(),
+  "audioUrl": zod.string().nullish()
 })
 
 
@@ -267,12 +277,14 @@ export const TogglePostLikeResponse = zod.object({
   "avatarUrl": zod.string().nullish(),
   "isAdmin": zod.boolean(),
   "isMainAdmin": zod.boolean(),
+  "isMufti": zod.boolean(),
   "isActive": zod.boolean(),
   "createdAt": zod.coerce.date()
 }),
   "content": zod.string(),
   "imageUrl": zod.string().nullish(),
   "videoUrl": zod.string().nullish(),
+  "audioUrl": zod.string().nullish(),
   "likeCount": zod.number(),
   "likedByMe": zod.boolean(),
   "createdAt": zod.coerce.date()
@@ -294,6 +306,7 @@ export const ListStoriesResponseItem = zod.object({
   "avatarUrl": zod.string().nullish(),
   "isAdmin": zod.boolean(),
   "isMainAdmin": zod.boolean(),
+  "isMufti": zod.boolean(),
   "isActive": zod.boolean(),
   "createdAt": zod.coerce.date()
 }),
@@ -381,10 +394,12 @@ export const ListChatMessagesResponseItem = zod.object({
   "avatarUrl": zod.string().nullish(),
   "isAdmin": zod.boolean(),
   "isMainAdmin": zod.boolean(),
+  "isMufti": zod.boolean(),
   "isActive": zod.boolean(),
   "createdAt": zod.coerce.date()
 }),
-  "content": zod.string(),
+  "content": zod.string().optional(),
+  "audioUrl": zod.string().nullish(),
   "createdAt": zod.coerce.date()
 })
 export const ListChatMessagesResponse = zod.array(ListChatMessagesResponseItem)
@@ -402,7 +417,8 @@ export const postChatMessageBodyContentMax = 1000;
 
 
 export const PostChatMessageBody = zod.object({
-  "content": zod.string().min(1).max(postChatMessageBodyContentMax)
+  "content": zod.string().max(postChatMessageBodyContentMax).optional(),
+  "audioUrl": zod.string().nullish()
 })
 
 
@@ -621,6 +637,7 @@ export const GetTestLeaderboardResponseItem = zod.object({
   "avatarUrl": zod.string().nullish(),
   "isAdmin": zod.boolean(),
   "isMainAdmin": zod.boolean(),
+  "isMufti": zod.boolean(),
   "isActive": zod.boolean(),
   "createdAt": zod.coerce.date()
 }),
@@ -653,12 +670,14 @@ export const GetDashboardSummaryResponse = zod.object({
   "avatarUrl": zod.string().nullish(),
   "isAdmin": zod.boolean(),
   "isMainAdmin": zod.boolean(),
+  "isMufti": zod.boolean(),
   "isActive": zod.boolean(),
   "createdAt": zod.coerce.date()
 }),
   "content": zod.string(),
   "imageUrl": zod.string().nullish(),
   "videoUrl": zod.string().nullish(),
+  "audioUrl": zod.string().nullish(),
   "likeCount": zod.number(),
   "likedByMe": zod.boolean(),
   "createdAt": zod.coerce.date()
@@ -706,6 +725,7 @@ export const AdminLoginResponse = zod.object({
   "avatarUrl": zod.string().nullish(),
   "isAdmin": zod.boolean(),
   "isMainAdmin": zod.boolean(),
+  "isMufti": zod.boolean(),
   "isActive": zod.boolean(),
   "createdAt": zod.coerce.date()
 })
@@ -725,6 +745,7 @@ export const AdminListUsersResponseItem = zod.object({
   "avatarUrl": zod.string().nullish(),
   "isAdmin": zod.boolean(),
   "isMainAdmin": zod.boolean(),
+  "isMufti": zod.boolean(),
   "isActive": zod.boolean(),
   "createdAt": zod.coerce.date()
 })
@@ -753,6 +774,7 @@ export const AdminSetAdminResponse = zod.object({
   "avatarUrl": zod.string().nullish(),
   "isAdmin": zod.boolean(),
   "isMainAdmin": zod.boolean(),
+  "isMufti": zod.boolean(),
   "isActive": zod.boolean(),
   "createdAt": zod.coerce.date()
 })
@@ -780,6 +802,7 @@ export const AdminSetActiveResponse = zod.object({
   "avatarUrl": zod.string().nullish(),
   "isAdmin": zod.boolean(),
   "isMainAdmin": zod.boolean(),
+  "isMufti": zod.boolean(),
   "isActive": zod.boolean(),
   "createdAt": zod.coerce.date()
 })
@@ -973,3 +996,219 @@ export const AdminDeleteBookParams = zod.object({
 })
 
 
+/**
+ * @summary List fatawa (user sees own, mufti/admin sees all)
+ */
+export const ListFatawaResponseItem = zod.object({
+  "id": zod.number(),
+  "userId": zod.number(),
+  "muftiId": zod.number().nullish(),
+  "questionText": zod.string(),
+  "category": zod.string(),
+  "isAnonymous": zod.boolean(),
+  "answerText": zod.string().nullish(),
+  "answerAudioUrl": zod.string().nullish(),
+  "status": zod.enum(['pending', 'answered', 'published']),
+  "askerName": zod.string().nullish(),
+  "createdAt": zod.coerce.date(),
+  "answeredAt": zod.coerce.date().nullish()
+})
+export const ListFatawaResponse = zod.array(ListFatawaResponseItem)
+
+
+/**
+ * @summary Submit a question to the mufti
+ */
+export const createFatwaBodyQuestionTextMin = 10;
+export const createFatwaBodyQuestionTextMax = 3000;
+
+export const createFatwaBodyCategoryMin = 2;
+export const createFatwaBodyCategoryMax = 100;
+
+export const createFatwaBodyIsAnonymousDefault = false;
+
+export const CreateFatwaBody = zod.object({
+  "questionText": zod.string().min(createFatwaBodyQuestionTextMin).max(createFatwaBodyQuestionTextMax),
+  "category": zod.string().min(createFatwaBodyCategoryMin).max(createFatwaBodyCategoryMax),
+  "isAnonymous": zod.boolean().default(createFatwaBodyIsAnonymousDefault)
+})
+
+
+/**
+ * @summary List unread fatawa notifications for the current user
+ */
+export const ListFatawaNotificationsResponseItem = zod.object({
+  "id": zod.number(),
+  "userId": zod.number(),
+  "fatwaId": zod.number(),
+  "type": zod.enum(['question_received', 'answer_ready']),
+  "isRead": zod.boolean(),
+  "createdAt": zod.coerce.date()
+})
+export const ListFatawaNotificationsResponse = zod.array(ListFatawaNotificationsResponseItem)
+
+
+/**
+ * @summary Mark all fatawa notifications as read
+ */
+export const MarkFatawaNotificationsReadResponse = zod.object({
+  "ok": zod.boolean()
+})
+
+
+/**
+ * @summary Get a single fatwa
+ */
+export const GetFatwaParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const GetFatwaResponse = zod.object({
+  "id": zod.number(),
+  "userId": zod.number(),
+  "muftiId": zod.number().nullish(),
+  "questionText": zod.string(),
+  "category": zod.string(),
+  "isAnonymous": zod.boolean(),
+  "answerText": zod.string().nullish(),
+  "answerAudioUrl": zod.string().nullish(),
+  "status": zod.enum(['pending', 'answered', 'published']),
+  "askerName": zod.string().nullish(),
+  "createdAt": zod.coerce.date(),
+  "answeredAt": zod.coerce.date().nullish()
+})
+
+
+/**
+ * @summary Mufti submits an answer
+ */
+export const AnswerFatwaParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const answerFatwaBodyAnswerTextMax = 10000;
+
+
+
+export const AnswerFatwaBody = zod.object({
+  "answerText": zod.string().max(answerFatwaBodyAnswerTextMax).nullish(),
+  "answerAudioUrl": zod.string().nullish()
+})
+
+export const AnswerFatwaResponse = zod.object({
+  "id": zod.number(),
+  "userId": zod.number(),
+  "muftiId": zod.number().nullish(),
+  "questionText": zod.string(),
+  "category": zod.string(),
+  "isAnonymous": zod.boolean(),
+  "answerText": zod.string().nullish(),
+  "answerAudioUrl": zod.string().nullish(),
+  "status": zod.enum(['pending', 'answered', 'published']),
+  "askerName": zod.string().nullish(),
+  "createdAt": zod.coerce.date(),
+  "answeredAt": zod.coerce.date().nullish()
+})
+
+
+/**
+ * @summary Questioner publishes Q&A publicly (identity hidden)
+ */
+export const PublishFatwaParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const PublishFatwaResponse = zod.object({
+  "id": zod.number(),
+  "userId": zod.number(),
+  "muftiId": zod.number().nullish(),
+  "questionText": zod.string(),
+  "category": zod.string(),
+  "isAnonymous": zod.boolean(),
+  "answerText": zod.string().nullish(),
+  "answerAudioUrl": zod.string().nullish(),
+  "status": zod.enum(['pending', 'answered', 'published']),
+  "askerName": zod.string().nullish(),
+  "createdAt": zod.coerce.date(),
+  "answeredAt": zod.coerce.date().nullish()
+})
+
+
+/**
+ * @summary List published fatawa visible to all (identity hidden)
+ */
+export const ListPublicFatawaResponseItem = zod.object({
+  "id": zod.number(),
+  "questionText": zod.string(),
+  "category": zod.string(),
+  "answerText": zod.string().nullish(),
+  "answerAudioUrl": zod.string().nullish(),
+  "status": zod.enum(['published']),
+  "createdAt": zod.coerce.date(),
+  "answeredAt": zod.coerce.date().nullish()
+})
+export const ListPublicFatawaResponse = zod.array(ListPublicFatawaResponseItem)
+
+
+/**
+ * @summary List mufti assignments (admin only)
+ */
+export const AdminListMuftisResponseItem = zod.object({
+  "id": zod.number(),
+  "userId": zod.number(),
+  "assignedBy": zod.number(),
+  "assignedAt": zod.coerce.date(),
+  "isActive": zod.boolean(),
+  "user": zod.object({
+  "id": zod.number(),
+  "username": zod.string(),
+  "displayName": zod.string(),
+  "email": zod.string().email().nullish(),
+  "gender": zod.enum(['male', 'female']),
+  "country": zod.string().nullish(),
+  "bio": zod.string().nullish(),
+  "avatarUrl": zod.string().nullish(),
+  "isAdmin": zod.boolean(),
+  "isMainAdmin": zod.boolean(),
+  "isMufti": zod.boolean(),
+  "isActive": zod.boolean(),
+  "createdAt": zod.coerce.date()
+}).optional()
+})
+export const AdminListMuftisResponse = zod.array(AdminListMuftisResponseItem)
+
+
+/**
+ * @summary Assign a user as mufti (admin only)
+ */
+export const AdminAssignMuftiBody = zod.object({
+  "userId": zod.number()
+})
+
+
+/**
+ * @summary Revoke mufti status (admin only)
+ */
+export const AdminRevokeMuftiParams = zod.object({
+  "userId": zod.coerce.number()
+})
+
+
+/**
+ * @summary Admin view of all fatawa
+ */
+export const AdminListFatawaResponseItem = zod.object({
+  "id": zod.number(),
+  "userId": zod.number(),
+  "muftiId": zod.number().nullish(),
+  "questionText": zod.string(),
+  "category": zod.string(),
+  "isAnonymous": zod.boolean(),
+  "answerText": zod.string().nullish(),
+  "answerAudioUrl": zod.string().nullish(),
+  "status": zod.enum(['pending', 'answered', 'published']),
+  "askerName": zod.string().nullish(),
+  "createdAt": zod.coerce.date(),
+  "answeredAt": zod.coerce.date().nullish()
+})
+export const AdminListFatawaResponse = zod.array(AdminListFatawaResponseItem)

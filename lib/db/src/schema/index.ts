@@ -5,3 +5,4 @@ export * from "./chat";
 export * from "./meetings";
 export * from "./books";
 export * from "./tests";
+export * from "./fatawa";

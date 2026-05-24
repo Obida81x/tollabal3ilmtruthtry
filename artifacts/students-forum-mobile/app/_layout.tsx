@@ -42,8 +42,14 @@ function RootLayoutNav() {
       <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
       <Stack.Screen name="halaqah/[id]" options={{ headerShown: false }} />
       <Stack.Screen name="sessions" options={{ headerShown: false }} />
+      <Stack.Screen name="sessions/[id]" options={{ headerShown: false }} />
       <Stack.Screen name="profile/[id]" options={{ headerShown: false }} />
       <Stack.Screen name="tests/[id]" options={{ headerShown: false }} />
+      <Stack.Screen name="library/[id]" options={{ headerShown: false }} />
+      <Stack.Screen name="members" options={{ headerShown: false }} />
+      <Stack.Screen name="admin" options={{ headerShown: false }} />
+      <Stack.Screen name="forgot-password" options={{ headerShown: false, animation: "slide_from_bottom" }} />
+      <Stack.Screen name="fatawa" options={{ headerShown: false }} />
     </Stack>
   );
 }

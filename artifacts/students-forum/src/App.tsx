@@ -22,6 +22,7 @@ import TestDetailPage from "@/pages/test-detail";
 import MembersPage from "@/pages/members";
 import ProfilePage from "@/pages/profile";
 import AdminPage from "@/pages/admin";
+import FatawaPage from "@/pages/fatawa";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -52,6 +53,7 @@ function Routes() {
       <Route path="/members" component={MembersPage} />
       <Route path="/profile/:id" component={ProfilePage} />
       <Route path="/admin" component={AdminPage} />
+      <Route path="/fatawa" component={FatawaPage} />
       <Route component={NotFound} />
     </Switch>
   );

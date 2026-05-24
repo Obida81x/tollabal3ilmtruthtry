@@ -25,10 +25,18 @@ import {
   useAdminCreateBook,
   useAdminUpdateBook,
   useAdminDeleteBook,
+  useAdminListMuftis,
+  useAdminAssignMufti,
+  useAdminRevokeMufti,
+  useAdminListFatawa,
+  useAnswerFatwa,
+  usePublishFatwa,
   getAdminListUsersQueryKey,
   getGetCurrentUserQueryKey,
   getListMeetingsQueryKey,
   getListBooksQueryKey,
+  getAdminListMuftisQueryKey,
+  getAdminListFatawaQueryKey,
 } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useAuth, useRequireAuth } from "@/lib/auth";
@@ -289,6 +297,240 @@ function AdminMembers({
         })}
       </CardContent>
     </Card>
+  );
+}
+
+function AdminMuftis() {
+  const { t } = useTranslation();
+  const queryClient = useQueryClient();
+  const { data: muftis, isLoading: loadingMuftis } = useAdminListMuftis({
+    query: { queryKey: getAdminListMuftisQueryKey() },
+  });
+  const { data: allUsers, isLoading: loadingUsers } = useAdminListUsers({
+    query: { queryKey: getAdminListUsersQueryKey() },
+  });
+  const assign = useAdminAssignMufti();
+  const revoke = useAdminRevokeMufti();
+
+  const invalidate = () => {
+    queryClient.invalidateQueries({ queryKey: getAdminListMuftisQueryKey() });
+    queryClient.invalidateQueries({ queryKey: getAdminListUsersQueryKey() });
+  };
+
+  if (loadingMuftis || loadingUsers) return <Skeleton className="h-64 w-full" />;
+
+  const muftiIds = new Set((muftis ?? []).map((m: { id: number }) => m.id));
+  const users = (allUsers ?? []) as AdminUser[];
+
+  return (
+    <div className="space-y-4">
+      <div>
+        <h2 className="text-lg font-semibold" style={{ fontFamily: "var(--app-font-serif)" }}>
+          {t("admin.muftis.heading")}
+        </h2>
+        <p className="text-sm text-muted-foreground">{t("admin.muftis.subtitle")}</p>
+      </div>
+      <Card className="border-card-border">
+        <CardContent className="p-0 divide-y divide-border">
+          {users.map((u) => {
+            const isMufti = muftiIds.has(u.id);
+            return (
+              <div key={u.id} className="flex items-center gap-4 p-4" data-testid={`mufti-row-${u.id}`}>
+                <InitialsAvatar name={u.displayName} size="md" />
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="font-medium">{u.displayName}</span>
+                    <span className="text-xs text-muted-foreground">@{u.username}</span>
+                    {isMufti && (
+                      <Badge className="gap-1 bg-amber-600 hover:bg-amber-700">
+                        <Star className="h-3 w-3" /> {t("admin.muftis.isMufti")}
+                      </Badge>
+                    )}
+                    <Badge
+                      variant="outline"
+                      className={u.gender === "male" ? "border-blue-500/40 text-blue-600" : "border-pink-500/40 text-pink-600"}
+                    >
+                      {u.gender === "male" ? t("common.brother") : t("common.sister")}
+                    </Badge>
+                  </div>
+                </div>
+                <Button
+                  variant={isMufti ? "destructive" : "outline"}
+                  size="sm"
+                  className="gap-1"
+                  disabled={assign.isPending || revoke.isPending}
+                  onClick={() => {
+                    if (isMufti) {
+                      revoke.mutate({ userId: u.id }, { onSettled: invalidate });
+                    } else {
+                      assign.mutate({ data: { userId: u.id } }, { onSettled: invalidate });
+                    }
+                  }}
+                  data-testid={`button-toggle-mufti-${u.id}`}
+                >
+                  {isMufti ? (
+                    <><ShieldOff className="h-4 w-4" /> {t("admin.muftis.revoke")}</>
+                  ) : (
+                    <><ShieldCheck className="h-4 w-4" /> {t("admin.muftis.grant")}</>
+                  )}
+                </Button>
+              </div>
+            );
+          })}
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
+
+function AdminFatawaQueue() {
+  const { t } = useTranslation();
+  const queryClient = useQueryClient();
+  const { data: fatawa, isLoading } = useAdminListFatawa({
+    query: { queryKey: getAdminListFatawaQueryKey() },
+  });
+  const answer = useAnswerFatwa();
+  const publish = usePublishFatwa();
+
+  const [answeringId, setAnsweringId] = useState<number | null>(null);
+  const [draftAnswer, setDraftAnswer] = useState("");
+
+  const invalidate = () =>
+    queryClient.invalidateQueries({ queryKey: getAdminListFatawaQueryKey() });
+
+  if (isLoading) return <Skeleton className="h-64 w-full" />;
+
+  const items = (fatawa ?? []) as Array<{
+    id: number;
+    question: string;
+    status: string;
+    category?: string | null;
+    answer?: string | null;
+    createdAt: string | Date;
+    user?: { displayName: string; username: string } | null;
+  }>;
+
+  return (
+    <div className="space-y-4">
+      <div>
+        <h2 className="text-lg font-semibold" style={{ fontFamily: "var(--app-font-serif)" }}>
+          {t("admin.fatawa.heading")}
+        </h2>
+        <p className="text-sm text-muted-foreground">{t("admin.fatawa.subtitle")}</p>
+      </div>
+      {items.length === 0 ? (
+        <Card className="border-card-border">
+          <CardContent className="p-8 text-center text-muted-foreground">
+            {t("admin.fatawa.empty")}
+          </CardContent>
+        </Card>
+      ) : (
+        <div className="space-y-3">
+          {items.map((f) => (
+            <Card key={f.id} className="border-card-border" data-testid={`fatwa-admin-row-${f.id}`}>
+              <CardContent className="p-5 space-y-3">
+                <div className="flex items-start gap-3">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 flex-wrap mb-1">
+                      <Badge variant={f.status === "answered" ? "default" : "secondary"}>
+                        {f.status}
+                      </Badge>
+                      {f.category && (
+                        <Badge variant="outline" className="text-xs">{f.category}</Badge>
+                      )}
+                      {f.user && (
+                        <span className="text-xs text-muted-foreground">
+                          from @{f.user.username}
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-foreground leading-relaxed">{f.question}</p>
+                  </div>
+                </div>
+                {f.answer && (
+                  <div className="p-3 bg-primary/5 rounded-lg border border-primary/20 text-sm">
+                    <div className="text-xs text-primary font-semibold uppercase tracking-wide mb-1">
+                      {t("admin.fatawa.answerLabel")}
+                    </div>
+                    {f.answer}
+                  </div>
+                )}
+                {answeringId === f.id ? (
+                  <div className="space-y-2">
+                    <Textarea
+                      value={draftAnswer}
+                      onChange={(e) => setDraftAnswer(e.target.value)}
+                      placeholder={t("admin.fatawa.answerPlaceholder")}
+                      rows={4}
+                      data-testid={`input-fatwa-answer-${f.id}`}
+                    />
+                    <div className="flex gap-2">
+                      <Button
+                        size="sm"
+                        disabled={!draftAnswer.trim() || answer.isPending}
+                        onClick={() => {
+                          answer.mutate(
+                            { id: f.id, data: { answer: draftAnswer.trim() } },
+                            {
+                              onSuccess: () => {
+                                setAnsweringId(null);
+                                setDraftAnswer("");
+                                invalidate();
+                              },
+                            },
+                          );
+                        }}
+                        data-testid={`button-save-answer-${f.id}`}
+                      >
+                        {answer.isPending ? t("admin.fatawa.saving") : t("admin.fatawa.answer")}
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => { setAnsweringId(null); setDraftAnswer(""); }}
+                      >
+                        {t("common.cancel")}
+                      </Button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="flex gap-2">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="gap-1"
+                      onClick={() => { setAnsweringId(f.id); setDraftAnswer(f.answer ?? ""); }}
+                      data-testid={`button-answer-${f.id}`}
+                    >
+                      <Pencil className="h-4 w-4" />
+                      {f.answer ? t("common.details") : t("admin.fatawa.answer")}
+                    </Button>
+                    {f.answer && f.status !== "answered" && (
+                      <Button
+                        size="sm"
+                        className="gap-1"
+                        disabled={publish.isPending}
+                        onClick={() =>
+                          publish.mutate({ id: f.id }, { onSuccess: invalidate })
+                        }
+                        data-testid={`button-publish-fatwa-${f.id}`}
+                      >
+                        {publish.isPending ? t("admin.fatawa.publishing") : t("admin.fatawa.publish")}
+                      </Button>
+                    )}
+                    {f.status === "answered" && (
+                      <Badge className="gap-1">
+                        <ShieldCheck className="h-3 w-3" /> {t("admin.fatawa.published")}
+                      </Badge>
+                    )}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
+    </div>
   );
 }
 
@@ -998,9 +1240,15 @@ export default function AdminPage() {
           <PasswordGate onSuccess={() => setUnlocked(true)} />
         ) : (
           <Tabs defaultValue="members">
-            <TabsList className="mb-6">
+            <TabsList className="mb-6 flex-wrap h-auto gap-1">
               <TabsTrigger value="members" data-testid="tab-admin-members">
                 {t("admin.tabs.members")}
+              </TabsTrigger>
+              <TabsTrigger value="muftis" data-testid="tab-admin-muftis">
+                {t("admin.tabs.muftis")}
+              </TabsTrigger>
+              <TabsTrigger value="fatawa" data-testid="tab-admin-fatawa">
+                {t("admin.tabs.fatawa")}
               </TabsTrigger>
               <TabsTrigger value="lessons" data-testid="tab-admin-lessons">
                 {t("admin.tabs.lessons")}
@@ -1011,6 +1259,12 @@ export default function AdminPage() {
             </TabsList>
             <TabsContent value="members">
               <AdminMembers me={me} />
+            </TabsContent>
+            <TabsContent value="muftis">
+              <AdminMuftis />
+            </TabsContent>
+            <TabsContent value="fatawa">
+              <AdminFatawaQueue />
             </TabsContent>
             <TabsContent value="lessons">
               <AdminLessons />

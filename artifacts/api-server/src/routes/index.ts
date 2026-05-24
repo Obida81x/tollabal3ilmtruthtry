@@ -11,6 +11,8 @@ import testsRouter from "./tests";
 import dashboardRouter from "./dashboard";
 import storageRouter from "./storage";
 import adminRouter from "./admin";
+import fatawaRouter from "./fatawa";
+import adminMuftisRouter from "./admin-muftis";
 
 const router: IRouter = Router();
 
@@ -26,5 +28,7 @@ router.use(testsRouter);
 router.use(dashboardRouter);
 router.use(storageRouter);
 router.use(adminRouter);
+router.use(fatawaRouter);
+router.use(adminMuftisRouter);
 
 export default router;

@@ -12,6 +12,7 @@ export function serializeUser(u: User) {
     avatarUrl: u.avatarUrl,
     isAdmin: u.isAdmin,
     isMainAdmin: u.isMainAdmin,
+    isMufti: u.isMufti,
     isActive: u.isActive,
     createdAt: u.createdAt,
   };

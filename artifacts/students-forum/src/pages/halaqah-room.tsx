@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useRoute, Link } from "wouter";
-import { ArrowLeft, ArrowRight, Send } from "lucide-react";
+import { ArrowLeft, ArrowRight, Send, Mic, Square } from "lucide-react";
 import {
   useGetChatGroup,
   useListChatMessages,
@@ -18,6 +18,7 @@ import { InitialsAvatar } from "@/components/InitialsAvatar";
 import { Skeleton } from "@/components/ui/skeleton";
 import { timeAgo } from "@/lib/utils";
 import { useTranslation } from "@/lib/i18n";
+import { uploadMedia } from "@/lib/upload";
 
 export default function HalaqahRoomPage() {
   const user = useRequireAuth();
@@ -42,6 +43,11 @@ export default function HalaqahRoomPage() {
   const post = usePostChatMessage();
 
   const [content, setContent] = useState("");
+  const [isRecording, setIsRecording] = useState(false);
+  const [recordError, setRecordError] = useState<string | null>(null);
+  const [uploadingAudio, setUploadingAudio] = useState(false);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const chunksRef = useRef<Blob[]>([]);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -51,6 +57,9 @@ export default function HalaqahRoomPage() {
     });
   }, [messages]);
 
+  const invalidate = () =>
+    queryClient.invalidateQueries({ queryKey: getListChatMessagesQueryKey(groupId) });
+
   const handleSend = (e: React.FormEvent) => {
     e.preventDefault();
     if (!content.trim()) return;
@@ -59,12 +68,49 @@ export default function HalaqahRoomPage() {
       {
         onSuccess: () => {
           setContent("");
-          queryClient.invalidateQueries({
-            queryKey: getListChatMessagesQueryKey(groupId),
-          });
+          invalidate();
         },
       },
     );
+  };
+
+  const handleRecord = async () => {
+    if (isRecording) {
+      mediaRecorderRef.current?.stop();
+      return;
+    }
+    setRecordError(null);
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const mr = new MediaRecorder(stream);
+      chunksRef.current = [];
+      mr.ondataavailable = (e) => {
+        if (e.data.size > 0) chunksRef.current.push(e.data);
+      };
+      mr.onstop = async () => {
+        stream.getTracks().forEach((t) => t.stop());
+        setIsRecording(false);
+        setUploadingAudio(true);
+        try {
+          const blob = new Blob(chunksRef.current, { type: "audio/webm" });
+          const file = new File([blob], `voice-${Date.now()}.webm`, { type: "audio/webm" });
+          const result = await uploadMedia(file);
+          post.mutate(
+            { id: groupId, data: { content: t("halaqah.voiceMessage"), audioUrl: result.url } },
+            { onSuccess: invalidate },
+          );
+        } catch {
+          setRecordError(t("halaqah.recordError"));
+        } finally {
+          setUploadingAudio(false);
+        }
+      };
+      mr.start();
+      mediaRecorderRef.current = mr;
+      setIsRecording(true);
+    } catch {
+      setRecordError(t("halaqah.recordError"));
+    }
   };
 
   const BackIcon = lang === "ar" ? ArrowRight : ArrowLeft;
@@ -130,6 +176,8 @@ export default function HalaqahRoomPage() {
           {isLoading && <Skeleton className="h-20 w-full" />}
           {messages?.map((m) => {
             const mine = m.userId === user?.id;
+            const hasAudio = !!(m as { audioUrl?: string | null }).audioUrl;
+            const audioUrl = (m as { audioUrl?: string | null }).audioUrl;
             return (
               <div
                 key={m.id}
@@ -152,7 +200,16 @@ export default function HalaqahRoomPage() {
                     }`}
                     data-testid={`text-message-${m.id}`}
                   >
-                    {m.content}
+                    {hasAudio && audioUrl ? (
+                      <div className="space-y-1">
+                        <div className="text-xs opacity-70 flex items-center gap-1">
+                          <Mic className="h-3 w-3" /> {t("halaqah.voiceMessage")}
+                        </div>
+                        <audio src={audioUrl} controls className="h-8 w-48" />
+                      </div>
+                    ) : (
+                      m.content
+                    )}
                   </div>
                 </div>
               </div>
@@ -165,6 +222,10 @@ export default function HalaqahRoomPage() {
           )}
         </div>
 
+        {recordError && (
+          <p className="text-xs text-destructive mb-2">{recordError}</p>
+        )}
+
         <form onSubmit={handleSend} className="flex gap-2 pt-3 border-t border-border">
           <Input
             value={content}
@@ -172,10 +233,26 @@ export default function HalaqahRoomPage() {
             placeholder={t("halaqah.messagePlaceholder")}
             maxLength={1000}
             data-testid="input-message"
+            disabled={isRecording || uploadingAudio}
           />
           <Button
+            type="button"
+            variant={isRecording ? "destructive" : "outline"}
+            size="icon"
+            onClick={handleRecord}
+            disabled={uploadingAudio || post.isPending}
+            data-testid="button-voice"
+            title={isRecording ? t("halaqah.stopRecording") : t("halaqah.voiceMessage")}
+          >
+            {isRecording ? (
+              <Square className="h-4 w-4" />
+            ) : (
+              <Mic className="h-4 w-4" />
+            )}
+          </Button>
+          <Button
             type="submit"
-            disabled={!content.trim() || post.isPending}
+            disabled={!content.trim() || post.isPending || isRecording || uploadingAudio}
             data-testid="button-send"
             className="gap-1"
           >

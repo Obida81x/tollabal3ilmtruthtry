@@ -118,6 +118,7 @@ router.get(
         userId: r.msg.userId,
         author: serializeUser(r.author),
         content: r.msg.content,
+        audioUrl: r.msg.audioUrl,
         createdAt: r.msg.createdAt,
       })),
     );
@@ -158,12 +159,19 @@ router.post(
       res.status(403).json({ error: "This halaqah is restricted" });
       return;
     }
+    const audioUrl = (req.body as { audioUrl?: string | null }).audioUrl ?? null;
+    const textContent = (body.data as { content?: string }).content ?? "";
+    if (!textContent.trim() && !audioUrl) {
+      res.status(400).json({ error: "Message must have content or audio" });
+      return;
+    }
     const [msg] = await db
       .insert(chatMessagesTable)
       .values({
         groupId: params.data.id,
         userId,
-        content: body.data.content,
+        content: textContent,
+        audioUrl,
       })
       .returning();
     if (!msg) {
@@ -181,6 +189,7 @@ router.post(
       userId: msg.userId,
       author: author ? serializeUser(author) : null,
       content: msg.content,
+      audioUrl: msg.audioUrl,
       createdAt: msg.createdAt,
     });
   },
