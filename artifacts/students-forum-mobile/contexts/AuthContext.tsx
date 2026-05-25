@@ -4,7 +4,10 @@ import {
   getGetCurrentUserQueryKey,
 } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
-import React, { createContext, useContext } from "react";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import React, { createContext, useContext, useEffect, useState } from "react";
+
+const USER_CACHE_KEY = "@auth:user";
 
 interface User {
   id: number;
@@ -34,23 +37,61 @@ const AuthContext = createContext<AuthContextValue>({
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const queryClient = useQueryClient();
+  const [cachedUser, setCachedUser] = useState<User | null>(null);
+  const [cacheLoaded, setCacheLoaded] = useState(false);
+
+  useEffect(() => {
+    AsyncStorage.getItem(USER_CACHE_KEY)
+      .then((json) => {
+        if (json) {
+          try {
+            setCachedUser(JSON.parse(json));
+          } catch {
+          }
+        }
+      })
+      .finally(() => setCacheLoaded(true));
+  }, []);
+
   const { data, isLoading, refetch } = useGetCurrentUser({
-    query: { queryKey: getGetCurrentUserQueryKey(), retry: false, staleTime: 30_000 },
+    query: {
+      queryKey: getGetCurrentUserQueryKey(),
+      retry: false,
+      staleTime: 30_000,
+      enabled: cacheLoaded,
+    },
   });
   const logoutMutation = useLogout();
 
-  const user = (data?.user as User | null | undefined) ?? null;
+  const apiUser = (data?.user as User | null | undefined) ?? null;
+
+  useEffect(() => {
+    if (!isLoading) {
+      if (apiUser) {
+        AsyncStorage.setItem(USER_CACHE_KEY, JSON.stringify(apiUser)).catch(() => {});
+        setCachedUser(apiUser);
+      } else {
+        AsyncStorage.removeItem(USER_CACHE_KEY).catch(() => {});
+        setCachedUser(null);
+      }
+    }
+  }, [apiUser, isLoading]);
+
+  const stillWaiting = !cacheLoaded || isLoading;
+  const user = apiUser ?? (stillWaiting ? cachedUser : null);
 
   function logout() {
     logoutMutation.mutate(undefined, {
       onSettled: () => {
+        AsyncStorage.removeItem(USER_CACHE_KEY).catch(() => {});
+        setCachedUser(null);
         queryClient.invalidateQueries({ queryKey: getGetCurrentUserQueryKey() });
       },
     });
   }
 
   return (
-    <AuthContext.Provider value={{ user, isLoading, refetch, logout }}>
+    <AuthContext.Provider value={{ user, isLoading: stillWaiting, refetch, logout }}>
       {children}
     </AuthContext.Provider>
   );

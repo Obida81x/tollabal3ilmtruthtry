@@ -34,8 +34,9 @@ export default function LoginScreen() {
     login.mutate(
       { data: { username: username.trim(), password } },
       {
-        onSuccess: () => {
+        onSuccess: (user) => {
           if (Platform.OS !== "web") Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+          queryClient.setQueryData(getGetCurrentUserQueryKey(), { user });
           queryClient.invalidateQueries({ queryKey: getGetCurrentUserQueryKey() });
           router.replace("/(tabs)");
         },

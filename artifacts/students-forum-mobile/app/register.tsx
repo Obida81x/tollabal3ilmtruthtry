@@ -40,8 +40,9 @@ export default function RegisterScreen() {
     register.mutate(
       { data: { username: username.trim(), displayName: displayName.trim(), email: email.trim(), password, gender } },
       {
-        onSuccess: () => {
+        onSuccess: (user) => {
           if (Platform.OS !== "web") Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+          queryClient.setQueryData(getGetCurrentUserQueryKey(), { user });
           queryClient.invalidateQueries({ queryKey: getGetCurrentUserQueryKey() });
           router.replace("/(tabs)");
         },
