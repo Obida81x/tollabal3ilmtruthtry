@@ -67,9 +67,15 @@ server.listen(PORT, "0.0.0.0", () => {
   // Build the exact environment Metro needs, swapping PORT to METRO_PORT
   const env = { ...process.env, PORT: String(METRO_PORT) };
 
+  // Run without --web so Metro outputs a QR code for Expo Go (iOS/Android).
+  // The EXPO_PACKAGER_PROXY_URL env var makes the QR code point to the correct
+  // Replit tunnel URL so phones can connect from anywhere.
+  console.log("[dev-health] Starting Metro (all platforms + web)…");
+  console.log("[dev-health] Scan the QR code below with Expo Go to open on your phone.");
+
   const metro = spawn(
     "pnpm",
-    ["exec", "expo", "start", "--web", "--port", String(METRO_PORT)],
+    ["exec", "expo", "start", "--port", String(METRO_PORT)],
     { stdio: "inherit", env }
   );
 
