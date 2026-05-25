@@ -1,6 +1,6 @@
 kind = "web"
 previewPath = "/"
-title = "Students of Islamic Law Forum"
+title = "مجتمع طلبة العلم"
 version = "1.0.0"
 id = "artifacts/students-forum"
 router = "path"

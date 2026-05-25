@@ -1,6 +1,6 @@
 kind = "mobile"
 previewPath = "/mobile/"
-title = "Students of Islamic Law Mobile"
+title = "مجتمع طلبة العلم"
 version = "1.0.0"
 id = "artifacts/students-forum-mobile"
 router = "path"
