@@ -64,16 +64,6 @@
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
-    },
-    "updates": {
-      "url": "https://u.expo.dev/students-forum-mobile",
-      "enabled": true,
-      "fallbackToCacheTimeout": 0
-    },
-    "extra": {
-      "eas": {
-        "projectId": "students-forum-mobile"
-      }
     }
   }
 }
