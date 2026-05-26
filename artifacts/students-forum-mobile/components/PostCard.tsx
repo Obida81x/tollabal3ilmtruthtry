@@ -11,6 +11,7 @@ import { Feather } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
 import { useColors } from "@/hooks/useColors";
 import { Avatar } from "./Avatar";
+import { isArabic, rtlStyle } from "@/utils/rtl";
 
 interface PostAuthor {
   id: number;
@@ -69,7 +70,15 @@ export function PostCard({ post, onLike }: PostCardProps) {
         </View>
       </View>
 
-      <Text style={[styles.content, { color: colors.foreground }]}>{post.content}</Text>
+      <Text
+        style={[
+          styles.content,
+          { color: colors.foreground },
+          isArabic(post.content) && rtlStyle,
+        ]}
+      >
+        {post.content}
+      </Text>
 
       {!!post.mediaUrl && (
         <Image

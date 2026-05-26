@@ -10,6 +10,7 @@ import {
   RefreshControl,
   Platform,
 } from "react-native";
+import { router } from "expo-router";
 import {
   useListPosts,
   useCreatePost,
@@ -152,7 +153,12 @@ export default function FeedScreen() {
           )
         }
         renderItem={({ item }) => (
-          <PostCard post={item as any} onLike={handleLike} currentUserId={user?.id} />
+          <TouchableOpacity
+            activeOpacity={0.95}
+            onPress={() => router.push(`/post/${(item as any).id}` as any)}
+          >
+            <PostCard post={item as any} onLike={handleLike} currentUserId={user?.id} />
+          </TouchableOpacity>
         )}
       />
     </View>

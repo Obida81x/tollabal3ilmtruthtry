@@ -12,11 +12,16 @@ import {
   db,
   postsTable,
   postLikesTable,
+  postCommentsTable,
   usersTable,
 } from "@workspace/db";
 import {
   CreatePostBody,
   TogglePostLikeParams,
+  GetPostParams,
+  ListPostCommentsParams,
+  CreatePostCommentParams,
+  CreatePostCommentBody,
 } from "@workspace/api-zod";
 import { serializeUser } from "../lib/serializers";
 import { requireUser, getUserId } from "../lib/auth";
@@ -91,6 +96,20 @@ router.get("/posts", async (req, res): Promise<void> => {
   res.json(result);
 });
 
+router.get("/posts/:id", async (req, res): Promise<void> => {
+  const parsed = GetPostParams.safeParse(req.params);
+  if (!parsed.success) {
+    res.status(400).json({ error: parsed.error.message });
+    return;
+  }
+  const [post] = await fetchPostsWithMeta([parsed.data.id], getUserId(req));
+  if (!post) {
+    res.status(404).json({ error: "Post not found" });
+    return;
+  }
+  res.json(post);
+});
+
 router.post("/posts", requireUser, async (req, res): Promise<void> => {
   const parsed = CreatePostBody.safeParse(req.body);
   if (!parsed.success) {
@@ -103,7 +122,6 @@ router.post("/posts", requireUser, async (req, res): Promise<void> => {
     return;
   }
   const audioUrl = (parsed.data as Record<string, unknown>).audioUrl as string | null ?? null;
-  // Audio posts are Brothers Only
   if (audioUrl) {
     const [poster] = await db
       .select({ gender: usersTable.gender })
@@ -180,6 +198,92 @@ router.post(
       return;
     }
     res.json(full);
+  },
+);
+
+router.get("/posts/:id/comments", async (req, res): Promise<void> => {
+  const parsed = ListPostCommentsParams.safeParse(req.params);
+  if (!parsed.success) {
+    res.status(400).json({ error: parsed.error.message });
+    return;
+  }
+
+  const comments = await db
+    .select({
+      comment: postCommentsTable,
+      author: usersTable,
+    })
+    .from(postCommentsTable)
+    .innerJoin(usersTable, eq(usersTable.id, postCommentsTable.userId))
+    .where(eq(postCommentsTable.postId, parsed.data.id))
+    .orderBy(postCommentsTable.createdAt);
+
+  res.json(
+    comments.map((r) => ({
+      id: r.comment.id,
+      postId: r.comment.postId,
+      userId: r.comment.userId,
+      author: serializeUser(r.author),
+      content: r.comment.content,
+      createdAt: r.comment.createdAt,
+    })),
+  );
+});
+
+router.post(
+  "/posts/:id/comments",
+  requireUser,
+  async (req, res): Promise<void> => {
+    const paramsParsed = CreatePostCommentParams.safeParse(req.params);
+    if (!paramsParsed.success) {
+      res.status(400).json({ error: paramsParsed.error.message });
+      return;
+    }
+    const bodyParsed = CreatePostCommentBody.safeParse(req.body);
+    if (!bodyParsed.success) {
+      res.status(400).json({ error: bodyParsed.error.message });
+      return;
+    }
+    const userId = getUserId(req);
+    if (!userId) {
+      res.status(401).json({ error: "Authentication required" });
+      return;
+    }
+
+    const postId = paramsParsed.data.id;
+    const [exists] = await db
+      .select({ id: postsTable.id })
+      .from(postsTable)
+      .where(eq(postsTable.id, postId))
+      .limit(1);
+    if (!exists) {
+      res.status(404).json({ error: "Post not found" });
+      return;
+    }
+
+    const [comment] = await db
+      .insert(postCommentsTable)
+      .values({ postId, userId, content: bodyParsed.data.content })
+      .returning();
+    if (!comment) {
+      res.status(500).json({ error: "Failed to create comment" });
+      return;
+    }
+
+    const [author] = await db
+      .select()
+      .from(usersTable)
+      .where(eq(usersTable.id, userId))
+      .limit(1);
+
+    res.status(201).json({
+      id: comment.id,
+      postId: comment.postId,
+      userId: comment.userId,
+      author: serializeUser(author!),
+      content: comment.content,
+      createdAt: comment.createdAt,
+    });
   },
 );
 

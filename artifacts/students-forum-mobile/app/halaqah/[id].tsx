@@ -26,6 +26,7 @@ import { KeyboardAvoidingView as KAV } from "react-native-keyboard-controller";
 import { useColors } from "@/hooks/useColors";
 import { useAuth } from "@/contexts/AuthContext";
 import { Avatar } from "@/components/Avatar";
+import { isArabic, rtlStyle } from "@/utils/rtl";
 
 function formatTime(dateStr: string): string {
   const d = new Date(dateStr);
@@ -137,7 +138,13 @@ export default function HalaqahRoom() {
                   {!isMe && (
                     <Text style={[styles.bubbleName, { color: colors.secondary }]}>{authorName}</Text>
                   )}
-                  <Text style={[styles.bubbleText, { color: isMe ? colors.primaryForeground : colors.foreground }]}>
+                  <Text
+                    style={[
+                      styles.bubbleText,
+                      { color: isMe ? colors.primaryForeground : colors.foreground },
+                      isArabic(item.content) && rtlStyle,
+                    ]}
+                  >
                     {item.content}
                   </Text>
                   <Text style={[styles.bubbleTime, { color: isMe ? "rgba(255,255,255,0.6)" : colors.mutedForeground }]}>

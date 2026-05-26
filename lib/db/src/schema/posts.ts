@@ -52,10 +52,37 @@ export const postLikesTable = pgTable(
   }),
 );
 
+export const postCommentsTable = pgTable(
+  "post_comments",
+  {
+    id: serial("id").primaryKey(),
+    postId: integer("post_id")
+      .notNull()
+      .references(() => postsTable.id, { onDelete: "cascade" }),
+    userId: integer("user_id")
+      .notNull()
+      .references(() => usersTable.id, { onDelete: "cascade" }),
+    content: text("content").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (t) => ({
+    postIdx: index("post_comments_post_idx").on(t.postId),
+    createdIdx: index("post_comments_created_idx").on(t.createdAt),
+  }),
+);
+
 export const insertPostSchema = createInsertSchema(postsTable).omit({
   id: true,
   createdAt: true,
 });
+export const insertPostCommentSchema = createInsertSchema(
+  postCommentsTable,
+).omit({ id: true, createdAt: true });
+
 export type InsertPost = z.infer<typeof insertPostSchema>;
+export type InsertPostComment = z.infer<typeof insertPostCommentSchema>;
 export type Post = typeof postsTable.$inferSelect;
 export type PostLike = typeof postLikesTable.$inferSelect;
+export type PostComment = typeof postCommentsTable.$inferSelect;

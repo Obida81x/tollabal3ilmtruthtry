@@ -144,6 +144,23 @@ export interface CreatePostBody {
   audioUrl?: string | null;
 }
 
+export interface PostComment {
+  id: number;
+  postId: number;
+  userId: number;
+  author: User;
+  content: string;
+  createdAt: string;
+}
+
+export interface CreatePostCommentBody {
+  /**
+     * @minLength 1
+     * @maxLength 1000
+     */
+  content: string;
+}
+
 export interface Story {
   id: number;
   userId: number;

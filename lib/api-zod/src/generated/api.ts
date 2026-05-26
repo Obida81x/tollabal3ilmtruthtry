@@ -257,6 +257,41 @@ export const CreatePostBody = zod.object({
 
 
 /**
+ * @summary Get a single post with comment count
+ */
+export const GetPostParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const GetPostResponse = zod.object({
+  "id": zod.number(),
+  "userId": zod.number(),
+  "author": zod.object({
+  "id": zod.number(),
+  "username": zod.string(),
+  "displayName": zod.string(),
+  "email": zod.string().email().nullish(),
+  "gender": zod.enum(['male', 'female']),
+  "country": zod.string().nullish(),
+  "bio": zod.string().nullish(),
+  "avatarUrl": zod.string().nullish(),
+  "isAdmin": zod.boolean(),
+  "isMainAdmin": zod.boolean(),
+  "isMufti": zod.boolean(),
+  "isActive": zod.boolean(),
+  "createdAt": zod.coerce.date()
+}),
+  "content": zod.string(),
+  "imageUrl": zod.string().nullish(),
+  "videoUrl": zod.string().nullish(),
+  "audioUrl": zod.string().nullish(),
+  "likeCount": zod.number(),
+  "likedByMe": zod.boolean(),
+  "createdAt": zod.coerce.date()
+})
+
+
+/**
  * @summary Toggle like on a post
  */
 export const TogglePostLikeParams = zod.object({
@@ -288,6 +323,54 @@ export const TogglePostLikeResponse = zod.object({
   "likeCount": zod.number(),
   "likedByMe": zod.boolean(),
   "createdAt": zod.coerce.date()
+})
+
+
+/**
+ * @summary List comments on a post
+ */
+export const ListPostCommentsParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const ListPostCommentsResponseItem = zod.object({
+  "id": zod.number(),
+  "postId": zod.number(),
+  "userId": zod.number(),
+  "author": zod.object({
+  "id": zod.number(),
+  "username": zod.string(),
+  "displayName": zod.string(),
+  "email": zod.string().email().nullish(),
+  "gender": zod.enum(['male', 'female']),
+  "country": zod.string().nullish(),
+  "bio": zod.string().nullish(),
+  "avatarUrl": zod.string().nullish(),
+  "isAdmin": zod.boolean(),
+  "isMainAdmin": zod.boolean(),
+  "isMufti": zod.boolean(),
+  "isActive": zod.boolean(),
+  "createdAt": zod.coerce.date()
+}),
+  "content": zod.string(),
+  "createdAt": zod.coerce.date()
+})
+export const ListPostCommentsResponse = zod.array(ListPostCommentsResponseItem)
+
+
+/**
+ * @summary Add a comment to a post
+ */
+export const CreatePostCommentParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const createPostCommentBodyContentMax = 1000;
+
+
+
+export const CreatePostCommentBody = zod.object({
+  "content": zod.string().min(1).max(createPostCommentBodyContentMax)
 })
 
 
