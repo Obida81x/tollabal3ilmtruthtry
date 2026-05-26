@@ -3,27 +3,17 @@
   "buildCommand": "pnpm --filter @workspace/db exec tsc -b && pnpm --filter @workspace/api-zod exec tsc -b && pnpm --filter @workspace/students-forum run build",
   "outputDirectory": "artifacts/students-forum/dist",
   "framework": null,
-  "headers": [
+  "rewrites": [
     {
       "source": "/sitemap.xml",
-      "headers": [
-        { "key": "Content-Type", "value": "application/xml; charset=utf-8" }
-      ]
+      "destination": "https://tollabal3ilm-api.onrender.com/api/sitemap.xml"
     },
-    {
-      "source": "/robots.txt",
-      "headers": [
-        { "key": "Content-Type", "value": "text/plain; charset=utf-8" }
-      ]
-    }
-  ],
-  "rewrites": [
     {
       "source": "/api/:path*",
       "destination": "https://tollabal3ilm-api.onrender.com/api/:path*"
     },
     {
-      "source": "/((?!api/|sitemap\\.xml|robots\\.txt).*)",
+      "source": "/((?!api/).*)",
       "destination": "/index.html"
     }
   ]
