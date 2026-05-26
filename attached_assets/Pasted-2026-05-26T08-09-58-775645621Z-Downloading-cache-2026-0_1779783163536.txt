@@ -1,0 +1,42 @@
+2026-05-26T08:09:58.775645621Z ==> Downloading cache...
+2026-05-26T08:09:58.812530057Z ==> Cloning from https://github.com/Obida81x/tollabal3ilmtruthtry
+2026-05-26T08:10:15.8584864Z ==> Checking out commit e12e8b3ceedb71b88d816511db6998617e20cf81 in branch main
+2026-05-26T08:10:22.778118421Z ==> Downloaded 214MB in 4s. Extraction took 6s.
+2026-05-26T08:10:28.974982052Z ==> Using Node.js version 24.14.1 (default)
+2026-05-26T08:10:28.974995892Z ==> Docs on specifying a Node.js version: https://render.com/docs/node-version
+2026-05-26T08:10:29.051707375Z ==> Running build command 'pnpm install && pnpm --filter @workspace/db exec tsc -b && pnpm --filter @workspace/api-zod exec tsc -b && pnpm --filter @workspace/api-server run build'...
+2026-05-26T08:10:45.600069776Z 
+2026-05-26T08:10:45.600102406Z > @workspace/api-server@0.0.0 build /opt/render/project/src/artifacts/api-server
+2026-05-26T08:10:45.600113326Z > node ./build.mjs
+2026-05-26T08:10:45.600118917Z 
+2026-05-26T08:10:46.090391685Z 
+2026-05-26T08:10:46.090414425Z   dist/index.mjs                       2.3mb ⚠️
+2026-05-26T08:10:46.090419315Z   dist/pino-worker.mjs               153.4kb
+2026-05-26T08:10:46.090422715Z   dist/pino-file.mjs                 142.1kb
+2026-05-26T08:10:46.090426125Z   dist/pino-pretty.mjs               114.6kb
+2026-05-26T08:10:46.090429155Z   dist/thread-stream-worker.mjs        7.3kb
+2026-05-26T08:10:46.090432155Z   dist/index.mjs.map                   3.8mb
+2026-05-26T08:10:46.090435195Z   dist/pino-worker.mjs.map           256.9kb
+2026-05-26T08:10:46.090438295Z   dist/pino-file.mjs.map             229.0kb
+2026-05-26T08:10:46.090441326Z   dist/pino-pretty.mjs.map           204.0kb
+2026-05-26T08:10:46.090444606Z   dist/thread-stream-worker.mjs.map   12.0kb
+2026-05-26T08:10:46.090447556Z 
+2026-05-26T08:10:46.090451326Z ⚡ Done in 437ms
+2026-05-26T08:10:47.055240067Z ==> Uploading build...
+2026-05-26T08:11:06.77032851Z ==> Uploaded in 10.6s. Compression took 9.2s
+2026-05-26T08:11:06.858677399Z ==> Build successful 🎉
+2026-05-26T08:11:09.006055648Z ==> Deploying...
+2026-05-26T08:11:09.074242862Z ==> Setting WEB_CONCURRENCY=1 by default, based on available CPUs in the instance
+2026-05-26T08:11:46.976853892Z ==> Running 'node --enable-source-maps ./artifacts/api-server/dist/index.mjs'
+2026-05-26T08:11:50.477645483Z Warning: connect.session() MemoryStore is not
+2026-05-26T08:11:50.477676613Z designed for a production environment, as it will leak
+2026-05-26T08:11:50.477681253Z memory, and will not scale past a single process.
+2026-05-26T08:11:50.480445578Z {"level":30,"time":1779783110479,"pid":70,"hostname":"srv-d7rlbp0sfn5c73cdhnp0-hibernate-84b75755cc-jhw4t","port":10000,"msg":"Server listening"}
+2026-05-26T08:11:50.585599968Z {"level":30,"time":1779783110585,"pid":70,"hostname":"srv-d7rlbp0sfn5c73cdhnp0-hibernate-84b75755cc-jhw4t","req":{"id":1,"method":"HEAD","url":"/"},"res":{"statusCode":404},"responseTime":6,"msg":"request completed"}
+2026-05-26T08:12:00.132295603Z ==> Your service is live 🎉
+2026-05-26T08:12:00.318437341Z ==> 
+2026-05-26T08:12:00.321328475Z ==> ///////////////////////////////////////////////////////////
+2026-05-26T08:12:00.323899683Z ==> 
+2026-05-26T08:12:00.326561323Z ==> Available at your primary URL https://tollabal3ilm-api.onrender.com
+2026-05-26T08:12:00.32908367Z ==> 
+2026-05-26T08:12:00.331641108Z ==> ///////////////////////////////////////////////////////////
