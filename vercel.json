@@ -1,0 +1,6 @@
+{
+  "buildCommand": "pnpm install && pnpm --filter @workspace/db exec tsc -b && pnpm --filter @workspace/api-zod exec tsc -b && pnpm --filter @workspace/students-forum run build",
+  "outputDirectory": "artifacts/students-forum/dist",
+  "installCommand": "corepack enable pnpm && pnpm install",
+  "framework": null
+}
