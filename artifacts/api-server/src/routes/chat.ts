@@ -12,7 +12,7 @@ import {
   PostChatMessageParams,
   PostChatMessageBody,
 } from "@workspace/api-zod";
-import { z } from "zod/v4";
+import { z } from "zod";
 import { serializeUser } from "../lib/serializers";
 import { requireUser, getUserId } from "../lib/auth";
 

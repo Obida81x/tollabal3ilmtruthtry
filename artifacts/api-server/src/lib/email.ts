@@ -7,6 +7,7 @@ export type SendEmailInput = {
   subject: string;
   text: string;
   html?: string;
+  replyTo?: string;
 };
 
 function getFromAddress(): { email: string; name: string } | null {
@@ -45,6 +46,7 @@ export async function sendEmail(input: SendEmailInput): Promise<{
         personalizations: [{ to: [{ email: input.to }] }],
         from,
         subject: input.subject,
+        ...(input.replyTo ? { reply_to: { email: input.replyTo } } : {}),
         content: [
           { type: "text/plain", value: input.text },
           ...(input.html

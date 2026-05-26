@@ -13,6 +13,8 @@ import storageRouter from "./storage";
 import adminRouter from "./admin";
 import fatawaRouter from "./fatawa";
 import adminMuftisRouter from "./admin-muftis";
+import adminApplicationsRouter from "./admin-applications";
+import supportRouter from "./support";
 
 const router: IRouter = Router();
 
@@ -30,5 +32,7 @@ router.use(storageRouter);
 router.use(adminRouter);
 router.use(fatawaRouter);
 router.use(adminMuftisRouter);
+router.use(adminApplicationsRouter);
+router.use(supportRouter);
 
 export default router;

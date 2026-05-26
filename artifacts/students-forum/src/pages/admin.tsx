@@ -1219,6 +1219,167 @@ function AdminBooks() {
   );
 }
 
+// ─── Admin Applications ───────────────────────────────────────────────────────
+
+type AdminApplication = {
+  id: number;
+  userId: number;
+  fullName: string;
+  age: number;
+  contactEmail: string;
+  notes: string | null;
+  reasons: string;
+  status: "pending" | "approved" | "rejected";
+  reviewedAt: string | null;
+  createdAt: string;
+  username: string | null;
+  displayName: string | null;
+  gender: string | null;
+};
+
+function AdminApplications() {
+  const { t } = useTranslation();
+  const [apps, setApps] = useState<AdminApplication[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [reviewing, setReviewing] = useState<number | null>(null);
+  const [messages, setMessages] = useState<Record<number, string>>({});
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchApps = async () => {
+    setLoading(true);
+    try {
+      const res = await fetch("/api/admin-applications", { credentials: "include" });
+      const data = await res.json();
+      if (res.ok) setApps(data);
+      else setError(data.error ?? "Failed to load");
+    } catch { setError("Network error"); }
+    finally { setLoading(false); }
+  };
+
+  useEffect(() => { fetchApps(); }, []);
+
+  const review = async (id: number, status: "approved" | "rejected") => {
+    setReviewing(id);
+    try {
+      const res = await fetch(`/api/admin-applications/${id}`, {
+        method: "PATCH", credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status, message: messages[id] ?? undefined }),
+      });
+      const data = await res.json();
+      if (!res.ok) { setError(data.error ?? "Failed"); return; }
+      fetchApps();
+    } catch { setError("Network error"); }
+    finally { setReviewing(null); }
+  };
+
+  const statusColor = (s: string) => s === "approved" ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-200" : s === "rejected" ? "bg-rose-100 text-rose-800 dark:bg-rose-900/30 dark:text-rose-200" : "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-200";
+
+  if (loading) return <div className="py-8 text-center text-muted-foreground"><Loader2 className="animate-spin h-5 w-5 mx-auto" /></div>;
+
+  return (
+    <div className="space-y-4">
+      {error && <div className="text-sm text-destructive mb-2">{error}</div>}
+      {apps.length === 0 && (
+        <Card className="border-card-border">
+          <CardContent className="p-6 text-center text-muted-foreground">{t("admin.applications.empty")}</CardContent>
+        </Card>
+      )}
+      {apps.map((app) => (
+        <Card key={app.id} className="border-card-border">
+          <CardContent className="p-5 space-y-3">
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className="font-semibold" style={{ fontFamily: "var(--app-font-serif)" }}>{app.fullName}</span>
+                  <span className="text-sm text-muted-foreground">@{app.username}</span>
+                  <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${statusColor(app.status)}`}>
+                    {t(`admin.applications.status.${app.status}` as Parameters<typeof t>[0])}
+                  </span>
+                </div>
+                <div className="text-sm text-muted-foreground mt-0.5">Age: {app.age} · {app.contactEmail}</div>
+              </div>
+              <div className="text-xs text-muted-foreground shrink-0">{new Date(app.createdAt).toLocaleDateString()}</div>
+            </div>
+
+            <div className="bg-muted/40 rounded-md p-3 text-sm">
+              <strong className="text-xs uppercase tracking-wide text-muted-foreground block mb-1">Reasons</strong>
+              <p className="whitespace-pre-wrap">{app.reasons}</p>
+              {app.notes && <><strong className="text-xs uppercase tracking-wide text-muted-foreground block mt-2 mb-1">Notes</strong><p className="whitespace-pre-wrap">{app.notes}</p></>}
+            </div>
+
+            {app.status === "pending" && (
+              <div className="space-y-2">
+                <Input
+                  placeholder={t("admin.applications.messagePlaceholder")}
+                  value={messages[app.id] ?? ""}
+                  onChange={(e) => setMessages((m) => ({ ...m, [app.id]: e.target.value }))}
+                />
+                <div className="flex gap-2">
+                  <Button size="sm" className="bg-emerald-600 hover:bg-emerald-700 text-white" onClick={() => review(app.id, "approved")} disabled={reviewing === app.id}>
+                    {reviewing === app.id ? t("admin.applications.reviewing") : t("admin.applications.approve")}
+                  </Button>
+                  <Button size="sm" variant="outline" className="border-rose-300 text-rose-600 hover:bg-rose-50" onClick={() => review(app.id, "rejected")} disabled={reviewing === app.id}>
+                    {t("admin.applications.reject")}
+                  </Button>
+                </div>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      ))}
+    </div>
+  );
+}
+
+// ─── Admin Settings ───────────────────────────────────────────────────────────
+
+function AdminSettings() {
+  const { t } = useTranslation();
+  const [email, setEmail] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [saved, setSaved] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    fetch("/api/support/contact-email").then(r => r.json()).then(d => { if (d.email) setEmail(d.email); });
+  }, []);
+
+  const save = async (e: React.FormEvent) => {
+    e.preventDefault(); setError(null); setSaved(false); setLoading(true);
+    try {
+      const res = await fetch("/api/support/contact-email", {
+        method: "PATCH", credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: email.trim() }),
+      });
+      const data = await res.json();
+      if (!res.ok) { setError(data.error ?? "Failed"); return; }
+      setSaved(true);
+    } catch { setError("Network error"); }
+    finally { setLoading(false); }
+  };
+
+  return (
+    <Card className="border-card-border max-w-md">
+      <CardContent className="p-6">
+        <form onSubmit={save} className="space-y-4">
+          <div>
+            <Label className="text-base font-semibold">{t("admin.settings.supportEmail")}</Label>
+            <p className="text-xs text-muted-foreground mb-2">{t("admin.settings.supportEmailDesc")}</p>
+            <Input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="admin@example.com" required />
+          </div>
+          {error && <p className="text-sm text-destructive">{error}</p>}
+          {saved && <p className="text-sm text-primary">{t("admin.settings.saved")}</p>}
+          <Button type="submit" disabled={loading}>
+            {loading ? t("admin.settings.saving") : t("admin.settings.save")}
+          </Button>
+        </form>
+      </CardContent>
+    </Card>
+  );
+}
+
 export default function AdminPage() {
   const me = useRequireAuth();
   const { t } = useTranslation();
@@ -1256,6 +1417,16 @@ export default function AdminPage() {
               <TabsTrigger value="books" data-testid="tab-admin-books">
                 {t("admin.tabs.books")}
               </TabsTrigger>
+              {me.isMainAdmin && (
+                <TabsTrigger value="applications" data-testid="tab-admin-applications">
+                  {t("admin.tabs.applications")}
+                </TabsTrigger>
+              )}
+              {me.isMainAdmin && (
+                <TabsTrigger value="settings" data-testid="tab-admin-settings">
+                  {t("admin.tabs.settings")}
+                </TabsTrigger>
+              )}
             </TabsList>
             <TabsContent value="members">
               <AdminMembers me={me} />
@@ -1272,6 +1443,16 @@ export default function AdminPage() {
             <TabsContent value="books">
               <AdminBooks />
             </TabsContent>
+            {me.isMainAdmin && (
+              <TabsContent value="applications">
+                <AdminApplications />
+              </TabsContent>
+            )}
+            {me.isMainAdmin && (
+              <TabsContent value="settings">
+                <AdminSettings />
+              </TabsContent>
+            )}
           </Tabs>
         )}
       </div>

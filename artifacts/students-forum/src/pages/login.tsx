@@ -132,6 +132,15 @@ export default function LoginPage() {
                 {t("login.forgotPassword")}
               </Link>
             </p>
+            <p className="mt-2 text-sm text-center">
+              <Link
+                href="/support"
+                className="text-muted-foreground hover:text-primary hover:underline text-xs"
+                data-testid="link-to-support"
+              >
+                {t("login.loginProblems")}
+              </Link>
+            </p>
             <p className="mt-2 text-sm text-center text-muted-foreground">
               {t("login.newHere")}{" "}
               <Link href="/register" className="text-primary hover:underline" data-testid="link-to-register">

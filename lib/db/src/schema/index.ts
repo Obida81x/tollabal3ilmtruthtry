@@ -6,3 +6,6 @@ export * from "./meetings";
 export * from "./books";
 export * from "./tests";
 export * from "./fatawa";
+export * from "./admin-applications";
+export * from "./settings";
+export * from "./email-changes";

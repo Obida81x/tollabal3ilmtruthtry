@@ -5,6 +5,7 @@ import {
   db,
   usersTable,
   passwordResetsTable,
+  emailChangesTable,
 } from "@workspace/db";
 import {
   RegisterBody,
@@ -259,6 +260,125 @@ router.post("/auth/reset-password", async (req, res): Promise<void> => {
 
   // Sign the user in after a successful reset
   req.session.userId = user.id;
+  res.json({ ok: true });
+});
+
+// ─── Password Change (authenticated — sends OTP to own email) ────────────────
+
+router.post("/auth/request-password-change", async (req, res): Promise<void> => {
+  const userId = req.session.userId;
+  if (!userId) { res.status(401).json({ error: "Login required" }); return; }
+
+  const [user] = await db.select().from(usersTable).where(eq(usersTable.id, userId)).limit(1);
+  if (!user || !user.isActive) { res.status(403).json({ error: "Account not found" }); return; }
+
+  const code = generateResetCode();
+  const expiresAt = new Date(Date.now() + RESET_CODE_TTL_MINUTES * 60_000);
+  await db.insert(passwordResetsTable).values({ userId: user.id, codeHash: hashResetCode(code), expiresAt });
+
+  const body =
+    `Assalamu alaykum ${user.displayName},\n\n` +
+    `Your password change verification code is:\n\n    ${code}\n\n` +
+    `This code is valid for ${RESET_CODE_TTL_MINUTES} minutes.\n` +
+    `If you did not request this, please ignore this email.\n`;
+
+  const result = await sendEmail({ to: user.email, subject: "Password change code", text: body });
+  if (!result.delivered) logger.info({ userId, code }, "Password-change code generated (email skipped)");
+
+  res.json({ ok: true, emailConfigured: isEmailConfigured() });
+});
+
+router.post("/auth/confirm-password-change", async (req, res): Promise<void> => {
+  const userId = req.session.userId;
+  if (!userId) { res.status(401).json({ error: "Login required" }); return; }
+
+  const { code, newPassword } = req.body ?? {};
+  if (typeof code !== "string" || !code.trim()) { res.status(400).json({ error: "code is required" }); return; }
+  if (typeof newPassword !== "string" || newPassword.length < 8) { res.status(400).json({ error: "newPassword must be at least 8 characters" }); return; }
+
+  const [user] = await db.select().from(usersTable).where(eq(usersTable.id, userId)).limit(1);
+  if (!user) { res.status(404).json({ error: "Account not found" }); return; }
+
+  const codeHash = hashResetCode(code.trim());
+  const now = new Date();
+  const [resetRow] = await db
+    .select()
+    .from(passwordResetsTable)
+    .where(and(eq(passwordResetsTable.userId, userId), eq(passwordResetsTable.codeHash, codeHash), gt(passwordResetsTable.expiresAt, now), isNull(passwordResetsTable.consumedAt)))
+    .limit(1);
+
+  if (!resetRow) { res.status(400).json({ error: "Invalid or expired code." }); return; }
+
+  const { hash, salt } = hashPassword(newPassword);
+  await db.update(usersTable).set({ passwordHash: hash, passwordSalt: salt }).where(eq(usersTable.id, userId));
+  await db.update(passwordResetsTable).set({ consumedAt: now }).where(eq(passwordResetsTable.id, resetRow.id));
+
+  res.json({ ok: true });
+});
+
+// ─── Email Change (authenticated — sends OTP to old email) ───────────────────
+
+router.post("/auth/request-email-change", async (req, res): Promise<void> => {
+  const userId = req.session.userId;
+  if (!userId) { res.status(401).json({ error: "Login required" }); return; }
+
+  const { newEmail: rawNewEmail } = req.body ?? {};
+  if (typeof rawNewEmail !== "string" || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(rawNewEmail.trim()) || rawNewEmail.length > 254) {
+    res.status(400).json({ error: "A valid email address is required." }); return;
+  }
+
+  const normalizedNew = rawNewEmail.trim().toLowerCase();
+
+  const [user] = await db.select().from(usersTable).where(eq(usersTable.id, userId)).limit(1);
+  if (!user || !user.isActive) { res.status(403).json({ error: "Account not found" }); return; }
+
+  // Check new email not already taken
+  const taken = await db.select({ id: usersTable.id }).from(usersTable).where(eq(usersTable.email, normalizedNew)).limit(1);
+  if (taken.length > 0) { res.status(409).json({ error: "This email address is already in use." }); return; }
+
+  const code = generateResetCode();
+  const expiresAt = new Date(Date.now() + RESET_CODE_TTL_MINUTES * 60_000);
+  // Mark any previous pending email changes as consumed
+  await db.update(emailChangesTable).set({ consumedAt: new Date() }).where(and(eq(emailChangesTable.userId, userId), isNull(emailChangesTable.consumedAt)));
+  await db.insert(emailChangesTable).values({ userId, newEmail: normalizedNew, codeHash: hashResetCode(code), expiresAt });
+
+  const body =
+    `Assalamu alaykum ${user.displayName},\n\n` +
+    `A request was made to change your email address to: ${normalizedNew}\n\n` +
+    `Your verification code is:\n\n    ${code}\n\n` +
+    `This code is valid for ${RESET_CODE_TTL_MINUTES} minutes.\n` +
+    `If you did not request this, please ignore this email.\n`;
+
+  const result = await sendEmail({ to: user.email, subject: "Email change verification code", text: body });
+  if (!result.delivered) logger.info({ userId, code }, "Email-change code generated (email skipped)");
+
+  res.json({ ok: true, emailConfigured: isEmailConfigured() });
+});
+
+router.post("/auth/confirm-email-change", async (req, res): Promise<void> => {
+  const userId = req.session.userId;
+  if (!userId) { res.status(401).json({ error: "Login required" }); return; }
+
+  const { code: emailCode } = req.body ?? {};
+  if (typeof emailCode !== "string" || !emailCode.trim()) { res.status(400).json({ error: "code is required" }); return; }
+
+  const codeHash = hashResetCode(emailCode.trim());
+  const now = new Date();
+  const [changeRow] = await db
+    .select()
+    .from(emailChangesTable)
+    .where(and(eq(emailChangesTable.userId, userId), eq(emailChangesTable.codeHash, codeHash), gt(emailChangesTable.expiresAt, now), isNull(emailChangesTable.consumedAt)))
+    .limit(1);
+
+  if (!changeRow) { res.status(400).json({ error: "Invalid or expired code." }); return; }
+
+  // Ensure new email still free
+  const taken = await db.select({ id: usersTable.id }).from(usersTable).where(eq(usersTable.email, changeRow.newEmail)).limit(1);
+  if (taken.length > 0) { res.status(409).json({ error: "This email address has just been taken." }); return; }
+
+  await db.update(usersTable).set({ email: changeRow.newEmail }).where(eq(usersTable.id, userId));
+  await db.update(emailChangesTable).set({ consumedAt: now }).where(eq(emailChangesTable.id, changeRow.id));
+
   res.json({ ok: true });
 });
 
