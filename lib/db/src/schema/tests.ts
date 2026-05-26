@@ -7,6 +7,7 @@ import {
   varchar,
   jsonb,
   index,
+  boolean,
 } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod/v4";
@@ -17,6 +18,8 @@ export const testsTable = pgTable("tests", {
   title: varchar("title", { length: 200 }).notNull(),
   description: text("description"),
   level: varchar("level", { length: 24 }).notNull(),
+  subject: varchar("subject", { length: 32 }).notNull().default("aqeedah"),
+  createdByUserId: integer("created_by_user_id"),
   createdAt: timestamp("created_at", { withTimezone: true })
     .notNull()
     .defaultNow(),

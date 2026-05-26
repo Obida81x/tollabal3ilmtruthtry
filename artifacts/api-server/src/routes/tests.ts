@@ -1,5 +1,5 @@
 import { Router, type IRouter } from "express";
-import { asc, desc, eq, sql } from "drizzle-orm";
+import { asc, desc, eq, sql, and } from "drizzle-orm";
 import {
   db,
   testsTable,
@@ -12,13 +12,57 @@ import {
   SubmitTestAttemptParams,
   SubmitTestAttemptBody,
 } from "@workspace/api-zod";
+import { z } from "zod/v4";
 import { serializeUser } from "../lib/serializers";
 import { requireUser, getUserId } from "../lib/auth";
 
 const router: IRouter = Router();
 
-router.get("/tests", async (_req, res): Promise<void> => {
-  const tests = await db.select().from(testsTable).orderBy(asc(testsTable.id));
+const SUBJECTS = ["aqeedah", "fiqh", "hadith"] as const;
+
+const CreateTestQuestionSchema = z.object({
+  prompt: z.string().min(1),
+  options: z.array(z.string()).min(2),
+  correctIndex: z.number().int().min(0),
+  explanation: z.string().nullable().optional(),
+  order: z.number().int().optional().default(0),
+});
+
+const CreateTestBodySchema = z.object({
+  title: z.string().min(2).max(200),
+  description: z.string().nullable().optional(),
+  level: z.enum(["beginner", "intermediate", "advanced"]),
+  subject: z.enum(["aqeedah", "fiqh", "hadith"]),
+  questions: z.array(CreateTestQuestionSchema).min(1),
+});
+
+const ListTestsQuerySchema = z.object({
+  subject: z.enum(["aqeedah", "fiqh", "hadith"]).optional(),
+});
+
+async function isAdminUser(userId: number): Promise<boolean> {
+  const [u] = await db
+    .select({ isAdmin: usersTable.isAdmin, isActive: usersTable.isActive })
+    .from(usersTable)
+    .where(eq(usersTable.id, userId))
+    .limit(1);
+  return !!(u?.isAdmin && u?.isActive);
+}
+
+router.get("/tests", async (req, res): Promise<void> => {
+  const query = ListTestsQuerySchema.safeParse(req.query);
+  const subjectFilter = query.success ? query.data.subject : undefined;
+
+  const whereClause = subjectFilter
+    ? eq(testsTable.subject, subjectFilter)
+    : undefined;
+
+  const tests = await db
+    .select()
+    .from(testsTable)
+    .where(whereClause)
+    .orderBy(asc(testsTable.id));
+
   const counts = await db
     .select({
       testId: testQuestionsTable.testId,
@@ -33,10 +77,68 @@ router.get("/tests", async (_req, res): Promise<void> => {
       title: t.title,
       description: t.description,
       level: t.level as "beginner" | "intermediate" | "advanced",
+      subject: (t.subject ?? "aqeedah") as "aqeedah" | "fiqh" | "hadith",
       questionCount: countMap.get(t.id) ?? 0,
       createdAt: t.createdAt,
     })),
   );
+});
+
+router.post("/tests", requireUser, async (req, res): Promise<void> => {
+  const userId = getUserId(req);
+  if (!userId) {
+    res.status(401).json({ error: "Authentication required" });
+    return;
+  }
+  if (!(await isAdminUser(userId))) {
+    res.status(403).json({ error: "Admin or supervisor access required." });
+    return;
+  }
+  const parsed = CreateTestBodySchema.safeParse(req.body);
+  if (!parsed.success) {
+    res.status(400).json({ error: parsed.error.message });
+    return;
+  }
+  const { title, description, level, subject, questions } = parsed.data;
+
+  const [test] = await db
+    .insert(testsTable)
+    .values({
+      title,
+      description: description ?? null,
+      level,
+      subject,
+      createdByUserId: userId,
+    })
+    .returning();
+
+  if (!test) {
+    res.status(500).json({ error: "Failed to create test" });
+    return;
+  }
+
+  if (questions.length > 0) {
+    await db.insert(testQuestionsTable).values(
+      questions.map((q, idx) => ({
+        testId: test.id,
+        prompt: q.prompt,
+        options: q.options,
+        correctIndex: q.correctIndex,
+        explanation: q.explanation ?? null,
+        order: q.order ?? idx,
+      })),
+    );
+  }
+
+  res.status(201).json({
+    id: test.id,
+    title: test.title,
+    description: test.description,
+    level: test.level as "beginner" | "intermediate" | "advanced",
+    subject: (test.subject ?? "aqeedah") as "aqeedah" | "fiqh" | "hadith",
+    questionCount: questions.length,
+    createdAt: test.createdAt,
+  });
 });
 
 router.get("/tests/leaderboard", async (_req, res): Promise<void> => {
@@ -87,6 +189,7 @@ router.get("/tests/:id", async (req, res): Promise<void> => {
     title: test.title,
     description: test.description,
     level: test.level as "beginner" | "intermediate" | "advanced",
+    subject: (test.subject ?? "aqeedah") as "aqeedah" | "fiqh" | "hadith",
     questions: questions.map((q) => ({
       id: q.id,
       prompt: q.prompt,

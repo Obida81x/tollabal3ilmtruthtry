@@ -4314,3 +4314,250 @@ export function useAdminListFatawa<TData = Awaited<ReturnType<typeof adminListFa
 
 
 
+
+
+// ─── createChatGroup ─────────────────────────────────────────────────────────
+
+export const getCreateChatGroupUrl = () => `/api/chat/groups`;
+
+export const createChatGroup = async (
+  createChatGroupBody: CreateChatGroupBody,
+  options?: RequestInit,
+): Promise<ChatGroup> => {
+  return customFetch<ChatGroup>(getCreateChatGroupUrl(), {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(createChatGroupBody),
+  });
+};
+
+export const getCreateChatGroupMutationOptions = <
+  TError = ErrorType<ErrorResponse>,
+  TContext = unknown,
+>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof createChatGroup>>,
+      TError,
+      { data: BodyType<CreateChatGroupBody> },
+      TContext
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+): UseMutationOptions<
+  Awaited<ReturnType<typeof createChatGroup>>,
+  TError,
+  { data: BodyType<CreateChatGroupBody> },
+  TContext
+> => {
+  const mutationKey = ['createChatGroup'];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof createChatGroup>>,
+    { data: BodyType<CreateChatGroupBody> }
+  > = (props) => {
+    const { data } = props ?? {};
+    return createChatGroup(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type CreateChatGroupMutationResult = NonNullable<Awaited<ReturnType<typeof createChatGroup>>>;
+export type CreateChatGroupMutationBody = BodyType<CreateChatGroupBody>;
+export type CreateChatGroupMutationError = ErrorType<ErrorResponse>;
+
+export const useCreateChatGroup = <TError = ErrorType<ErrorResponse>, TContext = unknown>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof createChatGroup>>,
+      TError,
+      { data: BodyType<CreateChatGroupBody> },
+      TContext
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+): UseMutationResult<
+  Awaited<ReturnType<typeof createChatGroup>>,
+  TError,
+  { data: BodyType<CreateChatGroupBody> },
+  TContext
+> => {
+  return useMutation(getCreateChatGroupMutationOptions(options));
+};
+
+// ─── listChatGroupsWithParams ─────────────────────────────────────────────────
+
+export const listChatGroupsWithParams = async (
+  params?: ListChatGroupsParams,
+  options?: RequestInit,
+): Promise<ChatGroup[]> => {
+  const url = new URL('/api/chat/groups', 'http://localhost');
+  if (params?.gender) url.searchParams.set('gender', params.gender);
+  return customFetch<ChatGroup[]>(url.pathname + (url.search || ''), {
+    ...options,
+    method: 'GET',
+  });
+};
+
+export const getListChatGroupsWithParamsQueryKey = (params?: ListChatGroupsParams) =>
+  [`/api/chat/groups`, ...(params ? [params] : [])] as const;
+
+export const getListChatGroupsWithParamsQueryOptions = <
+  TData = Awaited<ReturnType<typeof listChatGroupsWithParams>>,
+  TError = ErrorType<unknown>,
+>(
+  params?: ListChatGroupsParams,
+  options?: { query?: UseQueryOptions<Awaited<ReturnType<typeof listChatGroupsWithParams>>, TError, TData>; request?: SecondParameter<typeof customFetch> },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+  const queryKey = queryOptions?.queryKey ?? getListChatGroupsWithParamsQueryKey(params);
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof listChatGroupsWithParams>>> = ({ signal }) =>
+    listChatGroupsWithParams(params, { signal, ...requestOptions });
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof listChatGroupsWithParams>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export function useListChatGroupsWithParams<
+  TData = Awaited<ReturnType<typeof listChatGroupsWithParams>>,
+  TError = ErrorType<unknown>,
+>(
+  params?: ListChatGroupsParams,
+  options?: { query?: UseQueryOptions<Awaited<ReturnType<typeof listChatGroupsWithParams>>, TError, TData>; request?: SecondParameter<typeof customFetch> },
+): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getListChatGroupsWithParamsQueryOptions(params, options);
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & { queryKey: QueryKey };
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+// ─── createTest ──────────────────────────────────────────────────────────────
+
+export const getCreateTestUrl = () => `/api/tests`;
+
+export const createTest = async (
+  createTestBody: CreateTestBody,
+  options?: RequestInit,
+): Promise<TestSummary> => {
+  return customFetch<TestSummary>(getCreateTestUrl(), {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(createTestBody),
+  });
+};
+
+export const getCreateTestMutationOptions = <
+  TError = ErrorType<ErrorResponse>,
+  TContext = unknown,
+>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof createTest>>,
+      TError,
+      { data: BodyType<CreateTestBody> },
+      TContext
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+): UseMutationOptions<
+  Awaited<ReturnType<typeof createTest>>,
+  TError,
+  { data: BodyType<CreateTestBody> },
+  TContext
+> => {
+  const mutationKey = ['createTest'];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof createTest>>,
+    { data: BodyType<CreateTestBody> }
+  > = (props) => {
+    const { data } = props ?? {};
+    return createTest(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type CreateTestMutationResult = NonNullable<Awaited<ReturnType<typeof createTest>>>;
+export type CreateTestMutationBody = BodyType<CreateTestBody>;
+export type CreateTestMutationError = ErrorType<ErrorResponse>;
+
+export const useCreateTest = <TError = ErrorType<ErrorResponse>, TContext = unknown>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof createTest>>,
+      TError,
+      { data: BodyType<CreateTestBody> },
+      TContext
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+): UseMutationResult<
+  Awaited<ReturnType<typeof createTest>>,
+  TError,
+  { data: BodyType<CreateTestBody> },
+  TContext
+> => {
+  return useMutation(getCreateTestMutationOptions(options));
+};
+
+// ─── listTestsWithParams ──────────────────────────────────────────────────────
+
+export const listTestsWithParams = async (
+  params?: ListTestsParams,
+  options?: RequestInit,
+): Promise<TestSummary[]> => {
+  const url = new URL('/api/tests', 'http://localhost');
+  if (params?.subject) url.searchParams.set('subject', params.subject);
+  return customFetch<TestSummary[]>(url.pathname + (url.search || ''), {
+    ...options,
+    method: 'GET',
+  });
+};
+
+export const getListTestsWithParamsQueryKey = (params?: ListTestsParams) =>
+  [`/api/tests`, ...(params ? [params] : [])] as const;
+
+export const getListTestsWithParamsQueryOptions = <
+  TData = Awaited<ReturnType<typeof listTestsWithParams>>,
+  TError = ErrorType<unknown>,
+>(
+  params?: ListTestsParams,
+  options?: { query?: UseQueryOptions<Awaited<ReturnType<typeof listTestsWithParams>>, TError, TData>; request?: SecondParameter<typeof customFetch> },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+  const queryKey = queryOptions?.queryKey ?? getListTestsWithParamsQueryKey(params);
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof listTestsWithParams>>> = ({ signal }) =>
+    listTestsWithParams(params, { signal, ...requestOptions });
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof listTestsWithParams>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export function useListTestsWithParams<
+  TData = Awaited<ReturnType<typeof listTestsWithParams>>,
+  TError = ErrorType<unknown>,
+>(
+  params?: ListTestsParams,
+  options?: { query?: UseQueryOptions<Awaited<ReturnType<typeof listTestsWithParams>>, TError, TData>; request?: SecondParameter<typeof customFetch> },
+): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getListTestsWithParamsQueryOptions(params, options);
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & { queryKey: QueryKey };
+  return { ...query, queryKey: queryOptions.queryKey };
+}

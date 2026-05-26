@@ -398,6 +398,14 @@ paths:
       operationId: listChatGroups
       tags: [chat]
       summary: List chat groups available to the current user (filtered by gender)
+      parameters:
+        - in: query
+          name: gender
+          required: false
+          schema:
+            type: string
+            enum: [male, female]
+          description: Main admin only — override gender filter to view a specific section
       responses:
         "200":
           description: Groups
@@ -406,6 +414,26 @@ paths:
               schema:
                 type: array
                 items: { $ref: "#/components/schemas/ChatGroup" }
+    post:
+      operationId: createChatGroup
+      tags: [chat]
+      summary: Create a new halaqah group (admin only)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/CreateChatGroupBody" }
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ChatGroup" }
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorResponse" }
 
   /chat/groups/{id}:
     get:
@@ -603,7 +631,14 @@ paths:
     get:
       operationId: listTests
       tags: [tests]
-      summary: Aqeedah tests on the Salafi methodology
+      summary: Tests and Competitions — multi-subject knowledge tests
+      parameters:
+        - in: query
+          name: subject
+          required: false
+          schema:
+            $ref: "#/components/schemas/TestSubject"
+          description: Filter by subject (aqeedah, fiqh, hadith)
       responses:
         "200":
           description: Tests
@@ -612,6 +647,26 @@ paths:
               schema:
                 type: array
                 items: { $ref: "#/components/schemas/TestSummary" }
+    post:
+      operationId: createTest
+      tags: [tests]
+      summary: Create a new test (admin or supervisor)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/CreateTestBody" }
+      responses:
+        "201":
+          description: Created test summary
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/TestSummary" }
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorResponse" }
 
   /tests/{id}:
     get:
@@ -1675,9 +1730,13 @@ components:
         category: { type: string }
         createdAt: { type: string, format: date-time }
 
+    TestSubject:
+      type: string
+      enum: [aqeedah, fiqh, hadith]
+
     TestSummary:
       type: object
-      required: [id, title, level, questionCount, createdAt]
+      required: [id, title, level, subject, questionCount, createdAt]
       properties:
         id: { type: integer }
         title: { type: string }
@@ -1686,6 +1745,7 @@ components:
         level:
           type: string
           enum: [beginner, intermediate, advanced]
+        subject: { $ref: "#/components/schemas/TestSubject" }
         questionCount: { type: integer }
         createdAt: { type: string, format: date-time }
 
@@ -1702,7 +1762,7 @@ components:
 
     TestDetail:
       type: object
-      required: [id, title, level, questions, createdAt]
+      required: [id, title, level, subject, questions, createdAt]
       properties:
         id: { type: integer }
         title: { type: string }
@@ -1711,10 +1771,50 @@ components:
         level:
           type: string
           enum: [beginner, intermediate, advanced]
+        subject: { $ref: "#/components/schemas/TestSubject" }
         questions:
           type: array
           items: { $ref: "#/components/schemas/TestQuestion" }
         createdAt: { type: string, format: date-time }
+
+    CreateTestQuestionBody:
+      type: object
+      required: [prompt, options, correctIndex]
+      properties:
+        prompt: { type: string, minLength: 1 }
+        options:
+          type: array
+          items: { type: string }
+          minItems: 2
+        correctIndex: { type: integer }
+        explanation:
+          type: ["string", "null"]
+        order: { type: integer }
+
+    CreateTestBody:
+      type: object
+      required: [title, level, subject, questions]
+      properties:
+        title: { type: string, minLength: 2, maxLength: 200 }
+        description:
+          type: ["string", "null"]
+        level:
+          type: string
+          enum: [beginner, intermediate, advanced]
+        subject: { $ref: "#/components/schemas/TestSubject" }
+        questions:
+          type: array
+          items: { $ref: "#/components/schemas/CreateTestQuestionBody" }
+          minItems: 1
+
+    CreateChatGroupBody:
+      type: object
+      required: [name, gender]
+      properties:
+        name: { type: string, minLength: 2, maxLength: 80 }
+        description:
+          type: ["string", "null"]
+        gender: { $ref: "#/components/schemas/Gender" }
 
     SubmitTestAttemptBody:
       type: object

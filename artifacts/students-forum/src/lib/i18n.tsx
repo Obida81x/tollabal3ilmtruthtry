@@ -64,7 +64,7 @@ const en: Dict = {
   "nav.halaqah": "Halaqah",
   "nav.sessions": "Sessions",
   "nav.library": "Library",
-  "nav.tests": "Aqeedah Tests",
+  "nav.tests": "Tests & Competitions",
   "nav.members": "Members",
 
   // Landing
@@ -84,9 +84,9 @@ const en: Dict = {
   "landing.feature.halaqahTitle": "Brothers' & sisters' halaqahs",
   "landing.feature.halaqahBody":
     "Quiet, focused chat circles for sincere companionship in seeking knowledge.",
-  "landing.feature.testsTitle": "Aqeedah tests on the Salafi creed",
+  "landing.feature.testsTitle": "Tests & Competitions in all sciences",
   "landing.feature.testsBody":
-    "Test your understanding with carefully written multiple-choice questions and explanations.",
+    "Test your understanding of Aqeedah, Fiqh, and Hadith with carefully written multiple-choice questions and explanations.",
   "landing.quote":
     "“Whoever takes a path in pursuit of knowledge, Allah will make easy for him a path to Paradise.”",
   "landing.quoteSource": "— Sahih Muslim",
@@ -222,9 +222,9 @@ const en: Dict = {
   "library.backToLibrary": "Back to library",
 
   // Tests
-  "tests.title": "Aqeedah Tests",
+  "tests.title": "Tests & Competitions",
   "tests.subtitle":
-    "Test your understanding of the creed of Ahl as-Sunnah upon the methodology of the Salaf.",
+    "Test your understanding of Aqeedah, Fiqh, and Hadith — graded questions with explanations.",
   "tests.leaderboard": "Leaderboard",
   "tests.leaderboardEmpty": "No attempts yet — be the first.",
   "tests.bestLine": "Best: {pct}% · {attempts} attempts",
@@ -240,6 +240,30 @@ const en: Dict = {
   "tests.level.beginner": "beginner",
   "tests.level.intermediate": "intermediate",
   "tests.level.advanced": "advanced",
+  "tests.subject.all": "All Subjects",
+  "tests.subject.aqeedah": "Creed (Aqeedah)",
+  "tests.subject.fiqh": "Jurisprudence (Fiqh)",
+  "tests.subject.hadith": "Hadith",
+  "tests.create.button": "Create Test",
+  "tests.create.title": "Create a New Test",
+  "tests.create.name": "Test Title",
+  "tests.create.namePlaceholder": "e.g. Fundamentals of Tawheed",
+  "tests.create.description": "Description (optional)",
+  "tests.create.subject": "Subject",
+  "tests.create.level": "Level",
+  "tests.create.questions": "Questions",
+  "tests.create.addQuestion": "Add Question",
+  "tests.create.questionPrompt": "Question {n}",
+  "tests.create.questionPlaceholder": "Enter the question text…",
+  "tests.create.answer": "Answer {n}",
+  "tests.create.correctAnswer": "Correct Answer",
+  "tests.create.explanation": "Explanation (optional)",
+  "tests.create.explanationPlaceholder": "Why is this the correct answer?",
+  "tests.create.removeQuestion": "Remove",
+  "tests.create.submit": "Create Test",
+  "tests.create.submitting": "Creating…",
+  "tests.create.success": "Test created successfully!",
+  "tests.noTests": "No tests in this subject yet.",
 
   // Members
   "members.title": "The Members",
@@ -262,11 +286,27 @@ const en: Dict = {
   "ar.sistersHalaqahs": "حلقات الأخوات",
   "ar.sittings": "المجالس العلمية",
   "ar.library": "المكتبة",
-  "ar.tests": "اختبارات العقيدة",
+  "ar.tests": "الاختبارات والمسابقات",
   "ar.members": "الأعضاء",
   "ar.whatYoullFind": "ما تجده هنا",
   "ar.majlisFull": "مَجْلِسُ طُلَّابِ العِلْمِ",
   "ar.studentsOfIlm": "مجتمع طلبة العلم",
+
+  // Halaqah create
+  "halaqah.create.button": "Create Halaqah",
+  "halaqah.create.title": "Create a New Halaqah",
+  "halaqah.create.name": "Name",
+  "halaqah.create.namePlaceholder": "e.g. Kitab at-Tawheed study circle",
+  "halaqah.create.description": "Description (optional)",
+  "halaqah.create.gender": "Gender",
+  "halaqah.create.male": "Brothers",
+  "halaqah.create.female": "Sisters",
+  "halaqah.create.submit": "Create Halaqah",
+  "halaqah.create.submitting": "Creating…",
+  "halaqah.create.success": "Halaqah created successfully!",
+  "halaqah.viewingSection": "Viewing:",
+  "halaqah.switchToBrothers": "Switch to Brothers",
+  "halaqah.switchToSisters": "Switch to Sisters",
 
   // Navigation
   "nav.admin": "Admin",
@@ -469,7 +509,7 @@ const ar: Dict = {
   "nav.halaqah": "الحلقات",
   "nav.sessions": "المجالس",
   "nav.library": "المكتبة",
-  "nav.tests": "اختبارات العقيدة",
+  "nav.tests": "الاختبارات والمسابقات",
   "nav.members": "الأعضاء",
 
   // Landing
@@ -489,9 +529,9 @@ const ar: Dict = {
   "landing.feature.halaqahTitle": "حلقات للإخوة وحلقات للأخوات",
   "landing.feature.halaqahBody":
     "مجالس نقاش هادئة وصحبة صادقة في طلب العلم.",
-  "landing.feature.testsTitle": "اختبارات في عقيدة السلف",
+  "landing.feature.testsTitle": "اختبارات ومسابقات في سائر العلوم",
   "landing.feature.testsBody":
-    "اختبر فهمك بأسئلة اختيار من متعدد مكتوبة بعناية مع شرح الإجابات.",
+    "اختبر فهمك في العقيدة والفقه والحديث بأسئلة اختيار من متعدد مكتوبة بعناية مع شرح الإجابات.",
   "landing.quote":
     "«من سلك طريقًا يلتمس فيه علمًا سهّل الله له به طريقًا إلى الجنة».",
   "landing.quoteSource": "— صحيح مسلم",
@@ -625,9 +665,9 @@ const ar: Dict = {
   "library.backToLibrary": "العودة إلى المكتبة",
 
   // Tests
-  "tests.title": "اختبارات العقيدة",
+  "tests.title": "الاختبارات والمسابقات",
   "tests.subtitle":
-    "اختبر فهمك لعقيدة أهل السنة على منهج السلف الصالح.",
+    "اختبر فهمك في العقيدة والفقه والحديث — أسئلة مصحَّحة مع شرح الإجابات.",
   "tests.leaderboard": "لوحة المتميّزين",
   "tests.leaderboardEmpty": "لا توجد محاولات بعد — كن أول المتقدّمين.",
   "tests.bestLine": "أفضل: {pct}٪ · {attempts} محاولة",
@@ -643,6 +683,30 @@ const ar: Dict = {
   "tests.level.beginner": "مبتدئ",
   "tests.level.intermediate": "متوسط",
   "tests.level.advanced": "متقدّم",
+  "tests.subject.all": "جميع المواد",
+  "tests.subject.aqeedah": "العقيدة",
+  "tests.subject.fiqh": "الفقه",
+  "tests.subject.hadith": "الحديث",
+  "tests.create.button": "إنشاء اختبار",
+  "tests.create.title": "إنشاء اختبار جديد",
+  "tests.create.name": "عنوان الاختبار",
+  "tests.create.namePlaceholder": "مثال: أصول التوحيد",
+  "tests.create.description": "الوصف (اختياري)",
+  "tests.create.subject": "المادة",
+  "tests.create.level": "المستوى",
+  "tests.create.questions": "الأسئلة",
+  "tests.create.addQuestion": "إضافة سؤال",
+  "tests.create.questionPrompt": "السؤال {n}",
+  "tests.create.questionPlaceholder": "أدخل نص السؤال…",
+  "tests.create.answer": "الخيار {n}",
+  "tests.create.correctAnswer": "الإجابة الصحيحة",
+  "tests.create.explanation": "الشرح (اختياري)",
+  "tests.create.explanationPlaceholder": "لماذا هذه الإجابة صحيحة؟",
+  "tests.create.removeQuestion": "حذف",
+  "tests.create.submit": "إنشاء الاختبار",
+  "tests.create.submitting": "جارٍ الإنشاء…",
+  "tests.create.success": "تم إنشاء الاختبار بنجاح!",
+  "tests.noTests": "لا توجد اختبارات في هذه المادة بعد.",
 
   // Members
   "members.title": "الأعضاء",
@@ -665,11 +729,27 @@ const ar: Dict = {
   "ar.sistersHalaqahs": "حلقات الأخوات",
   "ar.sittings": "المجالس العلمية",
   "ar.library": "المكتبة",
-  "ar.tests": "اختبارات العقيدة",
+  "ar.tests": "الاختبارات والمسابقات",
   "ar.members": "الأعضاء",
   "ar.whatYoullFind": "ما تجده هنا",
   "ar.majlisFull": "مَجْلِسُ طُلَّابِ العِلْمِ",
   "ar.studentsOfIlm": "مجتمع طلبة العلم",
+
+  // Halaqah create
+  "halaqah.create.button": "إنشاء حلقة",
+  "halaqah.create.title": "إنشاء حلقة جديدة",
+  "halaqah.create.name": "الاسم",
+  "halaqah.create.namePlaceholder": "مثال: حلقة كتاب التوحيد",
+  "halaqah.create.description": "الوصف (اختياري)",
+  "halaqah.create.gender": "الفئة",
+  "halaqah.create.male": "الإخوة",
+  "halaqah.create.female": "الأخوات",
+  "halaqah.create.submit": "إنشاء الحلقة",
+  "halaqah.create.submitting": "جارٍ الإنشاء…",
+  "halaqah.create.success": "تم إنشاء الحلقة بنجاح!",
+  "halaqah.viewingSection": "تصفّح قسم:",
+  "halaqah.switchToBrothers": "التحويل إلى قسم الإخوة",
+  "halaqah.switchToSisters": "التحويل إلى قسم الأخوات",
 
   // Navigation
   "nav.admin": "الإدارة",

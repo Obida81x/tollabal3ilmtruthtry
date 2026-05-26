@@ -489,15 +489,54 @@ export const TestSummaryLevel = {
   advanced: 'advanced',
 } as const;
 
+export type TestSubject = typeof TestSubject[keyof typeof TestSubject];
+
+export const TestSubject = {
+  aqeedah: 'aqeedah',
+  fiqh: 'fiqh',
+  hadith: 'hadith',
+} as const;
+
 export interface TestSummary {
   id: number;
   title: string;
   /** @nullable */
   description?: string | null;
   level: TestSummaryLevel;
+  subject: TestSubject;
   questionCount: number;
   createdAt: string;
 }
+
+export interface CreateTestQuestionBody {
+  prompt: string;
+  options: string[];
+  correctIndex: number;
+  explanation?: string | null;
+  order?: number;
+}
+
+export interface CreateTestBody {
+  title: string;
+  description?: string | null;
+  level: TestSummaryLevel;
+  subject: TestSubject;
+  questions: CreateTestQuestionBody[];
+}
+
+export interface CreateChatGroupBody {
+  name: string;
+  description?: string | null;
+  gender: Gender;
+}
+
+export type ListTestsParams = {
+  subject?: TestSubject;
+};
+
+export type ListChatGroupsParams = {
+  gender?: 'male' | 'female';
+};
 
 export interface TestQuestion {
   id: number;
@@ -505,6 +544,14 @@ export interface TestQuestion {
   options: string[];
   order: number;
 }
+
+export type TestDetailSubject = typeof TestDetailSubject[keyof typeof TestDetailSubject];
+
+export const TestDetailSubject = {
+  aqeedah: 'aqeedah',
+  fiqh: 'fiqh',
+  hadith: 'hadith',
+} as const;
 
 export type TestDetailLevel = typeof TestDetailLevel[keyof typeof TestDetailLevel];
 

@@ -12,20 +12,31 @@ import {
   PostChatMessageParams,
   PostChatMessageBody,
 } from "@workspace/api-zod";
+import { z } from "zod/v4";
 import { serializeUser } from "../lib/serializers";
 import { requireUser, getUserId } from "../lib/auth";
 
 const router: IRouter = Router();
 
-async function viewerGender(req: import("express").Request): Promise<string | null> {
+const CreateChatGroupBodySchema = z.object({
+  name: z.string().min(2).max(80),
+  description: z.string().nullable().optional(),
+  gender: z.enum(["male", "female"]),
+});
+
+async function viewerInfo(req: import("express").Request): Promise<{ gender: string | null; isAdmin: boolean; isMainAdmin: boolean }> {
   const userId = getUserId(req);
-  if (!userId) return null;
+  if (!userId) return { gender: null, isAdmin: false, isMainAdmin: false };
   const [u] = await db
-    .select({ gender: usersTable.gender })
+    .select({ gender: usersTable.gender, isAdmin: usersTable.isAdmin, isMainAdmin: usersTable.isMainAdmin })
     .from(usersTable)
     .where(eq(usersTable.id, userId))
     .limit(1);
-  return u?.gender ?? null;
+  return {
+    gender: u?.gender ?? null,
+    isAdmin: u?.isAdmin ?? false,
+    isMainAdmin: u?.isMainAdmin ?? false,
+  };
 }
 
 async function serializeGroup(g: typeof chatGroupsTable.$inferSelect) {
@@ -49,14 +60,56 @@ async function serializeGroup(g: typeof chatGroupsTable.$inferSelect) {
 }
 
 router.get("/chat/groups", async (req, res): Promise<void> => {
-  const gender = await viewerGender(req);
+  const info = await viewerInfo(req);
+
+  let effectiveGender = info.gender;
+
+  // Main admin can override the gender filter via ?gender= query param
+  if (info.isMainAdmin && req.query.gender) {
+    const g = req.query.gender as string;
+    if (g === "male" || g === "female") {
+      effectiveGender = g;
+    }
+  }
+
   const groups = await db
     .select()
     .from(chatGroupsTable)
-    .where(gender ? eq(chatGroupsTable.gender, gender) : sql`false`)
+    .where(effectiveGender ? eq(chatGroupsTable.gender, effectiveGender) : sql`false`)
     .orderBy(asc(chatGroupsTable.name));
   const result = await Promise.all(groups.map(serializeGroup));
   res.json(result);
+});
+
+router.post("/chat/groups", requireUser, async (req, res): Promise<void> => {
+  const info = await viewerInfo(req);
+  if (!info.isAdmin) {
+    res.status(403).json({ error: "Admin access required." });
+    return;
+  }
+
+  const parsed = CreateChatGroupBodySchema.safeParse(req.body);
+  if (!parsed.success) {
+    res.status(400).json({ error: parsed.error.message });
+    return;
+  }
+
+  const { name, description, gender } = parsed.data;
+  const [group] = await db
+    .insert(chatGroupsTable)
+    .values({
+      name,
+      description: description ?? null,
+      gender,
+    })
+    .returning();
+
+  if (!group) {
+    res.status(500).json({ error: "Failed to create halaqah group" });
+    return;
+  }
+
+  res.status(201).json(await serializeGroup(group));
 });
 
 router.get("/chat/groups/:id", async (req, res): Promise<void> => {
@@ -74,8 +127,9 @@ router.get("/chat/groups/:id", async (req, res): Promise<void> => {
     res.status(404).json({ error: "Group not found" });
     return;
   }
-  const gender = await viewerGender(req);
-  if (gender !== group.gender) {
+  const info = await viewerInfo(req);
+  // Main admin can view any group regardless of gender
+  if (!info.isMainAdmin && info.gender !== group.gender) {
     res.status(403).json({ error: "This halaqah is restricted" });
     return;
   }
@@ -99,8 +153,9 @@ router.get(
       res.status(404).json({ error: "Group not found" });
       return;
     }
-    const gender = await viewerGender(req);
-    if (gender !== group.gender) {
+    const info = await viewerInfo(req);
+    // Main admin can view messages from any group
+    if (!info.isMainAdmin && info.gender !== group.gender) {
       res.status(403).json({ error: "This halaqah is restricted" });
       return;
     }
@@ -154,8 +209,8 @@ router.post(
       res.status(404).json({ error: "Group not found" });
       return;
     }
-    const gender = await viewerGender(req);
-    if (gender !== group.gender) {
+    const info = await viewerInfo(req);
+    if (info.gender !== group.gender) {
       res.status(403).json({ error: "This halaqah is restricted" });
       return;
     }
