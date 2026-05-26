@@ -9,6 +9,7 @@ import {
   KeyboardAvoidingView,
   Platform,
   ActivityIndicator,
+  Image,
 } from "react-native";
 import { router, Link } from "expo-router";
 import { useRegister, getGetCurrentUserQueryKey } from "@workspace/api-client-react";
@@ -68,11 +69,13 @@ export default function RegisterScreen() {
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.logoArea}>
-          <View style={[styles.logoCircle, { backgroundColor: colors.primary }]}>
-            <Text style={styles.logoAr}>ع</Text>
-          </View>
-          <Text style={[styles.appTitle, { color: colors.primary }]}>Create Account</Text>
-          <Text style={[styles.arabicSub, { color: colors.secondary }]}>انضم إلينا</Text>
+          <Image
+            source={require("../assets/images/icon.png")}
+            style={styles.logoImg}
+            resizeMode="contain"
+          />
+          <Text style={[styles.arabicSub, { color: colors.primary, fontSize: 18, fontWeight: "700" }]}>مجتمع طلبة العلم</Text>
+          <Text style={[styles.appTitle, { color: colors.secondary }]}>Tollabal3ilm Community</Text>
         </View>
 
         <View style={[styles.card, { backgroundColor: colors.card, borderColor: colors.border }]}>
@@ -196,17 +199,9 @@ const styles = StyleSheet.create({
   root: { flex: 1 },
   scroll: { paddingHorizontal: 24 },
   logoArea: { alignItems: "center", marginBottom: 28 },
-  logoCircle: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
-    alignItems: "center",
-    justifyContent: "center",
-    marginBottom: 12,
-  },
-  logoAr: { fontSize: 28, color: "#fff", fontWeight: "700" as const },
-  appTitle: { fontSize: 20, fontWeight: "700" as const },
-  arabicSub: { fontSize: 14, marginTop: 4 },
+  logoImg: { width: 80, height: 80, marginBottom: 12, borderRadius: 16 },
+  appTitle: { fontSize: 13, fontWeight: "600" as const, marginTop: 2, letterSpacing: 0.3 },
+  arabicSub: { fontSize: 14, marginTop: 4, textAlign: "center" as const },
   card: {
     borderRadius: 16,
     borderWidth: 1,

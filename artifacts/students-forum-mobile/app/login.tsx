@@ -9,6 +9,7 @@ import {
   KeyboardAvoidingView,
   Platform,
   ActivityIndicator,
+  Image,
 } from "react-native";
 import { router, Link } from "expo-router";
 import { useLogin, getGetCurrentUserQueryKey } from "@workspace/api-client-react";
@@ -63,11 +64,13 @@ export default function LoginScreen() {
       >
         {/* Logo */}
         <View style={styles.logoArea}>
-          <View style={[styles.logoCircle, { backgroundColor: colors.primary }]}>
-            <Text style={styles.logoAr}>ع</Text>
-          </View>
-          <Text style={[styles.appTitle, { color: colors.primary }]}>Students of Islamic Law</Text>
-          <Text style={[styles.arabicSub, { color: colors.secondary }]}>طلاب الفقه الإسلامي</Text>
+          <Image
+            source={require("../assets/images/icon.png")}
+            style={styles.logoImg}
+            resizeMode="contain"
+          />
+          <Text style={[styles.arabicSub, { color: colors.primary, fontSize: 18, fontWeight: "700" }]}>مجتمع طلبة العلم</Text>
+          <Text style={[styles.appTitle, { color: colors.secondary }]}>Tollabal3ilm Community</Text>
         </View>
 
         {/* Card */}
@@ -145,17 +148,9 @@ const styles = StyleSheet.create({
   root: { flex: 1 },
   scroll: { paddingHorizontal: 24 },
   logoArea: { alignItems: "center", marginBottom: 36 },
-  logoCircle: {
-    width: 72,
-    height: 72,
-    borderRadius: 36,
-    alignItems: "center",
-    justifyContent: "center",
-    marginBottom: 14,
-  },
-  logoAr: { fontSize: 32, color: "#fff", fontWeight: "700" as const },
-  appTitle: { fontSize: 20, fontWeight: "700" as const, textAlign: "center" },
-  arabicSub: { fontSize: 14, marginTop: 4 },
+  logoImg: { width: 88, height: 88, marginBottom: 14, borderRadius: 18 },
+  appTitle: { fontSize: 13, fontWeight: "600" as const, textAlign: "center", marginTop: 2, letterSpacing: 0.3 },
+  arabicSub: { fontSize: 14, marginTop: 4, textAlign: "center" },
   card: {
     borderRadius: 16,
     borderWidth: 1,

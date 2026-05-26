@@ -16,7 +16,7 @@ type Dict = Record<string, string>;
 
 const en: Dict = {
   // App identity
-  "app.name.en": "Students of Islamic Law",
+  "app.name.en": "Tollabal3ilm Community",
   "app.tagline": "A quiet majlis for seekers of knowledge",
   "app.footer": "Students of Islamic Law Forum · A quiet majlis for seekers of knowledge",
 
@@ -265,7 +265,7 @@ const en: Dict = {
   "ar.members": "الأعضاء",
   "ar.whatYoullFind": "ما تجده هنا",
   "ar.majlisFull": "مَجْلِسُ طُلَّابِ العِلْمِ",
-  "ar.studentsOfIlm": "طلاب علم",
+  "ar.studentsOfIlm": "مجتمع طلبة العلم",
 
   // Navigation
   "nav.admin": "Admin",
@@ -420,7 +420,7 @@ const en: Dict = {
 
 const ar: Dict = {
   // App identity
-  "app.name.en": "طلاب العلم الشرعي",
+  "app.name.en": "Tollabal3ilm Community",
   "app.tagline": "مجلس هادئ لطلاب العلم",
   "app.footer": "منتدى طلاب العلم الشرعي · مجلس هادئ لطلاب العلم",
 
@@ -667,7 +667,7 @@ const ar: Dict = {
   "ar.members": "الأعضاء",
   "ar.whatYoullFind": "ما تجده هنا",
   "ar.majlisFull": "مَجْلِسُ طُلَّابِ العِلْمِ",
-  "ar.studentsOfIlm": "طلاب علم",
+  "ar.studentsOfIlm": "مجتمع طلبة العلم",
 
   // Navigation
   "nav.admin": "الإدارة",
