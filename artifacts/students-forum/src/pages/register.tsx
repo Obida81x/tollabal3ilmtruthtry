@@ -20,6 +20,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Logo } from "@/components/Logo";
 import { ArabesqueDivider, GeometricPattern } from "@/components/Pattern";
 import { LanguageToggle } from "@/components/LanguageToggle";
+import { useSEO } from "@/hooks/use-seo";
 import { useTranslation } from "@/lib/i18n";
 
 export default function RegisterPage() {
@@ -27,6 +28,13 @@ export default function RegisterPage() {
   const queryClient = useQueryClient();
   const register = useRegister();
   const { t } = useTranslation();
+  useSEO({
+    titleAr: "إنشاء حساب | مجتمع طلاب العلم الشرعي",
+    titleEn: "Register | Tollabal3ilm Community",
+    descAr: "انضم إلى مجتمع طلاب العلم الشرعي وكن جزءاً من مجلس أهل السنة والجماعة",
+    descEn: "Join the Tollabal3ilm Community and become part of the Ahl al-Sunnah scholarly council",
+    path: "/register",
+  });
   const [form, setForm] = useState({
     username: "",
     displayName: "",

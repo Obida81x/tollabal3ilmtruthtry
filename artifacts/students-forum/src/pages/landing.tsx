@@ -7,12 +7,20 @@ import { Logo } from "@/components/Logo";
 import { GeometricPattern, ArabesqueDivider } from "@/components/Pattern";
 import { LanguageToggle } from "@/components/LanguageToggle";
 import { useAuth } from "@/lib/auth";
+import { useSEO } from "@/hooks/use-seo";
 import { useTranslation } from "@/lib/i18n";
 
 export default function LandingPage() {
   const { user, isLoading } = useAuth();
   const [, setLocation] = useLocation();
   const { t, lang } = useTranslation();
+  useSEO({
+    titleAr: "مجتمع طلاب العلم الشرعي | منهج السلف الصالح",
+    titleEn: "Students of Islamic Law | Tollabal3ilm Community",
+    descAr: "منصة مجتمع طلاب العلم الشرعي على منهج السلف الصالح — فتاوى ودروس وكتب ومجالس علمية مع العلماء",
+    descEn: "Islamic knowledge community following the Salafi methodology — fatwas, lessons, books and live scholarly sessions",
+    path: "/",
+  });
 
   useEffect(() => {
     if (!isLoading && user) setLocation("/home");

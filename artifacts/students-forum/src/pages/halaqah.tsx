@@ -32,12 +32,20 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { timeAgo } from "@/lib/utils";
+import { useSEO } from "@/hooks/use-seo";
 import { useTranslation } from "@/lib/i18n";
 
 export default function HalaqahListPage() {
   useRequireAuth();
   const { user } = useAuth();
   const { t, lang } = useTranslation();
+  useSEO({
+    titleAr: "حلقات الإخوة | مجتمع طلاب العلم الشرعي",
+    titleEn: "Study Circles | Tollabal3ilm Community",
+    descAr: "حلقات دراسية هادفة للإخوة والأخوات — انضم للنقاش وتبادل المعرفة الشرعية مع أهل السنة",
+    descEn: "Dedicated study circles for brothers and sisters — join Islamic knowledge discussions and share insights",
+    path: "/halaqah",
+  });
   const queryClient = useQueryClient();
 
   // Main admin can switch gender view; others always see their own section

@@ -12,11 +12,19 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { InitialsAvatar } from "@/components/InitialsAvatar";
+import { useSEO } from "@/hooks/use-seo";
 import { useTranslation } from "@/lib/i18n";
 
 export default function MembersPage() {
   useRequireAuth();
   const { t } = useTranslation();
+  useSEO({
+    titleAr: "الأعضاء | مجتمع طلاب العلم الشرعي",
+    titleEn: "Members | Tollabal3ilm Community",
+    descAr: "إخوة وأخوات انضموا إلى مجلس طلاب العلم الشرعي من مختلف أنحاء العالم",
+    descEn: "Brothers and sisters from around the world who have joined the Tollabal3ilm Community",
+    path: "/members",
+  });
   const [filter, setFilter] = useState<"all" | "male" | "female">("all");
   const params = filter === "all" ? undefined : { gender: filter };
   const { data: users, isLoading } = useListUsers(params, {

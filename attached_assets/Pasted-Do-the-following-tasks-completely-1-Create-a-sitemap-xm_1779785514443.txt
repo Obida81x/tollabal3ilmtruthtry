@@ -1,0 +1,44 @@
+Do the following tasks completely:
+
+1. Create a sitemap.xml file served at /sitemap.xml that includes all public pages of the website.
+
+2. Create a robots.txt file served at /robots.txt with this content:
+User-agent: *
+Allow: /
+Sitemap: https://tollabal3ilmcommunity.replit.app/sitemap.xml
+
+3. Add comprehensive SEO meta tags to every page's HTML head section:
+
+Arabic title: "مجتمع طلاب العلم الشرعي | فتاوى - دروس - كتب - مجالس علمية"
+English title: "Students of Islamic Law | Fatwas, Lessons, Books, scholarly councils"
+
+Meta description Arabic: "منصة مجتمع طلاب العلم الشرعي على منهج السلف الصالح — استمع للدروس العلمية، اقرأ الكتب الشرعية، احضر المجالس المباشرة مع العلماء، واطرح أسئلتك الشرعية للمفتين"
+Meta description English: "Islamic knowledge community following the Salafi methodology — listen to scholarly lessons, read Islamic books, attend live sessions with scholars, and ask fatwa questions"
+
+Meta keywords (Arabic + English combined):
+"طلاب العلم, مجتمع إسلامي, علم شرعي, فتاوى, دروس إسلامية, كتب إسلامية, مجالس علمية, أهل السنة, منهج السلف, تعلم الإسلام, فقه, عقيدة, حديث, تفسير, مجلس طلبة العلم, طلبة العلم الشرعي, تعلم الشريعة, الفقه الإسلامي, العقيدة السلفية, السنة النبوية, Islamic knowledge, students of Islamic law, Islamic community, fatwas, Islamic lessons, Islamic books, scholarly sessions, Salafi methodology, Ahl al-Sunnah, learn Islam, fiqh, aqeedah, hadith, tafsir, Islamic scholars, online Islamic learning, Quran, Sunnah, Islamic jurisprudence"
+
+4. Add Open Graph tags for social media sharing:
+og:title, og:description, og:url, og:type=website, og:locale=ar_AR, og:locale:alternate=en_US
+og:image: use the website logo
+
+5. Add Twitter Card meta tags:
+twitter:card=summary_large_image
+twitter:title, twitter:description, twitter:image
+
+6. Add Schema.org structured data (JSON-LD) for a religious educational community:
+@type: EducationalOrganization
+name: "مجتمع طلاب العلم الشرعي"
+alternateName: "Tollabal3ilm Community"
+description: same as meta description
+url: website URL
+inLanguage: ["ar", "en"]
+keywords: all the above keywords
+
+7. Add HTML lang attribute: <html lang="ar" dir="rtl">
+
+8. Add canonical URL meta tag pointing to the main domain.
+
+9. Make sure every individual page (home, fatwas, library, sessions, community, members) has its own specific title and description in both Arabic and English for better search indexing.
+
+After implementing, push all changes to GitHub so Vercel and Render redeploy automatically.

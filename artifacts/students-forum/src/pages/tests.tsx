@@ -37,6 +37,7 @@ import {
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { InitialsAvatar } from "@/components/InitialsAvatar";
+import { useSEO } from "@/hooks/use-seo";
 import { useTranslation } from "@/lib/i18n";
 
 const levelStyles: Record<string, string> = {
@@ -73,6 +74,13 @@ export default function TestsPage() {
   useRequireAuth();
   const { user } = useAuth();
   const { t, lang } = useTranslation();
+  useSEO({
+    titleAr: "الاختبارات والمسابقات | مجتمع طلاب العلم الشرعي",
+    titleEn: "Tests & Quizzes | Tollabal3ilm Community",
+    descAr: "اختبر فهمك في العقيدة والفقه والحديث — أسئلة مصحّحة مع شرح الإجابات",
+    descEn: "Test your knowledge of aqeedah, fiqh and hadith with graded questions and explained answers",
+    path: "/tests",
+  });
   const queryClient = useQueryClient();
 
   const [activeSubject, setActiveSubject] = useState<TestSubject | "all">("all");

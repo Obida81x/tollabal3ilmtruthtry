@@ -12,12 +12,20 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { PostCard } from "@/components/PostCard";
 import { formatDateTime } from "@/lib/utils";
+import { useSEO } from "@/hooks/use-seo";
 import { useTranslation } from "@/lib/i18n";
 
 export default function HomePage() {
   useRequireAuth();
   const { user } = useAuth();
   const { t, lang } = useTranslation();
+  useSEO({
+    titleAr: "اللوحة الرئيسية | مجتمع طلاب العلم الشرعي",
+    titleEn: "Dashboard | Tollabal3ilm Community",
+    descAr: "نظرة عامة على أحدث الفوائد والمجالس وإحصائيات مجتمع طلاب العلم الشرعي",
+    descEn: "Overview of the latest benefits, scholarly sessions and community statistics",
+    path: "/home",
+  });
   const { data, isLoading } = useGetDashboardSummary({
     query: { queryKey: getGetDashboardSummaryQueryKey() },
   });

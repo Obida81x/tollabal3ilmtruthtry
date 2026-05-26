@@ -12,11 +12,19 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { useSEO } from "@/hooks/use-seo";
 import { useTranslation } from "@/lib/i18n";
 
 export default function LibraryPage() {
   useRequireAuth();
   const { t } = useTranslation();
+  useSEO({
+    titleAr: "المكتبة الإسلامية | مجتمع طلاب العلم الشرعي",
+    titleEn: "Islamic Library | Tollabal3ilm Community",
+    descAr: "كتب أصيلة في العقيدة والحديث والفقه والتفسير — اقرأ وحمّل المراجع الإسلامية الموثوقة",
+    descEn: "Authentic books in aqeedah, hadith, fiqh and tafsir — read and download trusted Islamic references",
+    path: "/library",
+  });
   const { data: books, isLoading } = useListBooks(undefined, {
     query: { queryKey: getListBooksQueryKey() },
   });

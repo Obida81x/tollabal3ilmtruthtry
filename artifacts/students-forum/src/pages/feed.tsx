@@ -16,6 +16,7 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { InitialsAvatar } from "@/components/InitialsAvatar";
 import { MediaUploadButton } from "@/components/MediaUploadButton";
+import { useSEO } from "@/hooks/use-seo";
 import { useTranslation } from "@/lib/i18n";
 import type { UploadResult } from "@/lib/upload";
 
@@ -23,6 +24,13 @@ export default function FeedPage() {
   useRequireAuth();
   const { user } = useAuth();
   const { t } = useTranslation();
+  useSEO({
+    titleAr: "الفوائد | مجتمع طلاب العلم الشرعي",
+    titleEn: "Benefits Feed | Tollabal3ilm Community",
+    descAr: "فوائد علمية من أعضاء مجلس طلاب العلم — شارك فائدة أو سؤالاً لتعم الفائدة على الإخوة والأخوات",
+    descEn: "Scholarly benefits shared by members — share knowledge, a hadith or a question for the community",
+    path: "/feed",
+  });
   const queryClient = useQueryClient();
   const { data: posts, isLoading } = useListPosts({
     query: { queryKey: getListPostsQueryKey() },
