@@ -23,6 +23,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { MessageCircleQuestion, CheckCircle2, Clock, Eye } from "lucide-react";
+import { useSEO } from "@/hooks/use-seo";
 import { useTranslation } from "@/lib/i18n";
 import { timeAgo } from "@/lib/utils";
 
@@ -36,6 +37,13 @@ const STATUS_META: Record<string, { label: string; icon: React.ElementType; vari
 export default function FatawaPage() {
   const user = useRequireAuth();
   const { t } = useTranslation();
+  useSEO({
+    titleAr: "الفتاوى الشرعية | مجتمع طلاب العلم الشرعي",
+    titleEn: "Islamic Fatwas | Tollabal3ilm Community",
+    descAr: "اطرح أسئلتك الشرعية للمفتين في الفقه والعقيدة والحديث واحصل على إجابات موثوقة",
+    descEn: "Submit your Islamic law questions to qualified muftis on matters of fiqh, aqeedah and hadith",
+    path: "/fatawa",
+  });
   const queryClient = useQueryClient();
   const { data: fatawa, isLoading } = useListFatawa({
     query: { queryKey: getListFatawaQueryKey() },

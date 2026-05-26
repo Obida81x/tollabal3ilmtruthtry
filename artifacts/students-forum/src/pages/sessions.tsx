@@ -29,6 +29,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { formatDateTime } from "@/lib/utils";
+import { useSEO } from "@/hooks/use-seo";
 import { useTranslation } from "@/lib/i18n";
 
 type Meeting = {
@@ -295,6 +296,13 @@ function CreateLiveBroadcastDialog() {
 export default function SessionsPage() {
   useRequireAuth();
   const { t } = useTranslation();
+  useSEO({
+    titleAr: "المجالس العلمية | مجتمع طلاب العلم الشرعي",
+    titleEn: "Scholarly Sessions | Tollabal3ilm Community",
+    descAr: "حلقات علمية مباشرة ومسجلة من العلماء وطلاب العلم — استمع وشارك في المجالس العلمية",
+    descEn: "Live and recorded scholarly sessions from scholars and students of Islamic knowledge",
+    path: "/sessions",
+  });
   const { user } = useAuth();
   const live = useListMeetings(
     { kind: "live" },

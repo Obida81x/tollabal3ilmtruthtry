@@ -12,6 +12,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Logo } from "@/components/Logo";
 import { ArabesqueDivider, GeometricPattern } from "@/components/Pattern";
 import { LanguageToggle } from "@/components/LanguageToggle";
+import { useSEO } from "@/hooks/use-seo";
 import { useTranslation } from "@/lib/i18n";
 
 export default function LoginPage() {
@@ -19,6 +20,13 @@ export default function LoginPage() {
   const queryClient = useQueryClient();
   const login = useLogin();
   const { t } = useTranslation();
+  useSEO({
+    titleAr: "تسجيل الدخول | مجتمع طلاب العلم الشرعي",
+    titleEn: "Login | Tollabal3ilm Community",
+    descAr: "سجّل دخولك إلى مجتمع طلاب العلم الشرعي للوصول إلى الفوائد والدروس والمجالس العلمية",
+    descEn: "Sign in to Tollabal3ilm Community to access benefits, lessons, and scholarly sessions",
+    path: "/login",
+  });
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [rememberMe, setRememberMe] = useState(true);
