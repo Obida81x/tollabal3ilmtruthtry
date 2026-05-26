@@ -1,4 +1,4 @@
-import { type ReactNode } from "react";
+import { type ReactNode, useState } from "react";
 import { Link, useLocation } from "wouter";
 import {
   Home,
@@ -12,6 +12,9 @@ import {
   UserCircle,
   Shield,
   Scale,
+  Menu,
+  X,
+  ChevronRight,
 } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { useLogout, getGetCurrentUserQueryKey } from "@workspace/api-client-react";
@@ -30,6 +33,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
   const queryClient = useQueryClient();
   const logout = useLogout();
   const { t } = useTranslation();
+  const [moreOpen, setMoreOpen] = useState(false);
 
   const navItems = [
     { path: "/home", labelKey: "nav.dashboard", icon: Home, testId: "link-nav-home" },
@@ -45,18 +49,28 @@ export function AppLayout({ children }: { children: ReactNode }) {
       : []),
   ];
 
+  // First 4 items pinned in the bottom bar; rest go into the "More" sheet
+  const pinnedNav = navItems.slice(0, 4);
+  const moreNav = navItems.slice(4);
+
   const handleLogout = () => {
     logout.mutate(undefined, {
       onSuccess: () => {
         queryClient.invalidateQueries({ queryKey: getGetCurrentUserQueryKey() });
+        setMoreOpen(false);
         setLocation("/");
       },
     });
   };
 
+  const isMoreActive = moreNav.some(
+    (item) => location === item.path || location.startsWith(item.path + "/"),
+  );
+
   return (
     <div className="min-h-screen bg-background text-foreground">
       <div className="flex min-h-screen">
+        {/* ── Desktop sidebar ─────────────────────────────────────── */}
         <aside className="hidden lg:flex w-72 flex-col border-r border-border bg-sidebar text-sidebar-foreground relative overflow-hidden">
           <div className="absolute inset-0 pointer-events-none">
             <GeometricPattern opacity={0.05} />
@@ -67,39 +81,44 @@ export function AppLayout({ children }: { children: ReactNode }) {
             </Link>
             <LanguageToggle />
           </div>
-          <nav className="relative flex-1 px-3 py-4 space-y-1">
+          <nav className="relative flex-1 px-3 py-4 space-y-1 overflow-y-auto">
             {navItems.map((item) => {
               const Icon = item.icon;
               const active = location === item.path || location.startsWith(item.path + "/");
               return (
-                <Link key={item.path} href={item.path} data-testid={item.testId}
-                    className={cn(
-                      "flex items-center gap-3 px-3 py-2.5 rounded-md text-sm transition-colors",
-                      active
-                        ? "bg-primary text-primary-foreground shadow-sm"
-                        : "text-sidebar-foreground hover:bg-sidebar-accent",
-                    )}>
-                    <Icon className="h-4 w-4" />
-                    <span>{t(item.labelKey)}</span>
-                  </Link>
+                <Link
+                  key={item.path}
+                  href={item.path}
+                  data-testid={item.testId}
+                  className={cn(
+                    "flex items-center gap-3 px-3 py-2.5 rounded-md text-sm transition-colors",
+                    active
+                      ? "bg-primary text-primary-foreground shadow-sm"
+                      : "text-sidebar-foreground hover:bg-sidebar-accent",
+                  )}
+                >
+                  <Icon className="h-4 w-4" />
+                  <span>{t(item.labelKey)}</span>
+                </Link>
               );
             })}
           </nav>
           <div className="relative border-t border-sidebar-border p-3">
             {user ? (
               <div className="space-y-2">
-                <Link href={`/profile/${user.id}`} data-testid="link-current-profile"
-                    className="flex items-center gap-3 px-2 py-2 rounded-md hover:bg-sidebar-accent transition-colors">
-                    <InitialsAvatar name={user.displayName} size="md" testId="avatar-current" />
-                    <div className="flex-1 min-w-0">
-                      <div className="truncate text-sm font-medium" data-testid="text-current-name">
-                        {user.displayName}
-                      </div>
-                      <div className="truncate text-xs text-muted-foreground">
-                        @{user.username}
-                      </div>
+                <Link
+                  href={`/profile/${user.id}`}
+                  data-testid="link-current-profile"
+                  className="flex items-center gap-3 px-2 py-2 rounded-md hover:bg-sidebar-accent transition-colors"
+                >
+                  <InitialsAvatar name={user.displayName} size="md" testId="avatar-current" />
+                  <div className="flex-1 min-w-0">
+                    <div className="truncate text-sm font-medium" data-testid="text-current-name">
+                      {user.displayName}
                     </div>
-                  </Link>
+                    <div className="truncate text-xs text-muted-foreground">@{user.username}</div>
+                  </div>
+                </Link>
                 <Button
                   variant="ghost"
                   size="sm"
@@ -125,41 +144,137 @@ export function AppLayout({ children }: { children: ReactNode }) {
           </div>
         </aside>
 
+        {/* ── Mobile + content column ──────────────────────────────── */}
         <div className="flex-1 flex flex-col min-w-0">
+          {/* Mobile top header */}
           <header className="lg:hidden flex items-center justify-between border-b border-border px-4 py-3 bg-card">
-            <Link href={user ? "/home" : "/"}><Logo size="sm" showWordmark={false} /></Link>
+            <Link href={user ? "/home" : "/"}>
+              <Logo size="sm" showWordmark={false} />
+            </Link>
             <div className="flex items-center gap-2">
               <LanguageToggle />
               {user ? (
                 <Link href={`/profile/${user.id}`} data-testid="link-mobile-profile">
-                    <InitialsAvatar name={user.displayName} size="sm" />
-                  </Link>
+                  <InitialsAvatar name={user.displayName} size="sm" />
+                </Link>
               ) : (
                 <>
-                  <Button asChild size="sm" variant="ghost"><Link href="/login">{t("common.signIn")}</Link></Button>
-                  <Button asChild size="sm"><Link href="/register">{t("common.join")}</Link></Button>
+                  <Button asChild size="sm" variant="ghost">
+                    <Link href="/login">{t("common.signIn")}</Link>
+                  </Button>
+                  <Button asChild size="sm">
+                    <Link href="/register">{t("common.join")}</Link>
+                  </Button>
                 </>
               )}
             </div>
           </header>
 
-          {/* Mobile bottom nav */}
+          {/* Mobile bottom tab bar */}
           <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-card border-t border-border flex justify-around py-2">
-            {navItems.slice(0, 5).map((item) => {
+            {pinnedNav.map((item) => {
               const Icon = item.icon;
               const active = location === item.path || location.startsWith(item.path + "/");
               return (
-                <Link key={item.path} href={item.path} data-testid={`mobile-${item.testId}`}
-                    className={cn(
-                      "flex flex-col items-center gap-0.5 px-2 py-1 text-[10px]",
-                      active ? "text-primary" : "text-muted-foreground",
-                    )}>
-                    <Icon className="h-5 w-5" />
-                    <span>{t(item.labelKey)}</span>
-                  </Link>
+                <Link
+                  key={item.path}
+                  href={item.path}
+                  data-testid={`mobile-${item.testId}`}
+                  onClick={() => setMoreOpen(false)}
+                  className={cn(
+                    "flex flex-col items-center gap-0.5 px-3 py-1 text-[10px]",
+                    active ? "text-primary" : "text-muted-foreground",
+                  )}
+                >
+                  <Icon className="h-5 w-5" />
+                  <span>{t(item.labelKey)}</span>
+                </Link>
               );
             })}
+
+            {/* "More" tab */}
+            <button
+              onClick={() => setMoreOpen((v) => !v)}
+              data-testid="mobile-nav-more"
+              className={cn(
+                "flex flex-col items-center gap-0.5 px-3 py-1 text-[10px] transition-colors",
+                moreOpen || isMoreActive ? "text-primary" : "text-muted-foreground",
+              )}
+            >
+              {moreOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+              <span>{t("common.more")}</span>
+            </button>
           </nav>
+
+          {/* "More" slide-up sheet */}
+          {moreOpen && (
+            <>
+              {/* Backdrop */}
+              <div
+                className="lg:hidden fixed inset-0 z-30 bg-black/40"
+                onClick={() => setMoreOpen(false)}
+              />
+              {/* Sheet */}
+              <div className="lg:hidden fixed bottom-[57px] left-0 right-0 z-40 bg-card border-t border-border rounded-t-2xl shadow-xl animate-in slide-in-from-bottom-4 duration-200">
+                {/* Handle */}
+                <div className="flex justify-center pt-3 pb-1">
+                  <div className="w-10 h-1 rounded-full bg-border" />
+                </div>
+
+                {/* User info */}
+                {user && (
+                  <div className="px-4 py-3 border-b border-border flex items-center gap-3">
+                    <InitialsAvatar name={user.displayName} size="md" />
+                    <div className="flex-1 min-w-0">
+                      <div className="font-medium text-sm truncate">{user.displayName}</div>
+                      <div className="text-xs text-muted-foreground truncate">@{user.username}</div>
+                    </div>
+                  </div>
+                )}
+
+                {/* More nav items */}
+                <nav className="px-2 py-2 space-y-0.5">
+                  {moreNav.map((item) => {
+                    const Icon = item.icon;
+                    const active = location === item.path || location.startsWith(item.path + "/");
+                    return (
+                      <Link
+                        key={item.path}
+                        href={item.path}
+                        data-testid={`mobile-more-${item.testId}`}
+                        onClick={() => setMoreOpen(false)}
+                        className={cn(
+                          "flex items-center gap-3 px-3 py-3 rounded-xl text-sm transition-colors",
+                          active
+                            ? "bg-primary/10 text-primary font-medium"
+                            : "hover:bg-accent text-foreground",
+                        )}
+                      >
+                        <Icon className="h-5 w-5 shrink-0" />
+                        <span className="flex-1">{t(item.labelKey)}</span>
+                        {active && <ChevronRight className="h-4 w-4 text-primary" />}
+                      </Link>
+                    );
+                  })}
+                </nav>
+
+                {/* Logout */}
+                {user && (
+                  <div className="px-2 pb-4 pt-1 border-t border-border mt-1">
+                    <button
+                      onClick={handleLogout}
+                      disabled={logout.isPending}
+                      data-testid="button-mobile-logout"
+                      className="flex items-center gap-3 w-full px-3 py-3 rounded-xl text-sm text-destructive hover:bg-destructive/10 transition-colors"
+                    >
+                      <LogOut className="h-5 w-5 shrink-0" />
+                      <span>{t("common.signOut")}</span>
+                    </button>
+                  </div>
+                )}
+              </div>
+            </>
+          )}
 
           <main className="flex-1 pb-20 lg:pb-0">{children}</main>
 

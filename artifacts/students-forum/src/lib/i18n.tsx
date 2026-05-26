@@ -23,6 +23,7 @@ const en: Dict = {
   // Common
   "common.signIn": "Sign in",
   "common.signOut": "Sign out",
+  "common.more": "More",
   "common.signingIn": "Signing in…",
   "common.createAccount": "Create account",
   "common.creatingAccount": "Creating account…",
@@ -427,6 +428,7 @@ const ar: Dict = {
   // Common
   "common.signIn": "تسجيل الدخول",
   "common.signOut": "تسجيل الخروج",
+  "common.more": "المزيد",
   "common.signingIn": "جارٍ تسجيل الدخول…",
   "common.createAccount": "إنشاء حساب",
   "common.creatingAccount": "جارٍ إنشاء الحساب…",
