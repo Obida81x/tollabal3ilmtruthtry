@@ -5,4 +5,16 @@ outputs = []
 id = "RorFhAZUSSZwtoh1nbdp1"
 uri = "file://artifacts/students-forum-mobile/assets/images/icon.png"
 type = "image"
-title = "tollabal3ilm-logo"
+title = "generated_image"
+
+[[generated]]
+id = "0yI5kAH1ywT1C87Wt_6lU"
+uri = "file://artifacts/students-forum-mobile/assets/images/adaptive-icon.png"
+type = "image"
+title = "generated_image"
+
+[[generated]]
+id = "6RTMhUVUrpcmEn6J9qRs3"
+uri = "file://artifacts/students-forum-mobile/assets/images/splash.png"
+type = "image"
+title = "generated_image"
