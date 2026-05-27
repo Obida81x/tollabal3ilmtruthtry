@@ -1,10 +1,13 @@
-import express, { type Express } from "express";
+import express, { type Express, type Request, type Response, type NextFunction } from "express";
 import cors from "cors";
 import session from "express-session";
 import helmet from "helmet";
 import pinoHttp from "pino-http";
+import crypto from "node:crypto";
 import router from "./routes";
 import { logger } from "./lib/logger";
+import { db, userTokensTable } from "@workspace/db";
+import { and, eq, gt } from "drizzle-orm";
 
 const app: Express = express();
 
@@ -62,6 +65,32 @@ app.use(
     },
   }),
 );
+
+async function bearerTokenMiddleware(req: Request, _res: Response, next: NextFunction): Promise<void> {
+  const authHeader = req.headers.authorization;
+  if (authHeader && authHeader.startsWith("Bearer ")) {
+    const token = authHeader.slice(7).trim();
+    if (token) {
+      const tokenHash = crypto.createHash("sha256").update(token).digest("hex");
+      const [row] = await db
+        .select({ userId: userTokensTable.userId })
+        .from(userTokensTable)
+        .where(
+          and(
+            eq(userTokensTable.tokenHash, tokenHash),
+            gt(userTokensTable.expiresAt, new Date()),
+          ),
+        )
+        .limit(1);
+      if (row) {
+        req.userId = row.userId;
+      }
+    }
+  }
+  next();
+}
+
+app.use(bearerTokenMiddleware);
 
 app.use("/api", router);
 

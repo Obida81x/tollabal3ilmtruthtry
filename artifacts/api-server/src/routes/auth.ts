@@ -4,6 +4,7 @@ import { and, eq, gt, isNull } from "drizzle-orm";
 import {
   db,
   usersTable,
+  userTokensTable,
   passwordResetsTable,
   emailChangesTable,
 } from "@workspace/db";
@@ -13,10 +14,20 @@ import {
   ForgotPasswordBody,
   ResetPasswordBody,
 } from "@workspace/api-zod";
-import { hashPassword, verifyPassword } from "../lib/auth";
+import { hashPassword, verifyPassword, generateToken, hashToken, getUserId } from "../lib/auth";
 import { serializeUser } from "../lib/serializers";
 import { sendEmail, isEmailConfigured } from "../lib/email";
 import { logger } from "../lib/logger";
+
+const TOKEN_TTL_DAYS = 90;
+
+async function createUserToken(userId: number): Promise<string> {
+  const token = generateToken();
+  const tokenHash = hashToken(token);
+  const expiresAt = new Date(Date.now() + TOKEN_TTL_DAYS * 24 * 60 * 60 * 1000);
+  await db.insert(userTokensTable).values({ userId, tokenHash, expiresAt });
+  return token;
+}
 
 const router: IRouter = Router();
 
@@ -91,7 +102,8 @@ router.post("/auth/register", async (req, res): Promise<void> => {
   }
 
   req.session.userId = user.id;
-  res.status(201).json(serializeUser(user));
+  const token = await createUserToken(user.id);
+  res.status(201).json({ ...serializeUser(user), token });
 });
 
 router.post("/auth/login", async (req, res): Promise<void> => {
@@ -127,10 +139,19 @@ router.post("/auth/login", async (req, res): Promise<void> => {
     (req.session.cookie as Record<string, unknown>).maxAge = undefined;
     (req.session.cookie as Record<string, unknown>).expires = undefined;
   }
-  res.json(serializeUser(user));
+  const token = await createUserToken(user.id);
+  res.json({ ...serializeUser(user), token });
 });
 
-router.post("/auth/logout", (req, res): void => {
+router.post("/auth/logout", async (req, res): Promise<void> => {
+  const authHeader = req.headers.authorization;
+  if (authHeader && authHeader.startsWith("Bearer ")) {
+    const token = authHeader.slice(7).trim();
+    if (token) {
+      const tokenHash = hashToken(token);
+      await db.delete(userTokensTable).where(eq(userTokensTable.tokenHash, tokenHash)).catch(() => {});
+    }
+  }
   req.session.destroy(() => {
     res.clearCookie("sid");
     res.status(204).end();
@@ -138,7 +159,7 @@ router.post("/auth/logout", (req, res): void => {
 });
 
 router.get("/auth/me", async (req, res): Promise<void> => {
-  const userId = req.session.userId;
+  const userId = getUserId(req);
   if (!userId) {
     res.json({ user: null });
     return;
@@ -260,7 +281,8 @@ router.post("/auth/reset-password", async (req, res): Promise<void> => {
 
   // Sign the user in after a successful reset
   req.session.userId = user.id;
-  res.json({ ok: true });
+  const token = await createUserToken(user.id);
+  res.json({ ok: true, token });
 });
 
 // ─── Password Change (authenticated — sends OTP to own email) ────────────────

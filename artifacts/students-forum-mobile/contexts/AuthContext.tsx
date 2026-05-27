@@ -6,6 +6,7 @@ import {
 import { useQueryClient } from "@tanstack/react-query";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import React, { createContext, useContext, useEffect, useState } from "react";
+import { clearAuthToken } from "@/lib/tokenStorage";
 
 const USER_CACHE_KEY = "@auth:user";
 
@@ -84,6 +85,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     logoutMutation.mutate(undefined, {
       onSettled: () => {
         AsyncStorage.removeItem(USER_CACHE_KEY).catch(() => {});
+        clearAuthToken().catch(() => {});
         setCachedUser(null);
         queryClient.invalidateQueries({ queryKey: getGetCurrentUserQueryKey() });
       },

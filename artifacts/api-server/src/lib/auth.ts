@@ -24,8 +24,22 @@ export function verifyPassword(
   return crypto.timingSafeEqual(a, b);
 }
 
+export function generateToken(): string {
+  return crypto.randomBytes(32).toString("hex");
+}
+
+export function hashToken(token: string): string {
+  return crypto.createHash("sha256").update(token).digest("hex");
+}
+
 declare module "express-session" {
   interface SessionData {
+    userId?: number;
+  }
+}
+
+declare module "express-serve-static-core" {
+  interface Request {
     userId?: number;
   }
 }
@@ -35,7 +49,7 @@ export function requireUser(
   res: Response,
   next: NextFunction,
 ): void {
-  if (!req.session.userId) {
+  if (!req.userId && !req.session.userId) {
     res.status(401).json({ error: "Authentication required" });
     return;
   }
@@ -43,5 +57,5 @@ export function requireUser(
 }
 
 export function getUserId(req: Request): number | null {
-  return req.session.userId ?? null;
+  return req.userId ?? req.session.userId ?? null;
 }

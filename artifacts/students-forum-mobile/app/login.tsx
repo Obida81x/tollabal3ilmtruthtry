@@ -14,6 +14,7 @@ import {
 import { router, Link } from "expo-router";
 import { useLogin, getGetCurrentUserQueryKey } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
+import { saveAuthToken } from "@/lib/tokenStorage";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import * as Haptics from "expo-haptics";
 import { useColors } from "@/hooks/useColors";
@@ -37,6 +38,8 @@ export default function LoginScreen() {
       {
         onSuccess: (user) => {
           if (Platform.OS !== "web") Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+          const token = (user as unknown as Record<string, unknown>)?.token;
+          if (typeof token === "string") saveAuthToken(token).catch(() => {});
           queryClient.setQueryData(getGetCurrentUserQueryKey(), { user });
           queryClient.invalidateQueries({ queryKey: getGetCurrentUserQueryKey() });
           router.replace("/(tabs)");

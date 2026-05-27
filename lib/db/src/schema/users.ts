@@ -1,6 +1,7 @@
 import {
   pgTable,
   serial,
+  integer,
   text,
   timestamp,
   varchar,
@@ -37,6 +38,28 @@ export const usersTable = pgTable(
     genderIdx: index("users_gender_idx").on(t.gender),
   }),
 );
+
+export const userTokensTable = pgTable(
+  "user_tokens",
+  {
+    id: serial("id").primaryKey(),
+    userId: integer("user_id")
+      .notNull()
+      .references(() => usersTable.id, { onDelete: "cascade" }),
+    tokenHash: varchar("token_hash", { length: 64 }).notNull().unique(),
+    expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (t) => ({
+    tokenHashIdx: index("user_tokens_hash_idx").on(t.tokenHash),
+    userIdx: index("user_tokens_user_idx").on(t.userId),
+    expiresIdx: index("user_tokens_expires_idx").on(t.expiresAt),
+  }),
+);
+
+export type UserToken = typeof userTokensTable.$inferSelect;
 
 export const passwordResetsTable = pgTable(
   "password_resets",

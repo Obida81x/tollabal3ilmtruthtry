@@ -12,15 +12,20 @@ import React, { useEffect } from "react";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { KeyboardProvider } from "react-native-keyboard-controller";
 import { SafeAreaProvider } from "react-native-safe-area-context";
-import { setBaseUrl } from "@workspace/api-client-react";
+import { setBaseUrl, setAuthTokenGetter } from "@workspace/api-client-react";
 
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { AuthProvider } from "@/contexts/AuthContext";
+
+import { getAuthToken } from "@/lib/tokenStorage";
 
 // Point the API client to the deployed domain
 if (process.env.EXPO_PUBLIC_DOMAIN) {
   setBaseUrl(`https://${process.env.EXPO_PUBLIC_DOMAIN}`);
 }
+
+// Restore persisted auth token so Android (and iOS) stay signed in after restarts
+setAuthTokenGetter(() => getAuthToken());
 
 SplashScreen.preventAutoHideAsync();
 
