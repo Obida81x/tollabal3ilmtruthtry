@@ -319,7 +319,7 @@ function AdminMuftis() {
 
   if (loadingMuftis || loadingUsers) return <Skeleton className="h-64 w-full" />;
 
-  const muftiIds = new Set((muftis ?? []).map((m: { id: number }) => m.id));
+  const muftiIds = new Set((muftis ?? []).map((m: { userId: number }) => m.userId));
   const users = (allUsers ?? []) as AdminUser[];
 
   return (
@@ -402,12 +402,13 @@ function AdminFatawaQueue() {
 
   const items = (fatawa ?? []) as Array<{
     id: number;
-    question: string;
+    questionText: string;
     status: string;
     category?: string | null;
-    answer?: string | null;
+    answerText?: string | null;
+    answerAudioUrl?: string | null;
     createdAt: string | Date;
-    user?: { displayName: string; username: string } | null;
+    askerName?: string | null;
   }>;
 
   return (
@@ -438,21 +439,32 @@ function AdminFatawaQueue() {
                       {f.category && (
                         <Badge variant="outline" className="text-xs">{f.category}</Badge>
                       )}
-                      {f.user && (
+                      {f.askerName && (
                         <span className="text-xs text-muted-foreground">
-                          from @{f.user.username}
+                          {f.askerName}
                         </span>
                       )}
                     </div>
-                    <p className="text-foreground leading-relaxed">{f.question}</p>
+                    <p className="text-foreground leading-relaxed">{f.questionText}</p>
+                    {f.askerName && (
+                      <p className="text-xs text-muted-foreground mt-1">{f.askerName}</p>
+                    )}
                   </div>
                 </div>
-                {f.answer && (
+                {f.answerText && (
                   <div className="p-3 bg-primary/5 rounded-lg border border-primary/20 text-sm">
                     <div className="text-xs text-primary font-semibold uppercase tracking-wide mb-1">
                       {t("admin.fatawa.answerLabel")}
                     </div>
-                    {f.answer}
+                    {f.answerText}
+                  </div>
+                )}
+                {f.answerAudioUrl && (
+                  <div className="p-3 bg-primary/5 rounded-lg border border-primary/20 text-sm">
+                    <div className="text-xs text-primary font-semibold uppercase tracking-wide mb-1">
+                      {t("admin.fatawa.answerLabel")}
+                    </div>
+                    <audio src={f.answerAudioUrl} controls className="h-8 w-full" />
                   </div>
                 )}
                 {answeringId === f.id ? (
@@ -470,7 +482,7 @@ function AdminFatawaQueue() {
                         disabled={!draftAnswer.trim() || answer.isPending}
                         onClick={() => {
                           answer.mutate(
-                            { id: f.id, data: { answer: draftAnswer.trim() } },
+                            { id: f.id, data: { answerText: draftAnswer.trim() } },
                             {
                               onSuccess: () => {
                                 setAnsweringId(null);
@@ -499,13 +511,13 @@ function AdminFatawaQueue() {
                       size="sm"
                       variant="outline"
                       className="gap-1"
-                      onClick={() => { setAnsweringId(f.id); setDraftAnswer(f.answer ?? ""); }}
+                      onClick={() => { setAnsweringId(f.id); setDraftAnswer(f.answerText ?? ""); }}
                       data-testid={`button-answer-${f.id}`}
                     >
                       <Pencil className="h-4 w-4" />
-                      {f.answer ? t("common.details") : t("admin.fatawa.answer")}
+                      {f.answerText ? t("common.details") : t("admin.fatawa.answer")}
                     </Button>
-                    {f.answer && f.status !== "answered" && (
+                    {f.answerText && f.status === "answered" && (
                       <Button
                         size="sm"
                         className="gap-1"
@@ -518,7 +530,7 @@ function AdminFatawaQueue() {
                         {publish.isPending ? t("admin.fatawa.publishing") : t("admin.fatawa.publish")}
                       </Button>
                     )}
-                    {f.status === "answered" && (
+                    {f.status === "published" && (
                       <Badge className="gap-1">
                         <ShieldCheck className="h-3 w-3" /> {t("admin.fatawa.published")}
                       </Badge>

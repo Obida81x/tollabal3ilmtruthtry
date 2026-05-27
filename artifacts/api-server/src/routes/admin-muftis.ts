@@ -84,11 +84,6 @@ router.post(
       res.status(404).json({ error: "User not found" });
       return;
     }
-    if (!user.isAdmin && !user.isMainAdmin) {
-      res.status(400).json({ error: "User must be an admin or moderator first" });
-      return;
-    }
-
     // Upsert
     const existing = await db
       .select()
