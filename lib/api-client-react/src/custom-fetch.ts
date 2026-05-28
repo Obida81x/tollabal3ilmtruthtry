@@ -44,6 +44,15 @@ export function setAuthTokenGetter(getter: AuthTokenGetter | null): void {
   _authTokenGetter = getter;
 }
 
+// Auto-read token from localStorage/sessionStorage if no getter is set
+function getStoredToken(): string | null {
+  try {
+    return localStorage.getItem("auth_token") ?? sessionStorage.getItem("auth_token") ?? null;
+  } catch {
+    return null;
+  }
+}
+
 function isRequest(input: RequestInfo | URL): input is Request {
   return typeof Request !== "undefined" && input instanceof Request;
 }
@@ -351,8 +360,14 @@ export async function customFetch<T = unknown>(
 
   // Attach bearer token when an auth getter is configured and no
   // Authorization header has been explicitly provided.
-  if (_authTokenGetter && !headers.has("authorization")) {
-    const token = await _authTokenGetter();
+  if (!headers.has("authorization")) {
+    let token: string | null = null;
+    if (_authTokenGetter) {
+      token = await _authTokenGetter();
+    }
+    if (!token) {
+      token = getStoredToken();
+    }
     if (token) {
       headers.set("authorization", `Bearer ${token}`);
     }

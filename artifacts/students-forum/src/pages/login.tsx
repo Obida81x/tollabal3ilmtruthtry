@@ -38,7 +38,15 @@ export default function LoginPage() {
     login.mutate(
       { data: { username: username.trim(), password, rememberMe } },
       {
-        onSuccess: () => {
+        onSuccess: (data) => {
+          const token = (data as { token?: string }).token;
+          if (token) {
+            if (rememberMe) {
+              localStorage.setItem("auth_token", token);
+            } else {
+              sessionStorage.setItem("auth_token", token);
+            }
+          }
           queryClient.invalidateQueries({ queryKey: getGetCurrentUserQueryKey() });
           setLocation("/home");
         },
