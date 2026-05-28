@@ -42,8 +42,10 @@ app.use(
   }),
 );
 
-app.use(cors({ origin: true, credentials: true }));
-app.use(express.json());
+app.use(cors({ 
+  origin: process.env.CORS_ORIGIN ? process.env.CORS_ORIGIN.replace(/\/$/, '') : true, 
+  credentials: true 
+}));app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 const sessionSecret = process.env.SESSION_SECRET;
