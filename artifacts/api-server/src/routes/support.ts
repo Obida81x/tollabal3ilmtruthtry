@@ -180,6 +180,16 @@ router.post("/support/admin-message", async (req, res): Promise<void> => {
 
   console.log(`[Support] Admin message from ${username}: "${message.slice(0, 100)}"`);
 
+  // Save message to in-memory store
+  supportMessages.push({
+    id: msgIdCounter++,
+    userId: userId ?? null,
+    username,
+    message,
+    sentAt: new Date().toISOString(),
+    isRead: false,
+  });
+
   let destination = await getSupportEmail();
   if (!destination) destination = await getMainAdminEmail();
   if (!destination) destination = process.env.SENDGRID_FROM_EMAIL ?? null;
@@ -203,6 +213,27 @@ router.post("/support/admin-message", async (req, res): Promise<void> => {
   }
 
   res.status(201).json({ ok: true, sentAt: new Date().toISOString() });
+});
+
+// In-memory store for support messages (persists while server is running)
+const supportMessages: Array<{
+  id: number;
+  userId: number | null;
+  username: string;
+  message: string;
+  sentAt: string;
+  isRead: boolean;
+}> = [];
+let msgIdCounter = 1;
+
+// GET /support/messages — main admin only
+router.get("/support/messages", async (req, res): Promise<void> => {
+  const viewer = await getViewer(req);
+  if (!viewer?.isMainAdmin) {
+    res.status(403).json({ error: "Main admin access required" });
+    return;
+  }
+  res.json(supportMessages.slice().reverse());
 });
 
 export default router;

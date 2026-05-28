@@ -1346,6 +1346,56 @@ function AdminApplications() {
 
 // ─── Admin Settings ───────────────────────────────────────────────────────────
 
+function AdminSupportMessages() {
+  const [messages, setMessages] = useState<Array<{id: number; userId: number | null; username: string; message: string; sentAt: string; isRead: boolean}>>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchMessages = async () => {
+    setLoading(true);
+    try {
+      const res = await fetch("/api/support/messages", { credentials: "include" });
+      if (!res.ok) throw new Error("Failed to load");
+      const data = await res.json();
+      setMessages(data);
+    } catch {
+      setError("Failed to load support messages");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => { fetchMessages(); }, []);
+
+  if (loading) return <div className="space-y-3"><Skeleton className="h-20 w-full" /><Skeleton className="h-20 w-full" /></div>;
+  if (error) return <p className="text-destructive text-sm">{error}</p>;
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <h3 className="text-lg font-semibold">رسائل الدعم الفني</h3>
+        <Button variant="outline" size="sm" onClick={fetchMessages}>تحديث</Button>
+      </div>
+      {messages.length === 0 && (
+        <Card className="border-card-border">
+          <CardContent className="p-8 text-center text-muted-foreground">لا توجد رسائل بعد</CardContent>
+        </Card>
+      )}
+      {messages.map((msg) => (
+        <Card key={msg.id} className="border-card-border">
+          <CardContent className="p-4 space-y-2">
+            <div className="flex items-center justify-between">
+              <span className="font-medium text-sm">{msg.username}</span>
+              <span className="text-xs text-muted-foreground">{new Date(msg.sentAt).toLocaleString("ar")}</span>
+            </div>
+            <p className="text-sm text-foreground leading-relaxed">{msg.message}</p>
+          </CardContent>
+        </Card>
+      ))}
+    </div>
+  );
+}
+
 function AdminSettings() {
   const { t } = useTranslation();
   const [email, setEmail] = useState("");
@@ -1435,6 +1485,11 @@ export default function AdminPage() {
                 </TabsTrigger>
               )}
               {me.isMainAdmin && (
+                <TabsTrigger value="support" data-testid="tab-admin-support">
+                  الدعم الفني
+                </TabsTrigger>
+              )}
+              {me.isMainAdmin && (
                 <TabsTrigger value="settings" data-testid="tab-admin-settings">
                   {t("admin.tabs.settings")}
                 </TabsTrigger>
@@ -1458,6 +1513,11 @@ export default function AdminPage() {
             {me.isMainAdmin && (
               <TabsContent value="applications">
                 <AdminApplications />
+              </TabsContent>
+            )}
+            {me.isMainAdmin && (
+              <TabsContent value="support">
+                <AdminSupportMessages />
               </TabsContent>
             )}
             {me.isMainAdmin && (

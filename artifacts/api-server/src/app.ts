@@ -1,6 +1,7 @@
 import express, { type Express, type Request, type Response, type NextFunction } from "express";
 import cors from "cors";
 import session from "express-session";
+import connectPgSimple from "connect-pg-simple";
 import helmet from "helmet";
 import pinoHttp from "pino-http";
 import crypto from "node:crypto";
@@ -53,12 +54,18 @@ if (!sessionSecret) {
   throw new Error("SESSION_SECRET env var is required");
 }
 app.set("trust proxy", 1);
+const PgSession = connectPgSimple(session);
 app.use(
   session({
     name: "sid",
     secret: sessionSecret,
     resave: false,
     saveUninitialized: false,
+    store: new PgSession({
+      conString: process.env.DATABASE_URL,
+      tableName: "session",
+      createTableIfMissing: true,
+    }),
     cookie: {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
