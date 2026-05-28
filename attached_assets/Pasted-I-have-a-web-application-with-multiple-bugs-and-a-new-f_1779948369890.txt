@@ -1,0 +1,60 @@
+I have a web application with multiple bugs and a new feature to add. 
+Please fix all issues and add the new feature:
+
+## BUGS TO FIX:
+
+### 1. Email not sending (SendGrid)
+- Emails are not being sent at all
+- SendGrid is configured with SENDGRID_API_KEY and SENDGRID_FROM_EMAIL
+- Check all email sending functions and make sure they're properly implemented
+- Verify SendGrid is initialized correctly and errors are being caught and logged
+
+### 2. File/Image/Video upload not working (Cloudinary)
+- Uploads are failing silently
+- CLOUDINARY_URL is configured correctly in environment
+- Check multer or upload middleware configuration
+- Make sure Cloudinary SDK is properly initialized from CLOUDINARY_URL
+- Add proper error handling and error messages for failed uploads
+
+### 3. Fatwa submission not working
+- When user clicks submit fatwa button, nothing happens
+- Check the fatwa submission API endpoint
+- Check frontend fetch/axios call for fatwa submission
+- Add proper error handling and success/failure feedback to user
+
+### 4. Voice recording not working
+- Voice recording doesn't work in posts or chats
+- Check microphone permissions handling
+- Check MediaRecorder API implementation
+- Fix audio blob upload to server
+
+### 5. Chat loading infinitely
+- Chat page loads forever and never shows content
+- Check the chat API endpoint
+- Check WebSocket or polling implementation
+- Add loading timeout and error state
+
+### 6. "Report a problem" not working
+- User submits a problem report but nothing reaches admin
+- Not received via email and not received in admin chat
+- Fix both the email notification to admin and the in-app notification
+
+## NEW FEATURE TO ADD:
+### Technical Support / Contact Admin Feature
+- Add a dedicated "Technical Support" or "Contact Us" section
+- User can choose between two contact methods:
+  1. **Direct chat**: Private chat between the user and admin/support team, visible in the app
+  2. **Email**: User fills a contact form and it sends an email directly to the admin email address using SendGrid
+- The contact form should include: name, email, subject, message
+- Show success/failure feedback after submission
+- Admin should receive the email at the configured SENDGRID_FROM_EMAIL address
+
+## IMPORTANT NOTES:
+- Environment variables are set in Render:
+  - CLOUDINARY_URL
+  - SENDGRID_API_KEY  
+  - SENDGRID_FROM_EMAIL
+  - DATABASE_URL (PostgreSQL/Neon)
+- Add console.log for debugging in all fixed functions
+- Add proper try/catch error handling everywhere
+- Return meaningful error messages to the frontend

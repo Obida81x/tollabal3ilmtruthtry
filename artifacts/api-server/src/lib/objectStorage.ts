@@ -39,29 +39,34 @@ export async function uploadBuffer(
       : "image";
 
   const timestamp = Math.floor(Date.now() / 1000);
+
+  // Cloudinary signature: sort params alphabetically, append secret
   const signature = crypto
     .createHash("sha1")
     .update(`timestamp=${timestamp}${apiSecret}`)
     .digest("hex");
 
-  const base64 = buffer.toString("base64");
-  const dataUri = `data:${contentType};base64,${base64}`;
+  console.log(`[Cloudinary] Uploading ${resourceType}, size=${buffer.length} bytes, type=${contentType}`);
 
+  // Cloudinary upload endpoint requires multipart/form-data (not JSON)
   const uploadUrl = `https://api.cloudinary.com/v1_1/${cloudName}/${resourceType}/upload`;
+
+  const form = new FormData();
+  // Use base64 data URI as the file field — Cloudinary accepts this
+  const dataUri = `data:${contentType};base64,${buffer.toString("base64")}`;
+  form.append("file", dataUri);
+  form.append("api_key", apiKey);
+  form.append("timestamp", String(timestamp));
+  form.append("signature", signature);
 
   const response = await fetch(uploadUrl, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      file: dataUri,
-      api_key: apiKey,
-      timestamp,
-      signature,
-    }),
+    body: form,
   });
 
   if (!response.ok) {
     const detail = await response.text().catch(() => "");
+    console.error(`[Cloudinary] Upload failed (${response.status}): ${detail}`);
     throw new Error(`Cloudinary upload failed (${response.status}): ${detail}`);
   }
 
@@ -69,6 +74,8 @@ export async function uploadBuffer(
     secure_url: string;
     public_id: string;
   };
+
+  console.log(`[Cloudinary] Upload success: ${data.secure_url}`);
 
   const ext = path.extname(originalName).slice(0, 8) || "";
   const id = crypto.randomUUID();

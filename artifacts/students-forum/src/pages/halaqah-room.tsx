@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useRoute, Link } from "wouter";
-import { ArrowLeft, ArrowRight, Send, Mic, Square } from "lucide-react";
+import { ArrowLeft, ArrowRight, Send, Mic, Square, AlertCircle, RefreshCw } from "lucide-react";
 import {
   useGetChatGroup,
   useListChatMessages,
@@ -27,17 +27,22 @@ export default function HalaqahRoomPage() {
   const groupId = params?.id ? Number(params.id) : 0;
   const queryClient = useQueryClient();
 
-  const { data: group } = useGetChatGroup(groupId, {
+  const { data: group, isError: groupError } = useGetChatGroup(groupId, {
     query: {
       enabled: !!groupId,
       queryKey: getGetChatGroupQueryKey(groupId),
     },
   });
-  const { data: messages, isLoading } = useListChatMessages(groupId, {
+  const {
+    data: messages,
+    isLoading,
+    isError: messagesError,
+  } = useListChatMessages(groupId, {
     query: {
       enabled: !!groupId,
       queryKey: getListChatMessagesQueryKey(groupId),
       refetchInterval: 4000,
+      retry: 1,
     },
   });
   const post = usePostChatMessage();
@@ -96,11 +101,13 @@ export default function HalaqahRoomPage() {
           const file = new File([blob], `voice-${Date.now()}.webm`, { type: "audio/webm" });
           const result = await uploadMedia(file);
           post.mutate(
-            { id: groupId, data: { content: t("halaqah.voiceMessage"), audioUrl: result.url } },
+            { id: groupId, data: { content: t("halaqah.voiceMessage"), audioUrl: result.url } as Parameters<typeof post.mutate>[0]["data"] },
             { onSuccess: invalidate },
           );
-        } catch {
-          setRecordError(t("halaqah.recordError"));
+        } catch (err: unknown) {
+          const msg = err instanceof Error ? err.message : t("halaqah.recordError");
+          setRecordError(msg);
+          console.error("[VoiceRecord] Upload failed:", err);
         } finally {
           setUploadingAudio(false);
         }
@@ -108,12 +115,41 @@ export default function HalaqahRoomPage() {
       mr.start();
       mediaRecorderRef.current = mr;
       setIsRecording(true);
-    } catch {
-      setRecordError(t("halaqah.recordError"));
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : t("halaqah.recordError");
+      setRecordError(msg.includes("Permission") || msg.includes("NotAllowed")
+        ? "Microphone access was denied. Please allow microphone permissions in your browser."
+        : msg);
+      console.error("[VoiceRecord] MediaRecorder error:", err);
     }
   };
 
   const BackIcon = lang === "ar" ? ArrowRight : ArrowLeft;
+
+  // Show error if group or messages couldn't load
+  if ((groupError || messagesError) && !isLoading) {
+    return (
+      <AppLayout>
+        <div className="max-w-3xl mx-auto px-4 lg:px-10 py-12 text-center space-y-4">
+          <AlertCircle className="h-10 w-10 text-destructive mx-auto" />
+          <h2 className="text-lg font-semibold text-foreground">Could not load this room</h2>
+          <p className="text-sm text-muted-foreground">
+            This halaqah room may be restricted to your gender group, or there was a connection problem.
+          </p>
+          <div className="flex justify-center gap-3">
+            <Button variant="outline" asChild>
+              <Link href="/halaqah">
+                <BackIcon className="h-4 w-4 mr-1" /> Back to Rooms
+              </Link>
+            </Button>
+            <Button onClick={() => queryClient.invalidateQueries({ queryKey: getListChatMessagesQueryKey(groupId) })}>
+              <RefreshCw className="h-4 w-4 mr-1" /> Try again
+            </Button>
+          </div>
+        </div>
+      </AppLayout>
+    );
+  }
 
   return (
     <AppLayout>
@@ -223,7 +259,10 @@ export default function HalaqahRoomPage() {
         </div>
 
         {recordError && (
-          <p className="text-xs text-destructive mb-2">{recordError}</p>
+          <div className="flex items-center gap-2 text-xs text-destructive bg-destructive/10 rounded-md px-3 py-2 mb-2">
+            <AlertCircle className="h-3 w-3 shrink-0" />
+            {recordError}
+          </div>
         )}
 
         <form onSubmit={handleSend} className="flex gap-2 pt-3 border-t border-border">
@@ -246,6 +285,8 @@ export default function HalaqahRoomPage() {
           >
             {isRecording ? (
               <Square className="h-4 w-4" />
+            ) : uploadingAudio ? (
+              <RefreshCw className="h-4 w-4 animate-spin" />
             ) : (
               <Mic className="h-4 w-4" />
             )}

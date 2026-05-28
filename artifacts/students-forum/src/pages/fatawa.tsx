@@ -22,7 +22,7 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog";
-import { MessageCircleQuestion, CheckCircle2, Clock, Eye } from "lucide-react";
+import { MessageCircleQuestion, CheckCircle2, Clock, Eye, AlertCircle } from "lucide-react";
 import { useSEO } from "@/hooks/use-seo";
 import { useTranslation } from "@/lib/i18n";
 import { timeAgo } from "@/lib/utils";
@@ -31,6 +31,7 @@ const STATUS_META: Record<string, { label: string; icon: React.ElementType; vari
   pending: { label: "fatawa.status.pending", icon: Clock, variant: "secondary" },
   assigned: { label: "fatawa.status.assigned", icon: Eye, variant: "outline" },
   answered: { label: "fatawa.status.answered", icon: CheckCircle2, variant: "default" },
+  published: { label: "fatawa.status.answered", icon: CheckCircle2, variant: "default" },
   closed: { label: "fatawa.status.closed", icon: CheckCircle2, variant: "destructive" },
 };
 
@@ -45,7 +46,7 @@ export default function FatawaPage() {
     path: "/fatawa",
   });
   const queryClient = useQueryClient();
-  const { data: fatawa, isLoading } = useListFatawa({
+  const { data: fatawa, isLoading, error: listError } = useListFatawa({
     query: { queryKey: getListFatawaQueryKey() },
   });
   const create = useCreateFatwa();
@@ -53,20 +54,37 @@ export default function FatawaPage() {
   const [open, setOpen] = useState(false);
   const [question, setQuestion] = useState("");
   const [category, setCategory] = useState("");
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
   if (!user) return null;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!question.trim()) return;
+    setSubmitError(null);
+    const q = question.trim();
+    const cat = category.trim();
+    if (!q || q.length < 10) {
+      setSubmitError("Question must be at least 10 characters.");
+      return;
+    }
+    if (!cat || cat.length < 2) {
+      setSubmitError("Please enter a category (e.g. Fiqh, Aqeedah, Hadith).");
+      return;
+    }
+    // API expects questionText and category (not question)
     create.mutate(
-      { data: { question: question.trim(), category: category.trim() || undefined } },
+      { data: { questionText: q, category: cat } as Parameters<typeof create.mutate>[0]["data"] },
       {
         onSuccess: () => {
           setOpen(false);
           setQuestion("");
           setCategory("");
+          setSubmitError(null);
           queryClient.invalidateQueries({ queryKey: getListFatawaQueryKey() });
+        },
+        onError: (err: unknown) => {
+          const msg = err instanceof Error ? err.message : "Failed to submit question.";
+          setSubmitError(msg);
         },
       },
     );
@@ -81,7 +99,7 @@ export default function FatawaPage() {
       />
       <div className="px-6 lg:px-10 py-8 max-w-3xl mx-auto space-y-6">
         <div className="flex justify-end">
-          <Button onClick={() => setOpen(true)} className="gap-2" data-testid="button-ask-fatwa">
+          <Button onClick={() => { setOpen(true); setSubmitError(null); }} className="gap-2" data-testid="button-ask-fatwa">
             <MessageCircleQuestion className="h-4 w-4" />
             {t("fatawa.ask")}
           </Button>
@@ -94,7 +112,16 @@ export default function FatawaPage() {
           </div>
         )}
 
-        {!isLoading && (!fatawa || fatawa.length === 0) && (
+        {listError && !isLoading && (
+          <Card className="border-destructive/40 border-card-border">
+            <CardContent className="p-6 flex items-center gap-3 text-destructive">
+              <AlertCircle className="h-5 w-5 shrink-0" />
+              <p className="text-sm">Failed to load your questions. Please refresh the page.</p>
+            </CardContent>
+          </Card>
+        )}
+
+        {!isLoading && !listError && (!fatawa || fatawa.length === 0) && (
           <Card className="border-card-border">
             <CardContent className="p-8 text-center text-muted-foreground">
               {t("fatawa.empty")}
@@ -106,6 +133,9 @@ export default function FatawaPage() {
           {fatawa?.map((f) => {
             const meta = STATUS_META[f.status as string] ?? STATUS_META.pending;
             const StatusIcon = meta.icon;
+            // API returns questionText and answerText (not question/answer)
+            const questionText = (f as { questionText?: string; question?: string }).questionText ?? (f as { question?: string }).question ?? "";
+            const answerText = (f as { answerText?: string; answer?: string }).answerText ?? (f as { answer?: string }).answer ?? null;
             return (
               <Card key={f.id} className="border-card-border" data-testid={`card-fatwa-${f.id}`}>
                 <CardContent className="p-5 space-y-3">
@@ -115,7 +145,7 @@ export default function FatawaPage() {
                       style={{ fontFamily: "var(--app-font-serif)", fontSize: "1.05rem" }}
                       data-testid={`text-fatwa-question-${f.id}`}
                     >
-                      {f.question}
+                      {questionText}
                     </p>
                     <Badge variant={meta.variant} className="shrink-0 gap-1" data-testid={`badge-fatwa-status-${f.id}`}>
                       <StatusIcon className="h-3 w-3" />
@@ -125,7 +155,7 @@ export default function FatawaPage() {
                   {f.category && (
                     <Badge variant="outline" className="text-xs">{f.category}</Badge>
                   )}
-                  {f.answer && (
+                  {answerText && (
                     <div
                       className="mt-2 p-4 rounded-lg bg-primary/5 border border-primary/20 text-foreground text-sm leading-relaxed"
                       data-testid={`text-fatwa-answer-${f.id}`}
@@ -133,7 +163,7 @@ export default function FatawaPage() {
                       <div className="text-xs text-primary font-medium uppercase tracking-wide mb-2">
                         {t("fatawa.ruling")}
                       </div>
-                      {f.answer}
+                      {answerText}
                     </div>
                   )}
                   <div className="text-xs text-muted-foreground">
@@ -146,7 +176,7 @@ export default function FatawaPage() {
         </div>
       </div>
 
-      <Dialog open={open} onOpenChange={setOpen}>
+      <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (!v) setSubmitError(null); }}>
         <DialogContent className="max-w-lg">
           <DialogHeader>
             <DialogTitle style={{ fontFamily: "var(--app-font-serif)" }}>
@@ -167,7 +197,7 @@ export default function FatawaPage() {
               />
             </div>
             <div className="space-y-1.5">
-              <Label>{t("fatawa.category")} <span className="text-muted-foreground text-xs">({t("fatawa.optional")})</span></Label>
+              <Label>{t("fatawa.category")}</Label>
               <Input
                 value={category}
                 onChange={(e) => setCategory(e.target.value)}
@@ -175,7 +205,14 @@ export default function FatawaPage() {
                 maxLength={100}
                 data-testid="input-fatwa-category"
               />
+              <p className="text-xs text-muted-foreground">e.g. Fiqh, Aqeedah, Hadith, Tazkiyah</p>
             </div>
+            {submitError && (
+              <div className="flex items-center gap-2 text-sm text-destructive bg-destructive/10 rounded-md px-3 py-2">
+                <AlertCircle className="h-4 w-4 shrink-0" />
+                {submitError}
+              </div>
+            )}
             <DialogFooter>
               <Button type="button" variant="outline" onClick={() => setOpen(false)}>
                 {t("common.cancel")}
